@@ -42,10 +42,13 @@ class Kapsule_Packager {
             if ( ! $file->isFile() ) continue;
             $path = $file->getRealPath();
 
-            // Skip common large/irrelevant dirs
-            $rel = str_replace( $root, '', $path );
+            // Skip common large/irrelevant dirs.
+            // Prepend '/' so leading-slash patterns (e.g. '/.git/') match
+            // top-level directories whose relative path has no leading slash.
+            $rel          = str_replace( $root, '', $path );
+            $rel_prefixed = '/' . $rel;
             foreach ( $skip_patterns as $pattern ) {
-                if ( strpos( $rel, $pattern ) !== false ) continue 2;
+                if ( strpos( $rel_prefixed, $pattern ) !== false ) continue 2;
             }
 
             $size = $file->getSize();
