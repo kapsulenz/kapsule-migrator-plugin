@@ -88,6 +88,13 @@ Once migration is complete and you've confirmed your site is live on Kapsule, yo
 = What files are excluded from exports? =
 wp-config.php and wp-config-sample.php are always excluded. Common cache directories, node_modules, and backup directories are also skipped.
 
+== Screenshots ==
+
+1. The "Migrate to Kapsule" tab — paste your migration token and start a direct transfer to Kapsule Cloud.
+2. The "Export Site" tab — package your site for download without a Kapsule account.
+3. Migration running — chunked transfer progress in real time.
+4. Export complete — download your files and database archives when packaging finishes.
+
 == Changelog ==
 
 = 1.0.0 =

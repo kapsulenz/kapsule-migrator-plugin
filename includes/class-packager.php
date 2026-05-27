@@ -86,16 +86,18 @@ class Kapsule_Packager {
         fwrite( $handle, "SET FOREIGN_KEY_CHECKS=0;\n\n" );
 
         foreach ( $tables as $table ) {
+            $table_escaped = esc_sql( $table );
+
             // Drop + create
-            $create = $wpdb->get_row( "SHOW CREATE TABLE `{$table}`", ARRAY_N );
-            fwrite( $handle, "DROP TABLE IF EXISTS `{$table}`;\n" );
+            $create = $wpdb->get_row( "SHOW CREATE TABLE `{$table_escaped}`", ARRAY_N );
+            fwrite( $handle, "DROP TABLE IF EXISTS `{$table_escaped}`;\n" );
             fwrite( $handle, $create[1] . ";\n\n" );
 
             // Data in batches of 500 rows
             $offset = 0;
             $batch  = 500;
             do {
-                $rows = $wpdb->get_results( "SELECT * FROM `{$table}` LIMIT {$batch} OFFSET {$offset}", ARRAY_N );
+                $rows = $wpdb->get_results( "SELECT * FROM `{$table_escaped}` LIMIT {$batch} OFFSET {$offset}", ARRAY_N );
                 if ( empty( $rows ) ) break;
                 $cols  = $wpdb->get_col_info( 'name' );
                 $col_list = '`' . implode( '`, `', $cols ) . '`';
@@ -103,7 +105,7 @@ class Kapsule_Packager {
                     $vals = array_map( function( $v ) use ( $wpdb ) {
                         return $v === null ? 'NULL' : "'" . esc_sql( $v ) . "'";
                     }, $row );
-                    fwrite( $handle, "INSERT INTO `{$table}` ({$col_list}) VALUES (" . implode( ', ', $vals ) . ");\n" );
+                    fwrite( $handle, "INSERT INTO `{$table_escaped}` ({$col_list}) VALUES (" . implode( ', ', $vals ) . ");\n" );
                 }
                 $offset += $batch;
             } while ( count( $rows ) === $batch );

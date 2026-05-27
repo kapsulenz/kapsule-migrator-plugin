@@ -31,6 +31,8 @@ require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'includes/class-updater.php';
 require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'admin/class-admin-page.php';
 
 function kapsule_migrator_init() {
+    load_plugin_textdomain( 'kapsule-migrator', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+
     $updater = new Kapsule_Updater( __FILE__ );
     $updater->register();
 
