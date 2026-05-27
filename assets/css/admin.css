@@ -249,3 +249,59 @@
     font-size: 12px;
     color: #94a3b8;
 }
+
+/* Focus states for accessibility */
+.kapsule-tab:focus-visible,
+.button:focus-visible,
+#kapsule-start-btn:focus-visible,
+#kapsule-standalone-btn:focus-visible,
+#kapsule-reset-btn:focus-visible {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+}
+
+/* Token input focus */
+#kapsule-token-input:focus {
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+    outline: none;
+}
+
+/* Download row hover */
+.kapsule-download-row:hover {
+    background: #f8fafc;
+}
+
+/* Button hover state */
+.kapsule-form-row .button-primary:focus-visible {
+    outline: 2px solid #0369a1;
+    outline-offset: 2px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+    .kapsule-migrator-wrap {
+        margin: 16px 12px 0;
+    }
+    .kapsule-card {
+        padding: 20px 16px;
+    }
+    .kapsule-form-row {
+        flex-direction: column;
+    }
+    .kapsule-form-row input.regular-text {
+        min-width: unset;
+    }
+    .kapsule-trust-strip {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .kapsule-download-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .kapsule-download-row .button {
+        align-self: flex-start;
+    }
+}
