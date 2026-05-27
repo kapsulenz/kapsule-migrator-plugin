@@ -6,11 +6,9 @@ class Kapsule_Migrator {
         $admin = new Kapsule_Admin_Page();
         $admin->register();
 
-        // REST API endpoints — the plugin exposes these for AJAX actions
         add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
-
-        // Background migration hook
         add_action( 'kapsule_run_migration', array( $this, 'run_migration' ) );
+        add_action( 'kapsule_run_standalone', array( $this, 'run_standalone' ) );
     }
 
     public function register_rest_routes() {
@@ -31,14 +29,10 @@ class Kapsule_Migrator {
     }
 
     public function get_status( $request ) {
-        $token = get_option( 'kapsule_migration_token', '' );
-        $status = get_option( 'kapsule_migration_status', 'idle' );
-        $progress = get_option( 'kapsule_migration_progress', array() );
-
         return new WP_REST_Response( array(
-            'token'    => $token ? substr( $token, 0, 8 ) . '...' : null,
-            'status'   => $status,
-            'progress' => $progress,
+            'token'    => get_option( 'kapsule_migration_token', '' ) ? '***' : null,
+            'status'   => get_option( 'kapsule_migration_status', 'idle' ),
+            'progress' => get_option( 'kapsule_migration_progress', array() ),
             'version'  => KAPSULE_MIGRATOR_VERSION,
         ) );
     }
@@ -51,7 +45,6 @@ class Kapsule_Migrator {
             return new WP_Error( 'missing_token', 'Migration token required', array( 'status' => 400 ) );
         }
 
-        // Verify token with Kapsule API
         $verify = $this->call_kapsule_api( array(
             'token'         => $token,
             'action'        => 'handshake',
@@ -59,19 +52,14 @@ class Kapsule_Migrator {
             'sourceDomain'  => parse_url( home_url(), PHP_URL_HOST ),
         ) );
 
-        if ( is_wp_error( $verify ) ) {
-            return $verify;
-        }
+        if ( is_wp_error( $verify ) ) return $verify;
         if ( empty( $verify['ok'] ) ) {
             return new WP_Error( 'handshake_failed', 'Could not connect to Kapsule', array( 'status' => 401 ) );
         }
 
-        // Store token and queue preflight + migration
         update_option( 'kapsule_migration_token', $token );
         update_option( 'kapsule_migration_status', 'preflight' );
         update_option( 'kapsule_migration_progress', array() );
-
-        // Schedule migration to run in background (WP cron)
         wp_schedule_single_event( time() + 5, 'kapsule_run_migration' );
 
         return new WP_REST_Response( array( 'ok' => true, 'status' => 'preflight' ) );
@@ -82,7 +70,6 @@ class Kapsule_Migrator {
         if ( empty( $token ) ) return;
 
         try {
-            // Phase 1: Preflight scan
             update_option( 'kapsule_migration_status', 'scanning' );
             $preflight = new Kapsule_Preflight();
             $scan = $preflight->scan();
@@ -93,7 +80,6 @@ class Kapsule_Migrator {
                 'preflight' => $scan,
             ) );
 
-            // Phase 2: Package + upload files in chunks
             update_option( 'kapsule_migration_status', 'uploading_files' );
             $packager = new Kapsule_Packager();
             $uploader = new Kapsule_Uploader( $token );
@@ -114,7 +100,6 @@ class Kapsule_Migrator {
                 ) );
             } );
 
-            // Phase 3: Export + upload database
             update_option( 'kapsule_migration_status', 'uploading_db' );
             $db_path = $packager->export_database();
             $uploader->upload_chunk( $db_path, 'database.sql.gz' );
@@ -124,16 +109,15 @@ class Kapsule_Migrator {
                 'phase'  => 'database',
             ) );
 
-            // Phase 4: Signal complete
             update_option( 'kapsule_migration_status', 'complete' );
             $manifest = array(
-                'files_count'   => $packager->get_file_count(),
-                'files_bytes'   => $packager->get_total_bytes(),
-                'db_bytes'      => filesize( $db_path ),
-                'wp_version'    => get_bloginfo( 'version' ),
-                'plugins'       => $this->get_active_plugins(),
-                'theme'         => wp_get_theme()->get( 'Name' ),
-                'is_multisite'  => is_multisite(),
+                'files_count'  => $packager->get_file_count(),
+                'files_bytes'  => $packager->get_total_bytes(),
+                'db_bytes'     => filesize( $db_path ),
+                'wp_version'   => get_bloginfo( 'version' ),
+                'plugins'      => $this->get_active_plugins(),
+                'theme'        => wp_get_theme()->get( 'Name' ),
+                'is_multisite' => is_multisite(),
             );
             $result = $this->call_kapsule_api( array(
                 'token'          => $token,
@@ -144,8 +128,61 @@ class Kapsule_Migrator {
                 update_option( 'kapsule_migration_job_id', $result['jobId'] );
             }
 
-            // Cleanup temp files
             $packager->cleanup();
+
+        } catch ( Exception $e ) {
+            update_option( 'kapsule_migration_status', 'error' );
+            update_option( 'kapsule_migration_error', $e->getMessage() );
+        }
+    }
+
+    public function run_standalone() {
+        try {
+            update_option( 'kapsule_migration_status', 'standalone_packaging' );
+            update_option( 'kapsule_migration_progress', array(
+                'phase'            => 'scanning',
+                'bytesTransferred' => 0,
+                'totalBytes'       => 0,
+            ) );
+
+            $packager = new Kapsule_Packager();
+
+            $packager->package_files( function( $chunk_path, $bytes_done, $bytes_total ) {
+                update_option( 'kapsule_migration_progress', array(
+                    'phase'            => 'packaging',
+                    'bytesTransferred' => $bytes_done,
+                    'totalBytes'       => $bytes_total,
+                ) );
+            } );
+
+            update_option( 'kapsule_migration_progress', array(
+                'phase'            => 'exporting_db',
+                'bytesTransferred' => 0,
+                'totalBytes'       => 0,
+            ) );
+
+            $db_path = $packager->export_database();
+
+            // Collect all output files
+            $tmp_dir = $packager->get_tmp_dir();
+            $files   = array();
+
+            $db_gz = $tmp_dir . 'database.sql.gz';
+            if ( file_exists( $db_gz ) ) {
+                $files[] = array( 'name' => 'database.sql.gz', 'path' => $db_gz, 'size' => filesize( $db_gz ) );
+            }
+
+            $i = 0;
+            while ( file_exists( $tmp_dir . "files-chunk-{$i}.zip" ) ) {
+                $chunk = $tmp_dir . "files-chunk-{$i}.zip";
+                $files[] = array( 'name' => "files-chunk-{$i}.zip", 'path' => $chunk, 'size' => filesize( $chunk ) );
+                $i++;
+            }
+
+            update_option( 'kapsule_standalone_tmp_dir', $tmp_dir );
+            update_option( 'kapsule_standalone_files', $files );
+            update_option( 'kapsule_migration_status', 'standalone_ready' );
+            update_option( 'kapsule_migration_progress', array() );
 
         } catch ( Exception $e ) {
             update_option( 'kapsule_migration_status', 'error' );
@@ -178,15 +215,31 @@ class Kapsule_Migrator {
     }
 
     public static function activate() {
-        // Nothing on activate — no DB tables needed
+        // Nothing on activate
     }
 
     public static function deactivate() {
         wp_clear_scheduled_hook( 'kapsule_run_migration' );
+        wp_clear_scheduled_hook( 'kapsule_run_standalone' );
         delete_option( 'kapsule_migration_token' );
         delete_option( 'kapsule_migration_status' );
         delete_option( 'kapsule_migration_progress' );
         delete_option( 'kapsule_migration_error' );
         delete_option( 'kapsule_migration_job_id' );
+
+        // Clean up any standalone temp files
+        $tmp_dir = get_option( 'kapsule_standalone_tmp_dir', '' );
+        if ( $tmp_dir && is_dir( $tmp_dir ) ) {
+            $iter = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator( $tmp_dir, FilesystemIterator::SKIP_DOTS ),
+                RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ( $iter as $f ) {
+                $f->isDir() ? rmdir( $f->getRealPath() ) : unlink( $f->getRealPath() );
+            }
+            rmdir( $tmp_dir );
+        }
+        delete_option( 'kapsule_standalone_tmp_dir' );
+        delete_option( 'kapsule_standalone_files' );
     }
 }

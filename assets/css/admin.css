@@ -181,3 +181,71 @@
     font-family: monospace;
     margin-bottom: 16px;
 }
+
+/* Mode tabs */
+.kapsule-tabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 28px;
+}
+
+.kapsule-tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.kapsule-tab:hover {
+    color: #0f172a;
+}
+
+.kapsule-tab--active {
+    color: #0ea5e9;
+    border-bottom-color: #0ea5e9;
+}
+
+/* Download list */
+.kapsule-download-list {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.kapsule-download-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 12px;
+}
+
+.kapsule-download-row:last-child {
+    border-bottom: none;
+}
+
+.kapsule-download-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.kapsule-download-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    font-family: monospace;
+}
+
+.kapsule-download-size {
+    font-size: 12px;
+    color: #94a3b8;
+}

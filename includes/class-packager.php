@@ -129,6 +129,7 @@ class Kapsule_Packager {
 
     public function get_file_count(): int  { return $this->file_count; }
     public function get_total_bytes(): int { return $this->total_bytes; }
+    public function get_tmp_dir(): string   { return $this->tmp_dir; }
 
     public function cleanup(): void {
         if ( is_dir( $this->tmp_dir ) ) {
