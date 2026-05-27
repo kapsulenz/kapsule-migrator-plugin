@@ -29,6 +29,8 @@ class Kapsule_Packager {
             '/wp-content/cache/',
             '/wp-content/uploads/backup',
             '/wp-content/updraft',
+            'wp-config.php',
+            'wp-config-sample.php',
         );
 
         $iter = new RecursiveIteratorIterator(
