@@ -309,6 +309,11 @@ class Kapsule_Admin_Page {
                             You can close this tab &mdash; migration continues in the background. You'll be notified in Kapsule when it's done.
                         <?php endif; ?>
                     </p>
+                    <p style="margin-top:16px;">
+                        <button id="kapsule-reset-btn" class="button button-secondary" style="color:#dc2626;border-color:#dc2626;">
+                            Cancel and start over
+                        </button>
+                    </p>
                 </div>
 
             <?php elseif ( $status === 'standalone_ready' ) : ?>

@@ -3,8 +3,8 @@
 class Kapsule_Packager {
 
     private string $tmp_dir;
-    private int $file_count  = 0;
-    private int $total_bytes = 0;
+    private int    $file_count  = 0;
+    private int    $total_bytes = 0;
 
     public function __construct() {
         $this->tmp_dir = get_temp_dir() . 'kapsule-migrator-' . uniqid() . '/';
@@ -12,16 +12,27 @@ class Kapsule_Packager {
     }
 
     /**
-     * Package the WP files into 50 MB chunks and call $callback for each.
-     * $callback( string $chunk_path, int $bytes_done, int $bytes_total )
+     * Detect which archive backend is available.
+     * Returns 'zip' (ZipArchive) or 'tar' (PharData), or throws.
+     */
+    private static function archive_backend(): string {
+        if ( class_exists( 'ZipArchive' ) ) return 'zip';
+        if ( class_exists( 'PharData' ) )   return 'tar';
+        throw new Exception( 'No archive extension available (php-zip or phar required). Please contact Kapsule support.' );
+    }
+
+    /**
+     * Package the WP files into ≤50 MB chunks and call $callback for each.
+     * Callback signature: callable( string $chunk_path, int $bytes_done, int $bytes_total )
      */
     public function package_files( callable $callback ): void {
-        $root        = ABSPATH;
-        $chunk_size  = 50 * 1024 * 1024; // 50 MB per chunk
-        $chunk_index = 0;
-        $chunk_bytes = 0;
-        $zip         = null;
-        $zip_path    = '';
+        $backend = self::archive_backend();
+
+        @set_time_limit( 0 ); // Remove PHP execution limit — hosting may ignore this, but worth trying
+
+        $root       = ABSPATH;
+        $chunk_size = 50 * 1024 * 1024; // 50 MB per chunk
+        $ext        = $backend === 'zip' ? 'zip' : 'tar';
 
         $skip_patterns = array(
             '/.git/',
@@ -38,15 +49,44 @@ class Kapsule_Packager {
             RecursiveIteratorIterator::LEAVES_ONLY
         );
 
+        $chunk_index = 0;
+        $chunk_bytes = 0;  // bytes in the current open chunk
+        $bytes_done  = 0;  // cumulative bytes in completed chunks
+
+        /** @var ZipArchive|PharData|null */
+        $archive    = null;
+        $chunk_path = '';
+
+        $open_chunk = function () use ( &$archive, &$chunk_path, &$chunk_bytes, &$chunk_index, $backend, $ext ) {
+            $chunk_path  = $this->tmp_dir . "files-chunk-{$chunk_index}.{$ext}";
+            $chunk_bytes = 0;
+            if ( $backend === 'zip' ) {
+                $archive = new ZipArchive();
+                $archive->open( $chunk_path, ZipArchive::CREATE );
+            } else {
+                $archive = new PharData( $chunk_path );
+            }
+        };
+
+        $close_chunk = function () use ( &$archive, $backend ) {
+            if ( $archive === null ) return;
+            if ( $backend === 'zip' ) {
+                $archive->close();
+            } else {
+                // PharData flushes on unset
+                unset( $archive );
+            }
+            $archive = null;
+        };
+
+        $open_chunk();
+
         foreach ( $iter as $file ) {
             if ( ! $file->isFile() ) continue;
-            $path = $file->getRealPath();
-
-            // Skip common large/irrelevant dirs.
-            // Prepend '/' so leading-slash patterns (e.g. '/.git/') match
-            // top-level directories whose relative path has no leading slash.
+            $path         = $file->getRealPath();
             $rel          = str_replace( $root, '', $path );
             $rel_prefixed = '/' . $rel;
+
             foreach ( $skip_patterns as $pattern ) {
                 if ( strpos( $rel_prefixed, $pattern ) !== false ) continue 2;
             }
@@ -55,28 +95,33 @@ class Kapsule_Packager {
             $this->file_count++;
             $this->total_bytes += $size;
 
-            if ( $zip === null || $chunk_bytes + $size > $chunk_size ) {
-                if ( $zip !== null ) {
-                    $zip->close();
-                    $callback( $zip_path, $chunk_bytes * $chunk_index, $this->total_bytes );
-                    $chunk_index++;
-                }
-                $zip_path    = $this->tmp_dir . "files-chunk-{$chunk_index}.zip";
-                $zip         = new ZipArchive();
-                $zip->open( $zip_path, ZipArchive::CREATE );
-                $chunk_bytes = 0;
+            // Roll over to a new chunk if adding this file would exceed the limit
+            if ( $chunk_bytes > 0 && $chunk_bytes + $size > $chunk_size ) {
+                $close_chunk();
+                $callback( $chunk_path, $bytes_done + $chunk_bytes, $this->total_bytes );
+                $bytes_done += $chunk_bytes;
+                $chunk_index++;
+                $open_chunk();
             }
 
-            $zip->addFile( $path, $rel );
+            if ( $backend === 'zip' ) {
+                $archive->addFile( $path, $rel );
+            } else {
+                $archive->addFile( $path, $rel );
+            }
             $chunk_bytes += $size;
         }
 
-        if ( $zip !== null ) {
-            $zip->close();
-            $callback( $zip_path, $this->total_bytes, $this->total_bytes );
+        // Close and deliver the final (possibly only) chunk
+        if ( $archive !== null && $chunk_bytes > 0 ) {
+            $close_chunk();
+            $callback( $chunk_path, $this->total_bytes, $this->total_bytes );
         }
     }
 
+    /**
+     * Export the WordPress database to a gzip-compressed SQL file.
+     */
     public function export_database(): string {
         global $wpdb;
 
@@ -91,21 +136,19 @@ class Kapsule_Packager {
         foreach ( $tables as $table ) {
             $table_escaped = esc_sql( $table );
 
-            // Drop + create
             $create = $wpdb->get_row( "SHOW CREATE TABLE `{$table_escaped}`", ARRAY_N );
             fwrite( $handle, "DROP TABLE IF EXISTS `{$table_escaped}`;\n" );
             fwrite( $handle, $create[1] . ";\n\n" );
 
-            // Data in batches of 500 rows
             $offset = 0;
             $batch  = 500;
             do {
                 $rows = $wpdb->get_results( "SELECT * FROM `{$table_escaped}` LIMIT {$batch} OFFSET {$offset}", ARRAY_N );
                 if ( empty( $rows ) ) break;
-                $cols  = $wpdb->get_col_info( 'name' );
+                $cols     = $wpdb->get_col_info( 'name' );
                 $col_list = '`' . implode( '`, `', $cols ) . '`';
                 foreach ( $rows as $row ) {
-                    $vals = array_map( function( $v ) use ( $wpdb ) {
+                    $vals = array_map( function ( $v ) use ( $wpdb ) {
                         return $v === null ? 'NULL' : "'" . esc_sql( $v ) . "'";
                     }, $row );
                     fwrite( $handle, "INSERT INTO `{$table_escaped}` ({$col_list}) VALUES (" . implode( ', ', $vals ) . ");\n" );
@@ -119,7 +162,6 @@ class Kapsule_Packager {
         fwrite( $handle, "SET FOREIGN_KEY_CHECKS=1;\n" );
         fclose( $handle );
 
-        // gzip
         $gz = gzopen( $gz_file, 'wb9' );
         $in = fopen( $db_file, 'rb' );
         while ( ! feof( $in ) ) {
@@ -134,7 +176,7 @@ class Kapsule_Packager {
 
     public function get_file_count(): int  { return $this->file_count; }
     public function get_total_bytes(): int { return $this->total_bytes; }
-    public function get_tmp_dir(): string   { return $this->tmp_dir; }
+    public function get_tmp_dir(): string  { return $this->tmp_dir; }
 
     public function cleanup(): void {
         if ( is_dir( $this->tmp_dir ) ) {
