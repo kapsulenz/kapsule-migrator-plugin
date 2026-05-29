@@ -2,8 +2,8 @@
 Contributors: kapsulecloud
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
-Tested up to: 6.7
-Stable tag: 1.0.0
+Tested up to: 6.8
+Stable tag: 1.0.7
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -97,5 +97,30 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 
 == Changelog ==
 
+= 1.0.7 =
+* Improved upload reliability: server now tracks which chunks have been received, so interrupted transfers resume correctly without re-uploading complete chunks
+* Upload manifest now includes chunk count to improve progress accuracy
+
+= 1.0.6 =
+* PharData fallback for PHP hosts without the zip extension (previously only ZipArchive and system tar were tried)
+* Added cancel button so in-progress migrations can be cleanly aborted
+
+= 1.0.5 =
+* Fixed skip-pattern matching for top-level directories (was incorrectly including some cache dirs)
+* Added automated test suite for the packager component
+
+= 1.0.4 =
+* WP.org compliance: added capability check on all AJAX endpoints, improved SQL escaping, added text domain, added screenshots
+
+= 1.0.3 =
+* Improved accessibility: focus states on interactive elements; mobile-responsive admin CSS
+
+= 1.0.2 =
+* Added standalone export mode (no Kapsule account required)
+* Dual-distribution: separate CDN and WordPress.org builds to ensure correct update channel
+
+= 1.0.1 =
+* Security: wp-config.php and wp-config-sample.php excluded from all exports and migration packages
+
 = 1.0.0 =
-* Initial release — direct migration to Kapsule + standalone export mode
+* Initial release — direct migration to Kapsule Cloud

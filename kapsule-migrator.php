@@ -3,7 +3,7 @@
  * Plugin Name: Kapsule Migrator
  * Plugin URI:  https://kapsulecloud.com/migrate
  * Description: Migrate your WordPress site to Kapsule Cloud — or export your site for manual migration anywhere.
- * Version:     1.0.0
+ * Version:     1.0.7
  * Author:      Kapsule Cloud
  * Author URI:  https://kapsulecloud.com
  * License:     GPL-2.0-or-later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'KAPSULE_MIGRATOR_VERSION',     '1.0.0' );
+define( 'KAPSULE_MIGRATOR_VERSION',     '1.0.7' );
 define( 'KAPSULE_MIGRATOR_PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'KAPSULE_MIGRATOR_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );
 define( 'KAPSULE_MIGRATOR_API_BASE',    'https://kpanel.kapsulecloud.com/api/migration/plugin' );

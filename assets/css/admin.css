@@ -6,47 +6,70 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* ── Header ── */
 .kapsule-header {
     margin-bottom: 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
 }
 
 .kapsule-logo {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: #0f172a;
+    line-height: 1;
 }
 
+.kapsule-header-sub {
+    font-size: 12px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.kapsule-header-sub a {
+    color: #94a3b8;
+    text-decoration: none;
+}
+
+.kapsule-header-sub a:hover {
+    color: #0ea5e9;
+}
+
+/* ── Card ── */
 .kapsule-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 32px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
 }
 
 .kapsule-card h2 {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: #0f172a;
-    margin: 0 0 10px;
+    margin: 0 0 8px;
     padding: 0;
     border: none;
+    line-height: 1.3;
 }
 
 .kapsule-subtext {
-    font-size: 15px;
+    font-size: 14px;
     color: #475569;
     line-height: 1.6;
     margin: 0 0 24px;
 }
 
+/* ── Trust strip ── */
 .kapsule-trust-strip {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
     padding: 12px 16px;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -57,8 +80,12 @@
 .kapsule-trust-item {
     font-size: 13px;
     color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
+/* ── Form row ── */
 .kapsule-form-row {
     display: flex;
     gap: 10px;
@@ -69,76 +96,216 @@
 .kapsule-form-row input.regular-text {
     flex: 1;
     min-width: 200px;
-    height: 40px;
+    height: 42px;
     font-size: 14px;
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid #cbd5e1;
-    padding: 0 12px;
+    padding: 0 14px;
+    color: #0f172a;
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .kapsule-form-row .button-primary {
-    height: 40px;
+    height: 42px;
     background: #0ea5e9;
     border-color: #0284c7;
     color: #fff;
     font-size: 14px;
     font-weight: 600;
-    border-radius: 6px;
+    border-radius: 8px;
     white-space: nowrap;
+    padding: 0 20px;
 }
 
 .kapsule-form-row .button-primary:hover {
     background: #0284c7;
     border-color: #0369a1;
+    color: #fff;
 }
 
+/* ── Error ── */
 .kapsule-error {
     color: #dc2626;
     font-size: 13px;
     margin-top: 12px;
 }
 
-/* Status card */
-.kapsule-status-card {
-    text-align: center;
+/* ── Status card ── */
+.kapsule-status-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
-.kapsule-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #e2e8f0;
+.kapsule-status-header h2 {
+    margin: 0 0 4px;
+}
+
+.kapsule-status-label {
+    font-size: 14px;
+    color: #475569;
+    margin: 0;
+    min-height: 20px;
+}
+
+.kapsule-spinner-sm {
+    width: 36px;
+    height: 36px;
+    border: 2.5px solid #e2e8f0;
     border-top-color: #0ea5e9;
     border-radius: 50%;
-    animation: kapsule-spin 0.8s linear infinite;
-    margin: 0 auto 20px;
+    animation: kapsule-spin 0.75s linear infinite;
+    flex-shrink: 0;
+    margin-top: 2px;
 }
 
 @keyframes kapsule-spin {
     to { transform: rotate(360deg); }
 }
 
+/* ── Progress bar ── */
 .kapsule-progress-bar {
-    height: 6px;
-    background: #e2e8f0;
+    height: 8px;
+    background: #f1f5f9;
     border-radius: 99px;
     overflow: hidden;
-    margin: 16px 0;
+    margin-bottom: 28px;
 }
 
 .kapsule-progress-fill {
     height: 100%;
-    background: #0ea5e9;
+    background: linear-gradient(90deg, #0ea5e9, #38bdf8);
     border-radius: 99px;
-    transition: width 0.5s ease;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 0;
 }
 
+/* ── Step timeline ── */
+.kapsule-steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 28px;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+.kapsule-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.kapsule-step span {
+    font-size: 11px;
+    font-weight: 500;
+    color: #94a3b8;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    transition: color 0.2s;
+}
+
+.kapsule-step--active span {
+    color: #0ea5e9;
+    font-weight: 600;
+}
+
+.kapsule-step--done span {
+    color: #16a34a;
+}
+
+.kapsule-step-line {
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+    align-self: flex-start;
+    margin-top: 12px;
+    max-width: 24px;
+}
+
+.kapsule-step-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    border: 1.5px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.kapsule-step--active .kapsule-step-icon {
+    background: #eff6ff;
+    border-color: #0ea5e9;
+}
+
+.kapsule-step--done .kapsule-step-icon {
+    background: #dcfce7;
+    border-color: #86efac;
+}
+
+.kapsule-step-dot-inner {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #cbd5e1;
+}
+
+.kapsule-step-spinner {
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid #bfdbfe;
+    border-top-color: #0ea5e9;
+    border-radius: 50%;
+    animation: kapsule-spin 0.75s linear infinite;
+}
+
+/* ── Close note ── */
 .kapsule-close-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
     font-size: 13px;
     color: #64748b;
-    margin-top: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    line-height: 1.5;
 }
 
-/* Success card */
+/* ── Cancel button ── */
+.kapsule-cancel-btn {
+    background: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.kapsule-cancel-btn:hover {
+    border-color: #fca5a5;
+    color: #dc2626;
+    background: #fef2f2;
+}
+
+/* ── Success card ── */
 .kapsule-success-card {
     text-align: center;
 }
@@ -164,9 +331,10 @@
     padding: 8px 24px;
     height: auto;
     border-radius: 8px;
+    color: #fff;
 }
 
-/* Error card */
+/* ── Error card ── */
 .kapsule-error-card h2 {
     color: #dc2626;
 }
@@ -174,15 +342,17 @@
 .kapsule-error-detail {
     background: #fef2f2;
     border: 1px solid #fecaca;
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 12px;
     font-size: 13px;
     color: #dc2626;
     font-family: monospace;
     margin-bottom: 16px;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
-/* Mode tabs */
+/* ── Mode tabs ── */
 .kapsule-tabs {
     display: flex;
     gap: 2px;
@@ -212,10 +382,10 @@
     border-bottom-color: #0ea5e9;
 }
 
-/* Download list */
+/* ── Download list ── */
 .kapsule-download-list {
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
 }
 
@@ -226,10 +396,15 @@
     padding: 14px 16px;
     border-bottom: 1px solid #f1f5f9;
     gap: 12px;
+    transition: background 0.1s;
 }
 
 .kapsule-download-row:last-child {
     border-bottom: none;
+}
+
+.kapsule-download-row:hover {
+    background: #f8fafc;
 }
 
 .kapsule-download-info {
@@ -250,57 +425,55 @@
     color: #94a3b8;
 }
 
-/* Focus states for accessibility */
+/* ── Focus / accessibility ── */
 .kapsule-tab:focus-visible,
 .button:focus-visible,
 #kapsule-start-btn:focus-visible,
 #kapsule-standalone-btn:focus-visible,
-#kapsule-reset-btn:focus-visible {
+.kapsule-cancel-btn:focus-visible {
     outline: 2px solid #0ea5e9;
     outline-offset: 2px;
 }
 
-/* Token input focus */
 #kapsule-token-input:focus {
     border-color: #0ea5e9;
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
     outline: none;
 }
 
-/* Download row hover */
-.kapsule-download-row:hover {
-    background: #f8fafc;
-}
-
-/* Button hover state */
-.kapsule-form-row .button-primary:focus-visible {
-    outline: 2px solid #0369a1;
-    outline-offset: 2px;
-}
-
-/* Mobile responsiveness */
+/* ── Mobile ── */
 @media (max-width: 600px) {
     .kapsule-migrator-wrap {
         margin: 16px 12px 0;
     }
+
     .kapsule-card {
         padding: 20px 16px;
     }
+
     .kapsule-form-row {
         flex-direction: column;
     }
+
     .kapsule-form-row input.regular-text {
         min-width: unset;
     }
+
     .kapsule-trust-strip {
         flex-direction: column;
         gap: 8px;
     }
+
+    .kapsule-step span {
+        display: none;
+    }
+
     .kapsule-download-row {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
+
     .kapsule-download-row .button {
         align-self: flex-start;
     }

@@ -173,10 +173,14 @@ class Kapsule_Migrator {
             }
 
             $i = 0;
-            while ( file_exists( $tmp_dir . "files-chunk-{$i}.zip" ) ) {
-                $chunk = $tmp_dir . "files-chunk-{$i}.zip";
-                $files[] = array( 'name' => "files-chunk-{$i}.zip", 'path' => $chunk, 'size' => filesize( $chunk ) );
-                $i++;
+            foreach ( array( 'zip', 'tar' ) as $ext ) {
+                $i = 0;
+                while ( file_exists( $tmp_dir . "files-chunk-{$i}.{$ext}" ) ) {
+                    $chunk   = $tmp_dir . "files-chunk-{$i}.{$ext}";
+                    $files[] = array( 'name' => "files-chunk-{$i}.{$ext}", 'path' => $chunk, 'size' => filesize( $chunk ) );
+                    $i++;
+                }
+                if ( $i > 0 ) break; // found files with this extension, stop looking
             }
 
             update_option( 'kapsule_standalone_tmp_dir', $tmp_dir );
