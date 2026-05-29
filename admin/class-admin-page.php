@@ -265,6 +265,7 @@ class Kapsule_Admin_Page {
             $manifest = array(
                 'files_count'  => (int) get_option( 'kapsule_migration_file_count', 0 ),
                 'files_bytes'  => (int) get_option( 'kapsule_migration_file_bytes', 0 ),
+                'chunk_count'  => (int) get_option( 'kapsule_migration_chunk_count', 0 ),
                 'db_bytes'     => filesize( $db_path ),
                 'wp_version'   => get_bloginfo( 'version' ),
                 'plugins'      => $this->get_active_plugins(),
