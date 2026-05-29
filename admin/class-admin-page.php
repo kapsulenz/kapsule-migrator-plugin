@@ -5,11 +5,13 @@ class Kapsule_Admin_Page {
     public function register(): void {
         add_action( 'admin_menu',             array( $this, 'add_menu' ) );
         add_action( 'admin_enqueue_scripts',  array( $this, 'enqueue_scripts' ) );
-        add_action( 'wp_ajax_kapsule_get_status',      array( $this, 'ajax_get_status' ) );
-        add_action( 'wp_ajax_kapsule_start_migration', array( $this, 'ajax_start_migration' ) );
-        add_action( 'wp_ajax_kapsule_start_standalone', array( $this, 'ajax_start_standalone' ) );
-        add_action( 'wp_ajax_kapsule_reset',           array( $this, 'ajax_reset' ) );
-        add_action( 'admin_post_kapsule_download_file', array( $this, 'handle_download' ) );
+        add_action( 'wp_ajax_kapsule_get_status',              array( $this, 'ajax_get_status' ) );
+        add_action( 'wp_ajax_kapsule_start_migration',         array( $this, 'ajax_start_migration' ) );
+        add_action( 'wp_ajax_kapsule_start_standalone',        array( $this, 'ajax_start_standalone' ) );
+        add_action( 'wp_ajax_kapsule_reset',                   array( $this, 'ajax_reset' ) );
+        add_action( 'wp_ajax_kapsule_upload_chunk',            array( $this, 'ajax_upload_chunk' ) );
+        add_action( 'wp_ajax_kapsule_upload_db_and_complete',  array( $this, 'ajax_upload_db_and_complete' ) );
+        add_action( 'admin_post_kapsule_download_file',        array( $this, 'handle_download' ) );
     }
 
     public function add_menu(): void {
@@ -45,6 +47,11 @@ class Kapsule_Admin_Page {
             'nonce'       => wp_create_nonce( 'kapsule_migrator_nonce' ),
             'status'      => get_option( 'kapsule_migration_status', 'idle' ),
             'jobId'       => get_option( 'kapsule_migration_job_id', '' ),
+            'chunkCount'  => (int) get_option( 'kapsule_migration_chunk_count', 0 ),
+            'totalBytes'  => (int) get_option( 'kapsule_migration_file_bytes', 0 ),
+            'nextChunk'   => (int) get_option( 'kapsule_migration_next_chunk', 0 ),
+            'token'       => get_option( 'kapsule_migration_token', '' ),
+            'apiBase'     => KAPSULE_MIGRATOR_API_BASE,
         ) );
     }
 
@@ -89,6 +96,7 @@ class Kapsule_Admin_Page {
             return;
         }
 
+        // Handshake
         $response = wp_remote_post( KAPSULE_MIGRATOR_API_BASE, array(
             'headers'     => array( 'Content-Type' => 'application/json' ),
             'body'        => wp_json_encode( array(
@@ -112,14 +120,195 @@ class Kapsule_Admin_Page {
             return;
         }
 
-        update_option( 'kapsule_migration_token', $token );
-        update_option( 'kapsule_migration_status', 'preflight' );
-        update_option( 'kapsule_migration_progress', array() );
+        // Preflight scan
+        @set_time_limit( 0 );
+        $preflight = new Kapsule_Preflight();
+        $scan      = $preflight->scan();
+        wp_remote_post( KAPSULE_MIGRATOR_API_BASE, array(
+            'headers'     => array( 'Content-Type' => 'application/json' ),
+            'body'        => wp_json_encode( array(
+                'token'     => $token,
+                'action'    => 'preflight',
+                'preflight' => $scan,
+            ) ),
+            'timeout'     => 15,
+            'data_format' => 'body',
+        ) );
+
+        // Scan all files and split into chunks — browser will drive each chunk as a separate AJAX call
+        $packager = new Kapsule_Packager();
+        $files    = $packager->scan_files();
+        $chunks   = Kapsule_Packager::build_chunks( $files );
+
+        update_option( 'kapsule_migration_token',       $token );
+        update_option( 'kapsule_migration_tmp_dir',     $packager->get_tmp_dir() );
+        update_option( 'kapsule_migration_chunks',      $chunks );
+        update_option( 'kapsule_migration_chunk_count', count( $chunks ) );
+        update_option( 'kapsule_migration_file_count',  $packager->get_file_count() );
+        update_option( 'kapsule_migration_file_bytes',  $packager->get_total_bytes() );
+        update_option( 'kapsule_migration_next_chunk',  0 );
+        update_option( 'kapsule_migration_status',      'uploading_files' );
+        update_option( 'kapsule_migration_progress',    array() );
         delete_option( 'kapsule_migration_error' );
         wp_clear_scheduled_hook( 'kapsule_run_migration' );
-        wp_schedule_single_event( time() + 3, 'kapsule_run_migration' );
 
-        wp_send_json_success( array( 'status' => 'preflight' ) );
+        wp_send_json_success( array(
+            'status'     => 'uploading_files',
+            'chunkCount' => count( $chunks ),
+            'totalBytes' => $packager->get_total_bytes(),
+        ) );
+    }
+
+    public function ajax_upload_chunk(): void {
+        check_ajax_referer( 'kapsule_migrator_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'Permission denied' );
+            return;
+        }
+
+        $index  = absint( $_POST['index'] ?? 0 );
+        $token  = get_option( 'kapsule_migration_token', '' );
+        $chunks = get_option( 'kapsule_migration_chunks', array() );
+        $tmp    = get_option( 'kapsule_migration_tmp_dir', '' );
+
+        if ( empty( $token ) || ! isset( $chunks[ $index ] ) || ! $tmp ) {
+            wp_send_json_error( 'Invalid chunk state — reset and try again' );
+            return;
+        }
+
+        try {
+            $packager   = new Kapsule_Packager( $tmp );
+            $chunk_path = $packager->package_chunk( $chunks[ $index ], $index );
+
+            $uploader = new Kapsule_Uploader( $token );
+            $uploader->upload_chunk( $chunk_path );
+
+            // Accumulate progress
+            $bytes_before = 0;
+            for ( $i = 0; $i < $index; $i++ ) {
+                $bytes_before += array_sum( array_column( $chunks[ $i ], 'size' ) );
+            }
+            $chunk_bytes = array_sum( array_column( $chunks[ $index ], 'size' ) );
+            $bytes_done  = $bytes_before + $chunk_bytes;
+            $total_bytes = (int) get_option( 'kapsule_migration_file_bytes', 0 );
+
+            update_option( 'kapsule_migration_next_chunk', $index + 1 );
+            update_option( 'kapsule_migration_progress', array(
+                'phase'            => 'files',
+                'bytesTransferred' => $bytes_done,
+                'totalBytes'       => $total_bytes,
+            ) );
+
+            wp_remote_post( KAPSULE_MIGRATOR_API_BASE, array(
+                'headers'     => array( 'Content-Type' => 'application/json' ),
+                'body'        => wp_json_encode( array(
+                    'token'            => $token,
+                    'action'           => 'progress',
+                    'phase'            => 'files',
+                    'bytesTransferred' => $bytes_done,
+                    'totalBytes'       => $total_bytes,
+                ) ),
+                'timeout'     => 10,
+                'data_format' => 'body',
+            ) );
+
+            @unlink( $chunk_path );
+
+            wp_send_json_success( array(
+                'chunkIndex' => $index,
+                'bytesDone'  => $bytes_done,
+                'totalBytes' => $total_bytes,
+            ) );
+        } catch ( Exception $e ) {
+            update_option( 'kapsule_migration_status', 'error' );
+            update_option( 'kapsule_migration_error',  $e->getMessage() );
+            wp_send_json_error( $e->getMessage() );
+        }
+    }
+
+    public function ajax_upload_db_and_complete(): void {
+        check_ajax_referer( 'kapsule_migrator_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'Permission denied' );
+            return;
+        }
+
+        $token = get_option( 'kapsule_migration_token', '' );
+        $tmp   = get_option( 'kapsule_migration_tmp_dir', '' );
+
+        if ( empty( $token ) || ! $tmp ) {
+            wp_send_json_error( 'Invalid state — reset and try again' );
+            return;
+        }
+
+        try {
+            @set_time_limit( 0 );
+            update_option( 'kapsule_migration_status', 'uploading_db' );
+
+            $packager = new Kapsule_Packager( $tmp );
+            $db_path  = $packager->export_database();
+
+            $uploader = new Kapsule_Uploader( $token );
+            $uploader->upload_chunk( $db_path, 'db.sql.gz' );
+
+            wp_remote_post( KAPSULE_MIGRATOR_API_BASE, array(
+                'headers'     => array( 'Content-Type' => 'application/json' ),
+                'body'        => wp_json_encode( array(
+                    'token'  => $token,
+                    'action' => 'progress',
+                    'phase'  => 'database',
+                ) ),
+                'timeout'     => 10,
+                'data_format' => 'body',
+            ) );
+
+            $manifest = array(
+                'files_count'  => (int) get_option( 'kapsule_migration_file_count', 0 ),
+                'files_bytes'  => (int) get_option( 'kapsule_migration_file_bytes', 0 ),
+                'db_bytes'     => filesize( $db_path ),
+                'wp_version'   => get_bloginfo( 'version' ),
+                'plugins'      => $this->get_active_plugins(),
+                'theme'        => wp_get_theme()->get( 'Name' ),
+                'is_multisite' => is_multisite(),
+            );
+
+            $result      = wp_remote_post( KAPSULE_MIGRATOR_API_BASE, array(
+                'headers'     => array( 'Content-Type' => 'application/json' ),
+                'body'        => wp_json_encode( array(
+                    'token'          => $token,
+                    'action'         => 'complete',
+                    'uploadManifest' => $manifest,
+                ) ),
+                'timeout'     => 30,
+                'data_format' => 'body',
+            ) );
+            $result_body = is_wp_error( $result ) ? array() : json_decode( wp_remote_retrieve_body( $result ), true );
+            $job_id      = $result_body['jobId'] ?? '';
+
+            update_option( 'kapsule_migration_status', 'complete' );
+            if ( $job_id ) {
+                update_option( 'kapsule_migration_job_id', $job_id );
+            }
+
+            $packager->cleanup();
+
+            wp_send_json_success( array(
+                'status' => 'complete',
+                'jobId'  => $job_id,
+            ) );
+        } catch ( Exception $e ) {
+            update_option( 'kapsule_migration_status', 'error' );
+            update_option( 'kapsule_migration_error',  $e->getMessage() );
+            wp_send_json_error( $e->getMessage() );
+        }
+    }
+
+    private function get_active_plugins(): array {
+        $plugins = get_option( 'active_plugins', array() );
+        return array_map( function( $p ) {
+            $data = get_plugin_data( WP_PLUGIN_DIR . '/' . $p, false, false );
+            return array( 'slug' => $p, 'name' => $data['Name'] ?? $p, 'version' => $data['Version'] ?? '' );
+        }, $plugins );
     }
 
     public function ajax_start_standalone(): void {
@@ -167,6 +356,25 @@ class Kapsule_Admin_Page {
         delete_option( 'kapsule_migration_progress' );
         delete_option( 'kapsule_migration_error' );
         delete_option( 'kapsule_migration_job_id' );
+        delete_option( 'kapsule_migration_chunks' );
+        delete_option( 'kapsule_migration_chunk_count' );
+        delete_option( 'kapsule_migration_file_count' );
+        delete_option( 'kapsule_migration_file_bytes' );
+        delete_option( 'kapsule_migration_next_chunk' );
+
+        // Clean up AJAX-driven migration tmp dir
+        $migration_tmp = get_option( 'kapsule_migration_tmp_dir', '' );
+        delete_option( 'kapsule_migration_tmp_dir' );
+        if ( $migration_tmp && is_dir( $migration_tmp ) ) {
+            $iter = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator( $migration_tmp, FilesystemIterator::SKIP_DOTS ),
+                RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ( $iter as $f ) {
+                $f->isDir() ? rmdir( $f->getRealPath() ) : unlink( $f->getRealPath() );
+            }
+            @rmdir( $migration_tmp );
+        }
 
         $tmp_dir = get_option( 'kapsule_standalone_tmp_dir', '' );
         if ( $tmp_dir && is_dir( $tmp_dir ) ) {
@@ -242,9 +450,9 @@ class Kapsule_Admin_Page {
         <div class="wrap kapsule-migrator-wrap">
             <div class="kapsule-header">
                 <div class="kapsule-logo">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    <span>Kapsule Migrator</span>
+                    <img src="https://kpanel.kapsulecloud.com/logo.svg" alt="Kapsule" height="28" style="display:block;" />
                 </div>
+                <p class="kapsule-header-sub">Migrator</p>
             </div>
 
             <?php if ( $status === 'idle' ) : ?>
@@ -296,24 +504,85 @@ class Kapsule_Admin_Page {
                     </div>
                 </div>
 
-            <?php elseif ( in_array( $status, array( 'preflight', 'scanning', 'uploading_files', 'uploading_db', 'standalone_packaging' ), true ) ) : ?>
+            <?php elseif ( in_array( $status, array( 'preflight', 'scanning', 'uploading_files', 'uploading_db', 'standalone_packaging' ), true ) ) :
+                $is_standalone  = $status === 'standalone_packaging';
+                $step_scan_done = in_array( $status, array( 'uploading_files', 'uploading_db' ), true );
+                $step_scan_act  = in_array( $status, array( 'preflight', 'scanning' ), true );
+                $step_files_done = $status === 'uploading_db';
+                $step_files_act  = $status === 'uploading_files';
+                $step_db_act     = $status === 'uploading_db';
+            ?>
                 <div class="kapsule-card kapsule-status-card">
-                    <div class="kapsule-spinner"></div>
-                    <h2><?php echo $status === 'standalone_packaging' ? 'Exporting site' : 'Migration in progress'; ?></h2>
-                    <p id="kapsule-status-text" class="kapsule-subtext"><?php echo esc_html( $this->status_label( $status ) ); ?></p>
-                    <div class="kapsule-progress-bar"><div id="kapsule-progress-fill" class="kapsule-progress-fill" style="width:0%"></div></div>
-                    <p class="kapsule-close-note">
-                        <?php if ( $status === 'standalone_packaging' ) : ?>
-                            Packaging runs in the background. Keep this tab open to see when your files are ready.
+                    <div class="kapsule-status-header">
+                        <div class="kapsule-spinner-sm"></div>
+                        <div>
+                            <h2><?php echo $is_standalone ? 'Exporting your site' : 'Migration in progress'; ?></h2>
+                            <p id="kapsule-status-text" class="kapsule-status-label"><?php echo esc_html( $this->status_label( $status ) ); ?></p>
+                        </div>
+                    </div>
+
+                    <div class="kapsule-progress-bar">
+                        <div id="kapsule-progress-fill" class="kapsule-progress-fill" style="width:0%"></div>
+                    </div>
+
+                    <?php if ( ! $is_standalone ) : ?>
+                    <div class="kapsule-steps" id="kapsule-steps">
+                        <div class="kapsule-step <?php echo $step_scan_done ? 'kapsule-step--done' : ( $step_scan_act ? 'kapsule-step--active' : '' ); ?>" id="kstep-scan">
+                            <div class="kapsule-step-icon">
+                                <?php if ( $step_scan_done ) : ?>
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                <?php elseif ( $step_scan_act ) : ?>
+                                    <div class="kapsule-step-spinner"></div>
+                                <?php else : ?>
+                                    <div class="kapsule-step-dot-inner"></div>
+                                <?php endif; ?>
+                            </div>
+                            <span>Scanning site</span>
+                        </div>
+                        <div class="kapsule-step-line"></div>
+                        <div class="kapsule-step <?php echo $step_files_done ? 'kapsule-step--done' : ( $step_files_act ? 'kapsule-step--active' : '' ); ?>" id="kstep-files">
+                            <div class="kapsule-step-icon">
+                                <?php if ( $step_files_done ) : ?>
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                <?php elseif ( $step_files_act ) : ?>
+                                    <div class="kapsule-step-spinner"></div>
+                                <?php else : ?>
+                                    <div class="kapsule-step-dot-inner"></div>
+                                <?php endif; ?>
+                            </div>
+                            <span>Uploading files</span>
+                        </div>
+                        <div class="kapsule-step-line"></div>
+                        <div class="kapsule-step <?php echo $step_db_act ? 'kapsule-step--active' : ''; ?>" id="kstep-db">
+                            <div class="kapsule-step-icon">
+                                <?php if ( $step_db_act ) : ?>
+                                    <div class="kapsule-step-spinner"></div>
+                                <?php else : ?>
+                                    <div class="kapsule-step-dot-inner"></div>
+                                <?php endif; ?>
+                            </div>
+                            <span>Uploading database</span>
+                        </div>
+                        <div class="kapsule-step-line"></div>
+                        <div class="kapsule-step" id="kstep-done">
+                            <div class="kapsule-step-icon"><div class="kapsule-step-dot-inner"></div></div>
+                            <span>Kapsule finalises</span>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="kapsule-close-note">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;margin-top:1px"><path d="M7 1a6 6 0 1 1 0 12A6 6 0 0 1 7 1zm0 4v2.5L9 9" stroke="#0ea5e9" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <?php if ( $is_standalone ) : ?>
+                            Keep this tab open &mdash; we'll show your download links when packaging is done.
                         <?php else : ?>
-                            You can close this tab &mdash; migration continues in the background. You'll be notified in Kapsule when it's done.
+                            You can close this tab &mdash; migration continues in the background. We'll notify you in Kapsule when it's done.
                         <?php endif; ?>
-                    </p>
-                    <p style="margin-top:16px;">
-                        <button id="kapsule-reset-btn" class="button button-secondary" style="color:#dc2626;border-color:#dc2626;">
-                            Cancel and start over
-                        </button>
-                    </p>
+                    </div>
+
+                    <button id="kapsule-reset-btn" class="kapsule-cancel-btn">
+                        Cancel and start over
+                    </button>
                 </div>
 
             <?php elseif ( $status === 'standalone_ready' ) : ?>
