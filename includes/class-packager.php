@@ -79,7 +79,7 @@ class Kapsule_Packager {
      * Split a flat file list into groups of at most $chunk_size bytes.
      * Returns array of arrays (each inner array is one chunk's file entries).
      */
-    public static function build_chunks( array $files, int $chunk_size = 5 * 1024 * 1024 ): array {
+    public static function build_chunks( array $files, int $chunk_size = 50 * 1024 * 1024 ): array {
         $chunks        = array();
         $current       = array();
         $current_bytes = 0;
@@ -160,7 +160,7 @@ class Kapsule_Packager {
         @set_time_limit( 0 ); // Remove PHP execution limit — hosting may ignore this, but worth trying
 
         $root       = ABSPATH;
-        $chunk_size = 5 * 1024 * 1024; // 5 MB per chunk — keeps tmp files small on restricted shared hosts
+        $chunk_size = 50 * 1024 * 1024; // 50 MB per chunk (well within our 100 MB server limit)
         $ext        = $backend === 'zip' ? 'zip' : 'tar';
 
         $skip_patterns = array(
