@@ -170,6 +170,21 @@ class Kapsule_Uploader {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => $timeout,
             CURLOPT_CONNECTTIMEOUT => 30,
+
+            // A STALL IS NOT SLOWNESS, and the absolute timeout cannot tell them apart.
+            //
+            // CURLOPT_TIMEOUT has to stay generous because a real customer on a poor connection
+            // genuinely needs minutes for a 50MB piece. But that same generosity means a connection
+            // that has DIED is not noticed until the whole budget expires. Measured on 2026-08-21: an
+            // nginx reload severed an in-flight upload and the transfer sat silent for 12.5 minutes
+            // before the timeout fired and the retry succeeded in 5 seconds. The customer watching
+            // that sees a frozen migration for a quarter of an hour.
+            //
+            // So abort on a transfer that has effectively stopped: under 1KB/s for 60 seconds running.
+            // Anyone actually moving data, however slowly, stays well clear of that floor; a dead
+            // socket hits it in a minute and the retry loop does its job immediately.
+            CURLOPT_LOW_SPEED_LIMIT => 1024,
+            CURLOPT_LOW_SPEED_TIME  => 60,
             CURLOPT_HTTPHEADER     => array(
                 'Content-Type: application/octet-stream',
                 'X-Migration-Token: ' . $this->token,
