@@ -20,6 +20,16 @@
  *   - records each completed chunk so a resumed run SKIPS it instead of re-uploading
  *   - reports the reason in customer language; a raw "HTTP 413" never reaches the UI
  */
+/**
+ * A transfer failure that is worth trying again: a dropped connection, a timeout, a 502 from a
+ * server being reloaded. Distinct from a plain Exception, which here always means STOP.
+ *
+ * The distinction exists so the caller can tell the customer the truth. "The connection dropped,
+ * retrying piece 57" and "your token is no longer valid" need opposite responses, and a single
+ * exception type forces the UI to guess.
+ */
+class Kapsule_Retryable_Exception extends Exception {}
+
 class Kapsule_Uploader {
 
     private string $token;
@@ -28,7 +38,19 @@ class Kapsule_Uploader {
     /** Chunk uploads that fail this way will never succeed by trying again. */
     private const PERMANENT_CODES = array( 400, 401, 403, 404, 413, 422 );
 
-    private const MAX_ATTEMPTS   = 5;
+    /**
+     * The filename the DATABASE dump must arrive under.
+     *
+     * The server's pre-flight looks for exactly this name and refuses the job without it. Two upload
+     * paths existed and disagreed: the browser sent `db.sql.gz` and the WP-Cron path sent
+     * `database.sql.gz`, so every cron-driven migration failed pre-flight with "db.sql.gz not found,
+     * database upload did not complete". That message blames the customer's connection for a file
+     * that transferred perfectly under a name nobody was reading. Named once here so the two paths
+     * cannot drift apart again.
+     */
+    public const DB_REMOTE_NAME = 'db.sql.gz';
+
+    public const MAX_ATTEMPTS    = 5;
     private const BASE_BACKOFF_S = 2;
     /** Assume a pessimistic 1 Mbps floor when sizing the timeout, plus headroom. */
     private const MIN_TIMEOUT_S  = 120;
@@ -58,22 +80,36 @@ class Kapsule_Uploader {
     }
 
     /**
-     * Upload one chunk, retrying transient failures.
+     * Upload one chunk.
      *
-     * Returns true if uploaded, false if it was already done (resume). Throws only when the failure
-     * is permanent or the retries are exhausted, and the message is written for a customer.
+     * Returns true if uploaded, false if it was already done (resume). Throws `Kapsule_Retryable_Exception`
+     * when the failure is worth another go, and a plain `Exception` when it never will be. Both messages
+     * are written for a customer to read.
+     *
+     * WHY $max_attempts IS A PARAMETER, AND WHY THE BROWSER PASSES 1. Retrying in here means SLEEPING
+     * in here, and every one of those seconds is spent inside a single HTTP request on the CUSTOMER'S
+     * server. nginx's default `fastcgi_read_timeout` is 60 seconds. A 50MB piece on a modest business
+     * uplink already flirts with that, and five attempts plus backoff guarantees a 504 that the browser
+     * can only read as "the whole thing failed". So the browser passes 1, gets a fast honest answer,
+     * and owns the waiting itself, where it can also SHOW the customer what is happening.
+     *
+     * WP-Cron has no browser to own the loop, so that path keeps the full budget.
      */
-    public function upload_chunk( string $file_path, ?string $remote_name = null ): bool {
-        if ( ! file_exists( $file_path ) ) {
-            throw new Exception( "We could not read a prepared piece of your site from disk. Free space on the server and start the migration again." );
-        }
-
+    public function upload_chunk( string $file_path, ?string $remote_name = null, int $max_attempts = 0 ): bool {
+        $max_attempts = $max_attempts > 0 ? $max_attempts : self::MAX_ATTEMPTS;
         $filename = $remote_name ?? basename( $file_path );
 
-        // RESUME: a chunk the server already accepted is not sent again. On a large site this is the
-        // difference between a resumed migration finishing in minutes and starting from nothing.
+        // RESUME FIRST, and the ORDER here is the point. A chunk the server has already accepted is
+        // done, whether or not a copy of it still exists on this disk. Checking the file first meant a
+        // resumed run threw "we could not read a prepared piece of your site" for a piece that had
+        // arrived perfectly, simply because the packager no longer needed to rebuild it. Delivered
+        // beats present.
         if ( in_array( $filename, self::completed_chunks(), true ) ) {
             return false;
+        }
+
+        if ( ! file_exists( $file_path ) ) {
+            throw new Exception( __( 'We could not read a prepared piece of your site from disk. Free up space on the server and start the migration again.', 'kapsule-migrator' ) );
         }
 
         $size    = (int) filesize( $file_path );
@@ -82,7 +118,7 @@ class Kapsule_Uploader {
         $attempt  = 0;
         $last_msg = '';
 
-        while ( $attempt < self::MAX_ATTEMPTS ) {
+        while ( $attempt < $max_attempts ) {
             $attempt++;
             list( $code, $body, $curl_error ) = $this->send( $file_path, $filename, $size, $timeout );
 
@@ -96,28 +132,34 @@ class Kapsule_Uploader {
                 throw new Exception( $this->explain( $code, $size ) );
             }
 
-            $last_msg = $curl_error ? $curl_error : "the server replied {$code}";
+            $last_msg = $curl_error ? $curl_error : sprintf( /* translators: %s: an HTTP status code. */ __( 'the server replied %s', 'kapsule-migrator' ), $code );
 
-            if ( $attempt < self::MAX_ATTEMPTS ) {
+            if ( $attempt < $max_attempts ) {
                 // Exponential backoff with jitter, so a server under load is not hammered in lockstep
-                // by every migration running at once.
+                // by every migration running at once. Only ever reached on the WP-Cron path: when the
+                // browser drives, $max_attempts is 1 and it does the waiting itself.
                 $delay = (int) ( self::BASE_BACKOFF_S * pow( 2, $attempt - 1 ) );
                 $delay = min( $delay, 60 ) + wp_rand( 0, 3 );
                 sleep( $delay );
             }
         }
 
-        throw new Exception(
-            "A piece of your site could not be transferred after " . self::MAX_ATTEMPTS . " attempts ({$last_msg}). "
-            . "Your site has not been changed. Start the migration again and it will continue from where it stopped."
-        );
+        // Retryable, not fatal. The caller decides whether any budget is left; saying STOP here would
+        // throw away a migration over one dropped packet.
+        throw new Kapsule_Retryable_Exception( $last_msg );
+    }
+
+    /** Backoff for attempt N, in whole seconds. Shared so the browser waits the same way cron does. */
+    public static function backoff_seconds( int $attempt ): int {
+        $delay = (int) ( self::BASE_BACKOFF_S * pow( 2, max( 0, $attempt - 1 ) ) );
+        return min( $delay, 60 );
     }
 
     /** One attempt. Returns [http code, body, curl error]. */
     private function send( string $file_path, string $filename, int $size, int $timeout ): array {
         $handle = fopen( $file_path, 'rb' );
         if ( ! $handle ) {
-            return array( 0, '', 'could not open the prepared file' );
+            return array( 0, '', __( 'we could not open the prepared file', 'kapsule-migrator' ) );
         }
 
         $ch = curl_init( $this->api_base . '/upload-chunk' );
@@ -156,17 +198,24 @@ class Kapsule_Uploader {
         $mb = round( $size / 1048576 );
         switch ( $code ) {
             case 413:
-                return "One piece of your site ({$mb} MB) was larger than the server would accept. "
-                     . "This is a limit on our side, not a problem with your site. Contact support and we will raise it.";
+                return sprintf(
+                    /* translators: %s: the size of the piece that was rejected, e.g. "50". */
+                    __( 'One piece of your site (%s MB) was larger than the server would accept. This is a limit on our side, not a problem with your site. Contact support and we will raise it.', 'kapsule-migrator' ),
+                    number_format_i18n( $mb )
+                );
             case 401:
             case 403:
-                return "Your migration token is no longer valid. Generate a new one in your KapsuleHost panel and paste it in again.";
+                return __( 'Your migration token is no longer valid. Generate a new one in your KapsuleHost panel and paste it in again.', 'kapsule-migrator' );
             case 404:
-                return "The migration this token belongs to no longer exists. Start a new migration from your KapsuleHost panel.";
+                return __( 'The migration this token belongs to no longer exists. Start a new migration from your KapsuleHost panel.', 'kapsule-migrator' );
             case 422:
-                return "The server could not read one of the prepared pieces of your site. Start the migration again to rebuild it.";
+                return __( 'The server could not read one of the prepared pieces of your site. Start the migration again to rebuild it.', 'kapsule-migrator' );
             default:
-                return "The server refused a piece of your site (code {$code}). Your site has not been changed. Contact support and we will look at it.";
+                return sprintf(
+                    /* translators: %s: the HTTP status code the server returned. */
+                    __( 'The server refused a piece of your site (code %s). Your site has not been changed. Contact support and we will look at it.', 'kapsule-migrator' ),
+                    $code
+                );
         }
     }
 }

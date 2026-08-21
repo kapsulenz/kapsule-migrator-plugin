@@ -1,0 +1,570 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Kapsule Migrator\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ko_KR\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: kapsule-migrator tools/translate.py\n"
+
+#. Plugin Name of the plugin
+#: kapsule-migrator.php
+msgid "KapsuleHost Migrator"
+msgstr "KapsuleHost Migrator"
+
+#. Plugin URI of the plugin
+#: kapsule-migrator.php
+msgid "https://kapsulehost.com/migrate"
+msgstr "https://kapsulehost.com/migrate"
+
+#. Description of the plugin
+#: kapsule-migrator.php
+msgid "Migrate your WordPress site to KapsuleHost, or export your site for manual migration anywhere."
+msgstr "WordPress 사이트를 KapsuleHost로 이전하거나, 수동 이전을 위해 사이트를 내보냅니다."
+
+#. Author of the plugin
+#: kapsule-migrator.php
+msgid "KapsuleHost"
+msgstr "KapsuleHost"
+
+#. Author URI of the plugin
+#: kapsule-migrator.php
+msgid "https://kapsulehost.com"
+msgstr "https://kapsulehost.com"
+
+#: admin/class-admin-page.php:118
+#: admin/class-admin-page.php:201
+#: admin/class-admin-page.php:286
+#: admin/class-admin-page.php:372
+#: admin/class-admin-page.php:403
+msgid "You do not have permission to do that. Ask an administrator of this site to run the migration."
+msgstr "권한이 없습니다. 이 사이트의 관리자에게 이전 작업을 요청하세요."
+
+#: admin/class-admin-page.php:124
+#: assets/js/migrator.js:185
+msgid "Paste your migration token first. You will find it in your KapsuleHost panel under Sites, then Migrate."
+msgstr "먼저 이전 토큰을 붙여넣으세요. KapsuleHost 패널의 사이트 메뉴에서 이전 항목을 선택하시면 토큰을 확인하실 수 있습니다."
+
+#: admin/class-admin-page.php:148
+#: assets/js/migrator.js:201
+msgid "We could not connect to KapsuleHost with that token. Check it and try again."
+msgstr "해당 토큰으로 KapsuleHost에 연결할 수 없습니다. 토큰을 확인하신 후 다시 시도해 주세요."
+
+#: admin/class-admin-page.php:211
+#: admin/class-admin-page.php:294
+msgid "This migration is no longer in a state we can continue from. Stop and start over to begin a clean run."
+msgstr "이 이전 작업은 더 이상 계속할 수 없는 상태입니다. 중단하고 처음부터 다시 시작해 주세요."
+
+#: admin/class-admin-page.php:457
+msgid "You do not have permission to download this file."
+msgstr "이 파일을 다운로드할 권한이 없습니다."
+
+#: admin/class-admin-page.php:464
+msgid "That download link has expired. Reload this page and try again."
+msgstr "다운로드 링크가 만료되었습니다. 페이지를 새로고침한 후 다시 시도해 주세요."
+
+#: admin/class-admin-page.php:469
+msgid "We could not find that file. The package may have been cleaned up, so package this site again."
+msgstr "파일을 찾을 수 없습니다. 패키지가 정리되었을 수 있으니 사이트를 다시 패키징해 주세요."
+
+#: admin/class-admin-page.php:476
+msgid "That file is no longer on this server. Package this site again to rebuild it."
+msgstr "해당 파일이 더 이상 서버에 없습니다. 사이트를 다시 패키징하여 재생성해 주세요."
+
+#: admin/class-admin-page.php:545
+msgid "Move to KapsuleHost"
+msgstr "KapsuleHost로 이전"
+
+#: admin/class-admin-page.php:546
+msgid "Download a copy"
+msgstr "사본 다운로드"
+
+#: admin/class-admin-page.php:551
+msgid "Step 1 of 1"
+msgstr "1단계 중 1단계"
+
+#: admin/class-admin-page.php:552
+msgid "Move this site to KapsuleHost"
+msgstr "이 사이트를 KapsuleHost로 이전"
+
+#: admin/class-admin-page.php:554
+msgid "Paste the migration token from your KapsuleHost panel. We copy your files and your database across and leave this site exactly as it is, serving visitors the whole time."
+msgstr "KapsuleHost 패널에서 받은 이전 토큰을 붙여넣으세요. 파일과 데이터베이스를 복사하며, 이 사이트는 그대로 유지되어 계속 방문자에게 서비스됩니다."
+
+#: admin/class-admin-page.php:558
+msgid "Migration token"
+msgstr "이전 토큰"
+
+#: admin/class-admin-page.php:560
+msgid "Paste your token"
+msgstr "토큰을 붙여넣으세요"
+
+#: admin/class-admin-page.php:562
+msgid "Find it in your panel under Sites, then Migrate. The token works once and is deleted when the move finishes."
+msgstr "패널의 사이트 메뉴에서 이전 항목을 선택하시면 확인하실 수 있습니다. 토큰은 한 번만 사용되며 이전이 완료되면 삭제됩니다."
+
+#: admin/class-admin-page.php:567
+#: assets/js/migrator.js:202
+#: assets/js/migrator.js:206
+msgid "Start the move"
+msgstr "이전 시작"
+
+#: admin/class-admin-page.php:577
+msgid "Encrypted end to end"
+msgstr "종단 간 암호화"
+
+#: admin/class-admin-page.php:578
+msgid "This site is only ever read, never changed"
+msgstr "이 사이트는 읽기만 하며 변경하지 않습니다"
+
+#: admin/class-admin-page.php:579
+msgid "Token deleted after use"
+msgstr "사용 후 토큰 삭제"
+
+#: admin/class-admin-page.php:585
+msgid "No account needed"
+msgstr "계정 불필요"
+
+#: admin/class-admin-page.php:586
+msgid "Download a copy of this site"
+msgstr "이 사이트의 사본 다운로드"
+
+#: admin/class-admin-page.php:588
+msgid "Package the files and database into archives you can download and take anywhere. Useful if you are moving by hand or want a copy before you change anything."
+msgstr "파일과 데이터베이스를 다운로드 가능한 압축 파일로 패키징합니다. 수동으로 이전하거나 변경 전에 사본을 보관하고 싶을 때 유용합니다."
+
+#: admin/class-admin-page.php:592
+#: assets/js/migrator.js:225
+#: assets/js/migrator.js:229
+msgid "Package this site"
+msgstr "사이트 패키징"
+
+#: admin/class-admin-page.php:602
+msgid "Files stay on your server until you download them"
+msgstr "파일은 다운로드할 때까지 서버에 보관됩니다"
+
+#: admin/class-admin-page.php:603
+msgid "wp-config.php is left out on purpose"
+msgstr "wp-config.php는 의도적으로 제외됩니다"
+
+#: admin/class-admin-page.php:628
+msgid "Packaging your site"
+msgstr "사이트 패키징 중"
+
+#: admin/class-admin-page.php:629
+msgid "We are building downloadable archives of your files and database. Keep this tab open."
+msgstr "파일과 데이터베이스를 다운로드 가능한 압축 파일로 만들고 있습니다. 이 탭을 열어 두세요."
+
+#: admin/class-admin-page.php:631
+msgid "Looking at your site"
+msgstr "사이트 확인 중"
+
+#: admin/class-admin-page.php:632
+msgid "We are counting your files and checking the connection to KapsuleHost. Nothing has moved yet."
+msgstr "파일 개수를 세고 KapsuleHost 연결을 확인하고 있습니다. 아직 아무것도 이동하지 않았습니다."
+
+#: admin/class-admin-page.php:634
+#: assets/js/migrator.js:332
+msgid "Moving your site"
+msgstr "사이트 이전 중"
+
+#: admin/class-admin-page.php:635
+#: assets/js/migrator.js:333
+msgid "Your site is being copied across in pieces. It stays live and unchanged the whole time."
+msgstr "사이트를 조각으로 나누어 복사하고 있습니다. 이 과정 동안 사이트는 계속 정상 운영되며 변경되지 않습니다."
+
+#. translators: 1: current piece number, 2: total number of pieces.
+#: admin/class-admin-page.php:655
+#: assets/js/migrator.js:154
+msgid "piece %1$s of %2$s"
+msgstr "%2$s 중 %1$s 조각"
+
+#: admin/class-admin-page.php:669
+msgid "Pieces sent"
+msgstr "전송된 조각"
+
+#: admin/class-admin-page.php:673
+msgid "Moved"
+msgstr "이전됨"
+
+#: admin/class-admin-page.php:677
+msgid "Total"
+msgstr "전체"
+
+#: admin/class-admin-page.php:681
+#: assets/js/migrator.js:335
+msgid "Files"
+msgstr "파일"
+
+#: admin/class-admin-page.php:689
+msgid "Count the files and check the connection"
+msgstr "파일 개수 세기 및 연결 확인"
+
+#: admin/class-admin-page.php:693
+msgid "Copy the files across"
+msgstr "파일 복사"
+
+#: admin/class-admin-page.php:697
+msgid "Copy the database across"
+msgstr "데이터베이스 복사"
+
+#: admin/class-admin-page.php:701
+msgid "KapsuleHost puts it together"
+msgstr "KapsuleHost에서 조합 중"
+
+#: admin/class-admin-page.php:710
+msgid "Keep this tab open. We will show your download links the moment packaging finishes."
+msgstr "이 탭을 열어 두세요. 패키징이 완료되는 즉시 다운로드 링크를 표시해 드립니다."
+
+#: admin/class-admin-page.php:712
+msgid "<strong>Keep this tab open.</strong> The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived."
+msgstr "<strong>이 탭을 열어 두세요.</strong> 이전 작업이 여기서 진행되므로 탭을 닫으면 일시 중지됩니다. 닫아도 문제없습니다. 페이지를 다시 열면 마지막으로 도착한 조각부터 이어집니다."
+
+#: admin/class-admin-page.php:718
+msgid "Stop and start over"
+msgstr "중단하고 처음부터 다시 시작"
+
+#: admin/class-admin-page.php:727
+msgid "Package ready"
+msgstr "패키지 준비 완료"
+
+#: admin/class-admin-page.php:728
+msgid "Your site is packaged"
+msgstr "사이트 패키징 완료"
+
+#: admin/class-admin-page.php:730
+msgid "Download the archives below and import them on your new host. This site has not been changed."
+msgstr "아래 압축 파일을 다운로드하여 새 호스트에서 가져오기 하세요. 이 사이트는 변경되지 않았습니다."
+
+#: admin/class-admin-page.php:740
+msgid "Download"
+msgstr "다운로드"
+
+#: admin/class-admin-page.php:747
+msgid "Moving to KapsuleHost instead? Use the token path and we do all of this for you, with nothing to download."
+msgstr "KapsuleHost로 이전하시겠습니까? 토큰 방식을 이용하시면 다운로드 없이 저희가 모든 작업을 대신해 드립니다."
+
+#: admin/class-admin-page.php:751
+msgid "Delete the package and start over"
+msgstr "패키지 삭제 후 처음부터 다시 시작"
+
+#: admin/class-admin-page.php:769
+msgid "Move complete"
+msgstr "이전 완료"
+
+#: admin/class-admin-page.php:770
+msgid "Your site is on KapsuleHost"
+msgstr "사이트가 KapsuleHost에 있습니다"
+
+#. translators: %s: number of files copied, already formatted for the locale.
+#: admin/class-admin-page.php:773
+msgid "%s files and your database were copied and checked. Open the copy and look around before you point your domain at it."
+msgstr "%s개의 파일과 데이터베이스가 복사되고 확인되었습니다. 도메인을 연결하기 전에 복사본을 열어서 확인해 보세요."
+
+#: admin/class-admin-page.php:780
+msgid "Files copied"
+msgstr "복사된 파일"
+
+#: admin/class-admin-page.php:784
+msgid "Transferred"
+msgstr "전송됨"
+
+#: admin/class-admin-page.php:788
+msgid "Database"
+msgstr "데이터베이스"
+
+#: admin/class-admin-page.php:789
+msgid "Copied"
+msgstr "복사됨"
+
+#: admin/class-admin-page.php:792
+msgid "Took"
+msgstr "소요 시간"
+
+#. translators: %s: whole number of minutes the migration took.
+#: admin/class-admin-page.php:796
+msgid "%s min"
+msgid_plural "%s min"
+msgstr[0] "%s분"
+
+#: admin/class-admin-page.php:798
+msgid "not recorded"
+msgstr "기록되지 않음"
+
+#: admin/class-admin-page.php:806
+msgid "<strong>This site has not been changed.</strong> It is still live and serving visitors. Nothing moves for your visitors until you point your domain at the new copy."
+msgstr "<strong>이 사이트는 변경되지 않았습니다.</strong> 여전히 정상 운영되며 방문자에게 서비스되고 있습니다. 도메인을 새 사본으로 연결하기 전까지는 방문자에게 아무 변화가 없습니다."
+
+#: admin/class-admin-page.php:811
+msgid "Open the migrated site"
+msgstr "이전된 사이트 열기"
+
+#: admin/class-admin-page.php:813
+msgid "Back to my panel"
+msgstr "패널로 돌아가기"
+
+#: admin/class-admin-page.php:822
+msgid "Move stopped"
+msgstr "이전 중단됨"
+
+#: admin/class-admin-page.php:823
+msgid "We stopped before anything changed"
+msgstr "아무것도 변경되기 전에 중단했습니다"
+
+#: admin/class-admin-page.php:825
+msgid "The move did not finish, so we stopped rather than leave you with half a site. Your site here is untouched and still serving visitors."
+msgstr "이전이 완료되지 않아 불완전한 사이트를 남기지 않도록 중단했습니다. 현재 사이트는 변경되지 않았으며 계속 방문자에게 서비스되고 있습니다."
+
+#: admin/class-admin-page.php:836
+msgid "Try again"
+msgstr "다시 시도"
+
+#: admin/class-admin-page.php:837
+msgid "Contact support"
+msgstr "고객 지원 문의"
+
+#: admin/class-admin-page.php:870
+#: assets/js/migrator.js:443
+msgid "Checking the connection"
+msgstr "연결 확인 중"
+
+#: admin/class-admin-page.php:871
+#: assets/js/migrator.js:444
+msgid "Counting your files"
+msgstr "파일 개수 세는 중"
+
+#: admin/class-admin-page.php:872
+#: assets/js/migrator.js:331
+#: assets/js/migrator.js:445
+msgid "Copying files"
+msgstr "파일 복사 중"
+
+#: admin/class-admin-page.php:873
+#: assets/js/migrator.js:420
+#: assets/js/migrator.js:446
+msgid "Copying database"
+msgstr "데이터베이스 복사 중"
+
+#: admin/class-admin-page.php:874
+#: assets/js/migrator.js:447
+msgid "Packaging"
+msgstr "패키징 중"
+
+#: admin/class-admin-page.php:875
+msgid "Working"
+msgstr "작업 중"
+
+#. translators: %s: a formatted number of gigabytes, e.g. "5.9".
+#: admin/class-admin-page.php:889
+#: assets/js/migrator.js:66
+msgid "%s GB"
+msgstr "%s GB"
+
+#. translators: %s: a formatted number of megabytes.
+#: admin/class-admin-page.php:893
+#: assets/js/migrator.js:67
+msgid "%s MB"
+msgstr "%s MB"
+
+#. translators: %s: a formatted number of kilobytes.
+#: admin/class-admin-page.php:897
+#: assets/js/migrator.js:68
+msgid "%s KB"
+msgstr "%s KB"
+
+#. translators: %s: a formatted number of bytes.
+#: admin/class-admin-page.php:900
+#: assets/js/migrator.js:69
+msgid "%s B"
+msgstr "%s B"
+
+#: includes/class-packager.php:26
+msgid "This server cannot create archives, so we cannot package your site. Ask your host to enable the PHP zip extension, then contact KapsuleHost support if it still fails."
+msgstr "이 서버에서 압축 파일을 만들 수 없어 사이트를 패키징할 수 없습니다. 호스트에 PHP zip 확장 기능 활성화를 요청하시고, 그래도 실패하면 KapsuleHost 고객 지원에 문의해 주세요."
+
+#: includes/class-uploader.php:89
+msgid "We could not read a prepared piece of your site from disk. Free up space on the server and start the migration again."
+msgstr "디스크에서 준비된 사이트 조각을 읽을 수 없습니다. 서버 공간을 확보한 후 이전 작업을 다시 시작해 주세요."
+
+#. translators: %s: an HTTP status code.
+#: includes/class-uploader.php:120
+msgid "the server replied %s"
+msgstr "서버 응답: %s"
+
+#: includes/class-uploader.php:147
+msgid "we could not open the prepared file"
+msgstr "준비된 파일을 열 수 없습니다"
+
+#. translators: %s: the size of the piece that was rejected, e.g. "50".
+#: includes/class-uploader.php:188
+msgid "One piece of your site (%s MB) was larger than the server would accept. This is a limit on our side, not a problem with your site. Contact support and we will raise it."
+msgstr "사이트의 한 조각(%s MB)이 서버가 수용할 수 있는 크기보다 큽니다. 사이트 문제가 아니라 저희 쪽의 제한입니다. 고객 지원에 문의하시면 제한을 늘려 드리겠습니다."
+
+#: includes/class-uploader.php:193
+msgid "Your migration token is no longer valid. Generate a new one in your KapsuleHost panel and paste it in again."
+msgstr "이전 토큰이 더 이상 유효하지 않습니다. KapsuleHost 패널에서 새 토큰을 생성하여 다시 붙여넣으세요."
+
+#: includes/class-uploader.php:195
+msgid "The migration this token belongs to no longer exists. Start a new migration from your KapsuleHost panel."
+msgstr "이 토큰에 해당하는 이전 작업이 더 이상 존재하지 않습니다. KapsuleHost 패널에서 새 이전 작업을 시작해 주세요."
+
+#: includes/class-uploader.php:197
+msgid "The server could not read one of the prepared pieces of your site. Start the migration again to rebuild it."
+msgstr "서버가 준비된 사이트 조각 중 하나를 읽을 수 없습니다. 이전 작업을 다시 시작하여 재생성해 주세요."
+
+#. translators: %s: the HTTP status code the server returned.
+#: includes/class-uploader.php:201
+msgid "The server refused a piece of your site (code %s). Your site has not been changed. Contact support and we will look at it."
+msgstr "서버가 사이트 조각을 거부했습니다(코드 %s). 사이트는 변경되지 않았습니다. 고객 지원에 문의하시면 확인해 드리겠습니다."
+
+#: assets/js/migrator.js:75
+msgid "less than a minute left"
+msgstr "1분 미만 남음"
+
+#. translators: %s: whole number of minutes remaining.
+#: assets/js/migrator.js:80
+msgid "about %s minute left"
+msgid_plural "about %s minutes left"
+msgstr[0] "약 %s분 남음"
+
+#. translators: %s: whole number of hours remaining.
+#: assets/js/migrator.js:85
+msgid "about %s hour left"
+msgid_plural "about %s hours left"
+msgstr[0] "약 %s시간 남음"
+
+#. translators: 1: whole hours remaining, 2: additional minutes remaining.
+#: assets/js/migrator.js:88
+msgid "about %1$s h %2$s min left"
+msgstr "약 %1$s시간 %2$s분 남음"
+
+#: assets/js/migrator.js:190
+msgid "Checking your site..."
+msgstr "사이트 확인 중..."
+
+#: assets/js/migrator.js:205
+msgid "We could not reach KapsuleHost just now. Check this server can get online, then try again."
+msgstr "지금 KapsuleHost에 연결할 수 없습니다. 서버가 온라인 상태인지 확인한 후 다시 시도해 주세요."
+
+#: assets/js/migrator.js:214
+msgid "Packaging..."
+msgstr "패키징 중..."
+
+#: assets/js/migrator.js:224
+#: assets/js/migrator.js:228
+msgid "We could not start packaging. Please try again."
+msgstr "패키징을 시작할 수 없습니다. 다시 시도해 주세요."
+
+#: assets/js/migrator.js:235
+msgid "Cleaning up..."
+msgstr "정리 중..."
+
+#. translators: 1: which piece is moving, 2: estimated time remaining. Joined into one line.
+#: assets/js/migrator.js:262
+msgid "%1$s, %2$s"
+msgstr "%1$s, %2$s"
+
+#. translators: 1: pieces sent so far, 2: total pieces.
+#: assets/js/migrator.js:255
+#: assets/js/migrator.js:344
+msgid "%1$s / %2$s"
+msgstr "%1$s / %2$s"
+
+#. translators: %s: the HTTP status code the server returned, e.g. "502".
+#: assets/js/migrator.js:316
+msgid "the connection returned %s"
+msgstr "연결 응답: %s"
+
+#: assets/js/migrator.js:318
+#: assets/js/migrator.js:395
+msgid "the connection dropped"
+msgstr "연결 끊김"
+
+#: assets/js/migrator.js:326
+msgid "Keep this tab open."
+msgstr "이 탭을 열어 두세요."
+
+#: assets/js/migrator.js:327
+msgid "The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived."
+msgstr "이전 작업이 여기서 진행되므로 탭을 닫으면 일시 중지됩니다. 닫아도 문제없습니다. 페이지를 다시 열면 마지막으로 도착한 조각부터 이어집니다."
+
+#: assets/js/migrator.js:348
+msgid "Retrying"
+msgstr "재시도 중"
+
+#: assets/js/migrator.js:349
+msgid "The connection dropped"
+msgstr "연결이 끊어졌습니다"
+
+#. translators: %s: the number of the piece being retried.
+#: assets/js/migrator.js:351
+msgid "We are retrying piece %s. Everything already sent is kept, so this carries on from where it stopped rather than starting again."
+msgstr "%s번 조각을 재시도하고 있습니다. 이미 전송된 모든 내용은 보관되어 처음부터가 아닌 중단된 지점부터 이어집니다."
+
+#. translators: 1: the attempt about to be made, 2: total attempts allowed.
+#: assets/js/migrator.js:354
+msgid "Attempt"
+msgstr "시도"
+
+#: assets/js/migrator.js:355
+msgid "Nothing has been lost. Your site is untouched and still serving visitors. If this keeps failing we will tell you exactly what to do next."
+msgstr "아무것도 손실되지 않았습니다. 사이트는 변경되지 않았으며 계속 방문자에게 서비스되고 있습니다. 계속 실패하면 정확히 무엇을 해야 할지 안내해 드리겠습니다."
+
+#. translators: 1: seconds until the next attempt, 2: the attempt number, 3: total attempts.
+#: assets/js/migrator.js:363
+msgid "retrying in %1$s second, attempt %2$s of %3$s"
+msgid_plural "retrying in %1$s seconds, attempt %2$s of %3$s"
+msgstr[0] "%1$s초 후 재시도, %3$s회 중 %2$s번째 시도"
+
+#. translators: 1: the attempt number, 2: total attempts.
+#: assets/js/migrator.js:368
+msgid "retrying now, attempt %1$s of %2$s"
+msgstr "지금 재시도, %2$s회 중 %1$s번째 시도"
+
+#: assets/js/migrator.js:391
+msgid "Paused"
+msgstr "일시 중지됨"
+
+#: assets/js/migrator.js:392
+msgid "We have paused the move"
+msgstr "이전을 일시 중지했습니다"
+
+#. translators: 1: how many attempts were made, 2: why the connection failed.
+#: assets/js/migrator.js:394
+msgid "We could not reach KapsuleHost after %1$s tries (%2$s). Nothing is lost. Everything already copied is still there, and this site has not been changed."
+msgstr "%1$s회 시도 후 KapsuleHost에 연결할 수 없습니다(%2$s). 손실은 없습니다. 이미 복사된 모든 내용은 그대로 있으며, 이 사이트는 변경되지 않았습니다."
+
+#: assets/js/migrator.js:397
+msgid "Stopped at"
+msgstr "중단 위치"
+
+#. translators: %s: describes which piece the transfer stopped on, e.g. "piece 57 of 119".
+#: assets/js/migrator.js:399
+msgid "paused at %s"
+msgstr "%s에서 일시 중지됨"
+
+#: assets/js/migrator.js:400
+msgid "Check this server can reach the internet, then pick up where you left off. Nothing needs to be re-sent."
+msgstr "서버가 인터넷에 연결될 수 있는지 확인한 후 중단된 지점부터 이어가세요. 다시 전송할 필요가 없습니다."
+
+#: assets/js/migrator.js:404
+msgid "Pick up where it stopped"
+msgstr "중단된 지점부터 이어가기"
+
+#: assets/js/migrator.js:421
+msgid "Copying your database"
+msgstr "데이터베이스 복사 중"
+
+#: assets/js/migrator.js:422
+msgid "The files are across. We are copying your database now, which is usually the quickest part."
+msgstr "파일 복사가 완료되었습니다. 이제 데이터베이스를 복사하고 있으며, 보통 가장 빠른 단계입니다."
+
+#: assets/js/migrator.js:424
+#: assets/js/migrator.js:507
+msgid "database"
+msgstr "데이터베이스"
+
+#: assets/js/migrator.js:432
+msgid "finishing"
+msgstr "완료 중"

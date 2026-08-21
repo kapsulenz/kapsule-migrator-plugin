@@ -1,0 +1,590 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Kapsule Migrator\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ar\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5);\n"
+"X-Generator: kapsule-migrator tools/translate.py\n"
+
+#. Plugin Name of the plugin
+#: kapsule-migrator.php
+msgid "KapsuleHost Migrator"
+msgstr "KapsuleHost Migrator"
+
+#. Plugin URI of the plugin
+#: kapsule-migrator.php
+msgid "https://kapsulehost.com/migrate"
+msgstr "https://kapsulehost.com/migrate"
+
+#. Description of the plugin
+#: kapsule-migrator.php
+msgid "Migrate your WordPress site to KapsuleHost, or export your site for manual migration anywhere."
+msgstr "انقل موقع WordPress الخاص بك إلى KapsuleHost، أو صدّر موقعك للنقل اليدوي إلى أي مكان."
+
+#. Author of the plugin
+#: kapsule-migrator.php
+msgid "KapsuleHost"
+msgstr "KapsuleHost"
+
+#. Author URI of the plugin
+#: kapsule-migrator.php
+msgid "https://kapsulehost.com"
+msgstr "https://kapsulehost.com"
+
+#: admin/class-admin-page.php:118
+#: admin/class-admin-page.php:201
+#: admin/class-admin-page.php:286
+#: admin/class-admin-page.php:372
+#: admin/class-admin-page.php:403
+msgid "You do not have permission to do that. Ask an administrator of this site to run the migration."
+msgstr "ليس لديك إذن للقيام بذلك. اطلب من مسؤول هذا الموقع تشغيل عملية النقل."
+
+#: admin/class-admin-page.php:124
+#: assets/js/migrator.js:185
+msgid "Paste your migration token first. You will find it in your KapsuleHost panel under Sites, then Migrate."
+msgstr "الصق رمز النقل الخاص بك أولاً. ستجده في لوحة KapsuleHost الخاصة بك تحت المواقع، ثم النقل."
+
+#: admin/class-admin-page.php:148
+#: assets/js/migrator.js:201
+msgid "We could not connect to KapsuleHost with that token. Check it and try again."
+msgstr "لم نتمكن من الاتصال بـ KapsuleHost بهذا الرمز. تحقق منه وحاول مرة أخرى."
+
+#: admin/class-admin-page.php:211
+#: admin/class-admin-page.php:294
+msgid "This migration is no longer in a state we can continue from. Stop and start over to begin a clean run."
+msgstr "لم تعد عملية النقل هذه في حالة يمكننا المتابعة منها. توقف وابدأ من جديد لبدء تشغيل نظيف."
+
+#: admin/class-admin-page.php:457
+msgid "You do not have permission to download this file."
+msgstr "ليس لديك إذن لتنزيل هذا الملف."
+
+#: admin/class-admin-page.php:464
+msgid "That download link has expired. Reload this page and try again."
+msgstr "انتهت صلاحية رابط التنزيل هذا. أعد تحميل هذه الصفحة وحاول مرة أخرى."
+
+#: admin/class-admin-page.php:469
+msgid "We could not find that file. The package may have been cleaned up, so package this site again."
+msgstr "لم نتمكن من العثور على هذا الملف. ربما تم تنظيف الحزمة، لذا قم بتجهيز هذا الموقع مرة أخرى."
+
+#: admin/class-admin-page.php:476
+msgid "That file is no longer on this server. Package this site again to rebuild it."
+msgstr "لم يعد هذا الملف موجوداً على هذا الخادم. قم بتجهيز هذا الموقع مرة أخرى لإعادة بنائه."
+
+#: admin/class-admin-page.php:545
+msgid "Move to KapsuleHost"
+msgstr "الانتقال إلى KapsuleHost"
+
+#: admin/class-admin-page.php:546
+msgid "Download a copy"
+msgstr "تنزيل نسخة"
+
+#: admin/class-admin-page.php:551
+msgid "Step 1 of 1"
+msgstr "الخطوة 1 من 1"
+
+#: admin/class-admin-page.php:552
+msgid "Move this site to KapsuleHost"
+msgstr "انقل هذا الموقع إلى KapsuleHost"
+
+#: admin/class-admin-page.php:554
+msgid "Paste the migration token from your KapsuleHost panel. We copy your files and your database across and leave this site exactly as it is, serving visitors the whole time."
+msgstr "الصق رمز النقل من لوحة KapsuleHost الخاصة بك. سننسخ ملفاتك وقاعدة البيانات الخاصة بك ونترك هذا الموقع تماماً كما هو، ليخدم الزوار طوال الوقت."
+
+#: admin/class-admin-page.php:558
+msgid "Migration token"
+msgstr "رمز النقل"
+
+#: admin/class-admin-page.php:560
+msgid "Paste your token"
+msgstr "الصق رمزك"
+
+#: admin/class-admin-page.php:562
+msgid "Find it in your panel under Sites, then Migrate. The token works once and is deleted when the move finishes."
+msgstr "ستجده في لوحتك تحت المواقع، ثم النقل. يعمل الرمز مرة واحدة ويُحذف عند انتهاء النقل."
+
+#: admin/class-admin-page.php:567
+#: assets/js/migrator.js:202
+#: assets/js/migrator.js:206
+msgid "Start the move"
+msgstr "ابدأ النقل"
+
+#: admin/class-admin-page.php:577
+msgid "Encrypted end to end"
+msgstr "مشفر من طرف إلى طرف"
+
+#: admin/class-admin-page.php:578
+msgid "This site is only ever read, never changed"
+msgstr "تتم قراءة هذا الموقع فقط، ولا يتم تغييره أبداً"
+
+#: admin/class-admin-page.php:579
+msgid "Token deleted after use"
+msgstr "يُحذف الرمز بعد الاستخدام"
+
+#: admin/class-admin-page.php:585
+msgid "No account needed"
+msgstr "لا حاجة لحساب"
+
+#: admin/class-admin-page.php:586
+msgid "Download a copy of this site"
+msgstr "تنزيل نسخة من هذا الموقع"
+
+#: admin/class-admin-page.php:588
+msgid "Package the files and database into archives you can download and take anywhere. Useful if you are moving by hand or want a copy before you change anything."
+msgstr "قم بتجهيز الملفات وقاعدة البيانات في أرشيفات يمكنك تنزيلها ونقلها إلى أي مكان. مفيد إذا كنت تنقل يدوياً أو تريد نسخة قبل أن تغير أي شيء."
+
+#: admin/class-admin-page.php:592
+#: assets/js/migrator.js:225
+#: assets/js/migrator.js:229
+msgid "Package this site"
+msgstr "جهّز هذا الموقع"
+
+#: admin/class-admin-page.php:602
+msgid "Files stay on your server until you download them"
+msgstr "تبقى الملفات على خادمك حتى تقوم بتنزيلها"
+
+#: admin/class-admin-page.php:603
+msgid "wp-config.php is left out on purpose"
+msgstr "تم استبعاد wp-config.php عن قصد"
+
+#: admin/class-admin-page.php:628
+msgid "Packaging your site"
+msgstr "جارٍ تجهيز موقعك"
+
+#: admin/class-admin-page.php:629
+msgid "We are building downloadable archives of your files and database. Keep this tab open."
+msgstr "نقوم ببناء أرشيفات قابلة للتنزيل لملفاتك وقاعدة البيانات الخاصة بك. أبقِ هذه النافذة مفتوحة."
+
+#: admin/class-admin-page.php:631
+msgid "Looking at your site"
+msgstr "جارٍ فحص موقعك"
+
+#: admin/class-admin-page.php:632
+msgid "We are counting your files and checking the connection to KapsuleHost. Nothing has moved yet."
+msgstr "نقوم بحساب ملفاتك والتحقق من الاتصال بـ KapsuleHost. لم يتم نقل شيء بعد."
+
+#: admin/class-admin-page.php:634
+#: assets/js/migrator.js:332
+msgid "Moving your site"
+msgstr "جارٍ نقل موقعك"
+
+#: admin/class-admin-page.php:635
+#: assets/js/migrator.js:333
+msgid "Your site is being copied across in pieces. It stays live and unchanged the whole time."
+msgstr "يتم نسخ موقعك على أجزاء. يبقى حياً وبدون تغيير طوال الوقت."
+
+#. translators: 1: current piece number, 2: total number of pieces.
+#: admin/class-admin-page.php:655
+#: assets/js/migrator.js:154
+msgid "piece %1$s of %2$s"
+msgstr "الجزء %1$s من %2$s"
+
+#: admin/class-admin-page.php:669
+msgid "Pieces sent"
+msgstr "الأجزاء المرسلة"
+
+#: admin/class-admin-page.php:673
+msgid "Moved"
+msgstr "تم النقل"
+
+#: admin/class-admin-page.php:677
+msgid "Total"
+msgstr "الإجمالي"
+
+#: admin/class-admin-page.php:681
+#: assets/js/migrator.js:335
+msgid "Files"
+msgstr "الملفات"
+
+#: admin/class-admin-page.php:689
+msgid "Count the files and check the connection"
+msgstr "عد الملفات وتحقق من الاتصال"
+
+#: admin/class-admin-page.php:693
+msgid "Copy the files across"
+msgstr "انسخ الملفات"
+
+#: admin/class-admin-page.php:697
+msgid "Copy the database across"
+msgstr "انسخ قاعدة البيانات"
+
+#: admin/class-admin-page.php:701
+msgid "KapsuleHost puts it together"
+msgstr "يقوم KapsuleHost بتجميعها"
+
+#: admin/class-admin-page.php:710
+msgid "Keep this tab open. We will show your download links the moment packaging finishes."
+msgstr "أبقِ هذه النافذة مفتوحة. سنعرض روابط التنزيل الخاصة بك فور انتهاء التجهيز."
+
+#: admin/class-admin-page.php:712
+msgid "<strong>Keep this tab open.</strong> The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived."
+msgstr "<strong>أبقِ هذه النافذة مفتوحة.</strong> يتم تشغيل النقل من هنا، لذا فإن إغلاق النافذة يوقفه مؤقتاً. لن تفقد شيئاً إذا فعلت: أعد فتح هذه الصفحة وسيستمر من آخر جزء وصل."
+
+#: admin/class-admin-page.php:718
+msgid "Stop and start over"
+msgstr "توقف وابدأ من جديد"
+
+#: admin/class-admin-page.php:727
+msgid "Package ready"
+msgstr "الحزمة جاهزة"
+
+#: admin/class-admin-page.php:728
+msgid "Your site is packaged"
+msgstr "تم تجهيز موقعك"
+
+#: admin/class-admin-page.php:730
+msgid "Download the archives below and import them on your new host. This site has not been changed."
+msgstr "قم بتنزيل الأرشيفات أدناه واستوردها على المضيف الجديد الخاص بك. لم يتم تغيير هذا الموقع."
+
+#: admin/class-admin-page.php:740
+msgid "Download"
+msgstr "تنزيل"
+
+#: admin/class-admin-page.php:747
+msgid "Moving to KapsuleHost instead? Use the token path and we do all of this for you, with nothing to download."
+msgstr "هل تنتقل إلى KapsuleHost بدلاً من ذلك؟ استخدم مسار الرمز وسنقوم بكل هذا نيابة عنك، بدون أي شيء للتنزيل."
+
+#: admin/class-admin-page.php:751
+msgid "Delete the package and start over"
+msgstr "احذف الحزمة وابدأ من جديد"
+
+#: admin/class-admin-page.php:769
+msgid "Move complete"
+msgstr "اكتمل النقل"
+
+#: admin/class-admin-page.php:770
+msgid "Your site is on KapsuleHost"
+msgstr "موقعك الآن على KapsuleHost"
+
+#. translators: %s: number of files copied, already formatted for the locale.
+#: admin/class-admin-page.php:773
+msgid "%s files and your database were copied and checked. Open the copy and look around before you point your domain at it."
+msgstr "تم نسخ والتحقق من %s ملف وقاعدة البيانات الخاصة بك. افتح النسخة وتفحصها قبل أن توجه نطاقك إليها."
+
+#: admin/class-admin-page.php:780
+msgid "Files copied"
+msgstr "الملفات المنسوخة"
+
+#: admin/class-admin-page.php:784
+msgid "Transferred"
+msgstr "تم النقل"
+
+#: admin/class-admin-page.php:788
+msgid "Database"
+msgstr "قاعدة البيانات"
+
+#: admin/class-admin-page.php:789
+msgid "Copied"
+msgstr "تم النسخ"
+
+#: admin/class-admin-page.php:792
+msgid "Took"
+msgstr "استغرق"
+
+#. translators: %s: whole number of minutes the migration took.
+#: admin/class-admin-page.php:796
+msgid "%s min"
+msgid_plural "%s min"
+msgstr[0] "أقل من دقيقة"
+msgstr[1] "دقيقة واحدة"
+msgstr[2] "%s دقيقتان"
+msgstr[3] "%s دقائق"
+msgstr[4] "%s دقيقة"
+msgstr[5] "%s دقيقة"
+
+#: admin/class-admin-page.php:798
+msgid "not recorded"
+msgstr "غير مسجل"
+
+#: admin/class-admin-page.php:806
+msgid "<strong>This site has not been changed.</strong> It is still live and serving visitors. Nothing moves for your visitors until you point your domain at the new copy."
+msgstr "<strong>لم يتم تغيير هذا الموقع.</strong> لا يزال حياً ويخدم الزوار. لن يتغير شيء لزوارك حتى توجه نطاقك إلى النسخة الجديدة."
+
+#: admin/class-admin-page.php:811
+msgid "Open the migrated site"
+msgstr "افتح الموقع المنقول"
+
+#: admin/class-admin-page.php:813
+msgid "Back to my panel"
+msgstr "العودة إلى لوحتي"
+
+#: admin/class-admin-page.php:822
+msgid "Move stopped"
+msgstr "توقف النقل"
+
+#: admin/class-admin-page.php:823
+msgid "We stopped before anything changed"
+msgstr "توقفنا قبل تغيير أي شيء"
+
+#: admin/class-admin-page.php:825
+msgid "The move did not finish, so we stopped rather than leave you with half a site. Your site here is untouched and still serving visitors."
+msgstr "لم يكتمل النقل، لذا توقفنا بدلاً من تركك بنصف موقع. موقعك هنا لم يُمس ولا يزال يخدم الزوار."
+
+#: admin/class-admin-page.php:836
+msgid "Try again"
+msgstr "حاول مرة أخرى"
+
+#: admin/class-admin-page.php:837
+msgid "Contact support"
+msgstr "اتصل بالدعم"
+
+#: admin/class-admin-page.php:870
+#: assets/js/migrator.js:443
+msgid "Checking the connection"
+msgstr "جارٍ التحقق من الاتصال"
+
+#: admin/class-admin-page.php:871
+#: assets/js/migrator.js:444
+msgid "Counting your files"
+msgstr "جارٍ حساب ملفاتك"
+
+#: admin/class-admin-page.php:872
+#: assets/js/migrator.js:331
+#: assets/js/migrator.js:445
+msgid "Copying files"
+msgstr "جارٍ نسخ الملفات"
+
+#: admin/class-admin-page.php:873
+#: assets/js/migrator.js:420
+#: assets/js/migrator.js:446
+msgid "Copying database"
+msgstr "جارٍ نسخ قاعدة البيانات"
+
+#: admin/class-admin-page.php:874
+#: assets/js/migrator.js:447
+msgid "Packaging"
+msgstr "جارٍ التجهيز"
+
+#: admin/class-admin-page.php:875
+msgid "Working"
+msgstr "جارٍ العمل"
+
+#. translators: %s: a formatted number of gigabytes, e.g. "5.9".
+#: admin/class-admin-page.php:889
+#: assets/js/migrator.js:66
+msgid "%s GB"
+msgstr "%s غيغابايت"
+
+#. translators: %s: a formatted number of megabytes.
+#: admin/class-admin-page.php:893
+#: assets/js/migrator.js:67
+msgid "%s MB"
+msgstr "%s ميغابايت"
+
+#. translators: %s: a formatted number of kilobytes.
+#: admin/class-admin-page.php:897
+#: assets/js/migrator.js:68
+msgid "%s KB"
+msgstr "%s كيلوبايت"
+
+#. translators: %s: a formatted number of bytes.
+#: admin/class-admin-page.php:900
+#: assets/js/migrator.js:69
+msgid "%s B"
+msgstr "%s بايت"
+
+#: includes/class-packager.php:26
+msgid "This server cannot create archives, so we cannot package your site. Ask your host to enable the PHP zip extension, then contact KapsuleHost support if it still fails."
+msgstr "لا يمكن لهذا الخادم إنشاء أرشيفات، لذا لا يمكننا تجهيز موقعك. اطلب من مضيفك تفعيل امتداد PHP zip، ثم اتصل بدعم KapsuleHost إذا استمر الفشل."
+
+#: includes/class-uploader.php:89
+msgid "We could not read a prepared piece of your site from disk. Free up space on the server and start the migration again."
+msgstr "لم نتمكن من قراءة جزء محضر من موقعك من القرص. قم بتوفير مساحة على الخادم وابدأ عملية النقل مرة أخرى."
+
+#. translators: %s: an HTTP status code.
+#: includes/class-uploader.php:120
+msgid "the server replied %s"
+msgstr "رد الخادم بـ %s"
+
+#: includes/class-uploader.php:147
+msgid "we could not open the prepared file"
+msgstr "لم نتمكن من فتح الملف المحضر"
+
+#. translators: %s: the size of the piece that was rejected, e.g. "50".
+#: includes/class-uploader.php:188
+msgid "One piece of your site (%s MB) was larger than the server would accept. This is a limit on our side, not a problem with your site. Contact support and we will raise it."
+msgstr "كان أحد أجزاء موقعك (%s ميغابايت) أكبر مما يقبله الخادم. هذا حد من جانبنا، وليس مشكلة في موقعك. اتصل بالدعم وسنرفعه."
+
+#: includes/class-uploader.php:193
+msgid "Your migration token is no longer valid. Generate a new one in your KapsuleHost panel and paste it in again."
+msgstr "لم يعد رمز النقل الخاص بك صالحاً. أنشئ رمزاً جديداً في لوحة KapsuleHost الخاصة بك والصقه مرة أخرى."
+
+#: includes/class-uploader.php:195
+msgid "The migration this token belongs to no longer exists. Start a new migration from your KapsuleHost panel."
+msgstr "لم تعد عملية النقل التي ينتمي إليها هذا الرمز موجودة. ابدأ عملية نقل جديدة من لوحة KapsuleHost الخاصة بك."
+
+#: includes/class-uploader.php:197
+msgid "The server could not read one of the prepared pieces of your site. Start the migration again to rebuild it."
+msgstr "لم يتمكن الخادم من قراءة أحد أجزاء موقعك المحضرة. ابدأ عملية النقل مرة أخرى لإعادة بنائها."
+
+#. translators: %s: the HTTP status code the server returned.
+#: includes/class-uploader.php:201
+msgid "The server refused a piece of your site (code %s). Your site has not been changed. Contact support and we will look at it."
+msgstr "رفض الخادم جزءاً من موقعك (الكود %s). لم يتم تغيير موقعك. اتصل بالدعم وسنلقي نظرة عليه."
+
+#: assets/js/migrator.js:75
+msgid "less than a minute left"
+msgstr "أقل من دقيقة متبقية"
+
+#. translators: %s: whole number of minutes remaining.
+#: assets/js/migrator.js:80
+msgid "about %s minute left"
+msgid_plural "about %s minutes left"
+msgstr[0] "أقل من دقيقة متبقية"
+msgstr[1] "حوالي دقيقة واحدة متبقية"
+msgstr[2] "حوالي دقيقتان متبقيتان"
+msgstr[3] "حوالي %s دقائق متبقية"
+msgstr[4] "حوالي %s دقيقة متبقية"
+msgstr[5] "حوالي %s دقيقة متبقية"
+
+#. translators: %s: whole number of hours remaining.
+#: assets/js/migrator.js:85
+msgid "about %s hour left"
+msgid_plural "about %s hours left"
+msgstr[0] "أقل من ساعة متبقية"
+msgstr[1] "حوالي ساعة واحدة متبقية"
+msgstr[2] "حوالي ساعتان متبقيتان"
+msgstr[3] "حوالي %s ساعات متبقية"
+msgstr[4] "حوالي %s ساعة متبقية"
+msgstr[5] "حوالي %s ساعة متبقية"
+
+#. translators: 1: whole hours remaining, 2: additional minutes remaining.
+#: assets/js/migrator.js:88
+msgid "about %1$s h %2$s min left"
+msgstr "حوالي %1$s س %2$s د متبقية"
+
+#: assets/js/migrator.js:190
+msgid "Checking your site..."
+msgstr "جارٍ فحص موقعك..."
+
+#: assets/js/migrator.js:205
+msgid "We could not reach KapsuleHost just now. Check this server can get online, then try again."
+msgstr "لم نتمكن من الوصول إلى KapsuleHost الآن. تحقق من أن هذا الخادم يمكنه الاتصال بالإنترنت، ثم حاول مرة أخرى."
+
+#: assets/js/migrator.js:214
+msgid "Packaging..."
+msgstr "جارٍ التجهيز..."
+
+#: assets/js/migrator.js:224
+#: assets/js/migrator.js:228
+msgid "We could not start packaging. Please try again."
+msgstr "لم نتمكن من بدء التجهيز. يرجى المحاولة مرة أخرى."
+
+#: assets/js/migrator.js:235
+msgid "Cleaning up..."
+msgstr "جارٍ التنظيف..."
+
+#. translators: 1: which piece is moving, 2: estimated time remaining. Joined into one line.
+#: assets/js/migrator.js:262
+msgid "%1$s, %2$s"
+msgstr "%1$s، %2$s"
+
+#. translators: 1: pieces sent so far, 2: total pieces.
+#: assets/js/migrator.js:255
+#: assets/js/migrator.js:344
+msgid "%1$s / %2$s"
+msgstr "%1$s / %2$s"
+
+#. translators: %s: the HTTP status code the server returned, e.g. "502".
+#: assets/js/migrator.js:316
+msgid "the connection returned %s"
+msgstr "أرجع الاتصال %s"
+
+#: assets/js/migrator.js:318
+#: assets/js/migrator.js:395
+msgid "the connection dropped"
+msgstr "انقطع الاتصال"
+
+#: assets/js/migrator.js:326
+msgid "Keep this tab open."
+msgstr "أبقِ هذه النافذة مفتوحة."
+
+#: assets/js/migrator.js:327
+msgid "The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived."
+msgstr "يتم تشغيل النقل من هنا، لذا فإن إغلاق النافذة يوقفه مؤقتاً. لن تفقد شيئاً إذا فعلت: أعد فتح هذه الصفحة وسيستمر من آخر جزء وصل."
+
+#: assets/js/migrator.js:348
+msgid "Retrying"
+msgstr "إعادة المحاولة"
+
+#: assets/js/migrator.js:349
+msgid "The connection dropped"
+msgstr "انقطع الاتصال"
+
+#. translators: %s: the number of the piece being retried.
+#: assets/js/migrator.js:351
+msgid "We are retrying piece %s. Everything already sent is kept, so this carries on from where it stopped rather than starting again."
+msgstr "نعيد محاولة الجزء %s. يتم الاحتفاظ بكل ما تم إرساله بالفعل، لذا يستمر هذا من حيث توقف بدلاً من البدء مرة أخرى."
+
+#. translators: 1: the attempt about to be made, 2: total attempts allowed.
+#: assets/js/migrator.js:354
+msgid "Attempt"
+msgstr "المحاولة"
+
+#: assets/js/migrator.js:355
+msgid "Nothing has been lost. Your site is untouched and still serving visitors. If this keeps failing we will tell you exactly what to do next."
+msgstr "لم تفقد شيئاً. موقعك لم يُمس ولا يزال يخدم الزوار. إذا استمر هذا الفشل، سنخبرك بالضبط بما يجب فعله بعد ذلك."
+
+#. translators: 1: seconds until the next attempt, 2: the attempt number, 3: total attempts.
+#: assets/js/migrator.js:363
+msgid "retrying in %1$s second, attempt %2$s of %3$s"
+msgid_plural "retrying in %1$s seconds, attempt %2$s of %3$s"
+msgstr[0] "إعادة المحاولة خلال أقل من ثانية، المحاولة %2$s من %3$s"
+msgstr[1] "إعادة المحاولة خلال ثانية واحدة، المحاولة %2$s من %3$s"
+msgstr[2] "إعادة المحاولة خلال ثانيتين، المحاولة %2$s من %3$s"
+msgstr[3] "إعادة المحاولة خلال %1$s ثوانٍ، المحاولة %2$s من %3$s"
+msgstr[4] "إعادة المحاولة خلال %1$s ثانية، المحاولة %2$s من %3$s"
+msgstr[5] "إعادة المحاولة خلال %1$s ثانية، المحاولة %2$s من %3$s"
+
+#. translators: 1: the attempt number, 2: total attempts.
+#: assets/js/migrator.js:368
+msgid "retrying now, attempt %1$s of %2$s"
+msgstr "إعادة المحاولة الآن، المحاولة %1$s من %2$s"
+
+#: assets/js/migrator.js:391
+msgid "Paused"
+msgstr "متوقف مؤقتاً"
+
+#: assets/js/migrator.js:392
+msgid "We have paused the move"
+msgstr "أوقفنا النقل مؤقتاً"
+
+#. translators: 1: how many attempts were made, 2: why the connection failed.
+#: assets/js/migrator.js:394
+msgid "We could not reach KapsuleHost after %1$s tries (%2$s). Nothing is lost. Everything already copied is still there, and this site has not been changed."
+msgstr "لم نتمكن من الوصول إلى KapsuleHost بعد %1$s محاولات (%2$s). لم تفقد شيئاً. كل ما تم نسخه بالفعل لا يزال موجوداً، ولم يتم تغيير هذا الموقع."
+
+#: assets/js/migrator.js:397
+msgid "Stopped at"
+msgstr "توقف عند"
+
+#. translators: %s: describes which piece the transfer stopped on, e.g. "piece 57 of 119".
+#: assets/js/migrator.js:399
+msgid "paused at %s"
+msgstr "متوقف مؤقتاً عند %s"
+
+#: assets/js/migrator.js:400
+msgid "Check this server can reach the internet, then pick up where you left off. Nothing needs to be re-sent."
+msgstr "تحقق من أن هذا الخادم يمكنه الوصول إلى الإنترنت، ثم تابع من حيث توقفت. لا يلزم إعادة إرسال أي شيء."
+
+#: assets/js/migrator.js:404
+msgid "Pick up where it stopped"
+msgstr "تابع من حيث توقف"
+
+#: assets/js/migrator.js:421
+msgid "Copying your database"
+msgstr "جارٍ نسخ قاعدة البيانات الخاصة بك"
+
+#: assets/js/migrator.js:422
+msgid "The files are across. We are copying your database now, which is usually the quickest part."
+msgstr "الملفات منقولة. نقوم بنسخ قاعدة البيانات الخاصة بك الآن، وهو عادةً الجزء الأسرع."
+
+#: assets/js/migrator.js:424
+#: assets/js/migrator.js:507
+msgid "database"
+msgstr "قاعدة البيانات"
+
+#: assets/js/migrator.js:432
+msgid "finishing"
+msgstr "الإنهاء"

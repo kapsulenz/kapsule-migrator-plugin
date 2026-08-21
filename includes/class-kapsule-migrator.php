@@ -106,7 +106,7 @@ class Kapsule_Migrator {
 
             update_option( 'kapsule_migration_status', 'uploading_db' );
             $db_path = $packager->export_database();
-            $uploader->upload_chunk( $db_path, 'database.sql.gz' );
+            $uploader->upload_chunk( $db_path, Kapsule_Uploader::DB_REMOTE_NAME );
             $this->call_kapsule_api( array(
                 'token'  => $token,
                 'action' => 'progress',

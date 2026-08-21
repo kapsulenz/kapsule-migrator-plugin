@@ -1,480 +1,349 @@
-/* Kapsule Migrator — Admin styles */
-
-.kapsule-migrator-wrap {
-    max-width: 640px;
-    margin: 32px 20px 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+/*
+ * Urbanist is the estate's UI face. It is BUNDLED rather than fetched from a font CDN for three
+ * reasons: a customer's wp-admin must not make a third-party request on our behalf, the screen must
+ * look right on a site with no network egress, and a fallback stack alone renders as generic system
+ * sans, which is precisely the "looks like every other plugin" outcome this rebuild exists to avoid.
+ * One variable latin file, ~30KB, covers every weight used here.
+ */
+@font-face {
+  font-family: 'KapsuleUrbanist';
+  src: url('../fonts/urbanist-var.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
 
-/* ── Header ── */
-.kapsule-header {
-    margin-bottom: 24px;
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
+/*
+ * Kapsule Migrator, admin UI.
+ *
+ * DESIGN BRIEF. Someone is about to move their live business website. They are not a sysadmin, they
+ * are a person whose shop or portfolio pays their rent, and the last plugin that promised something
+ * like this probably scared them. Every choice here serves one job: make a large, slow, risky-feeling
+ * operation feel legible and safe.
+ *
+ * PALETTE IS THE ESTATE'S OWN, not a plugin invention. Taken from src/styles/tokens.css in the
+ * portal, so this screen belongs to the same product as the panel the customer just came from:
+ * accent #14bccf, surfaces #FAFAFA / #FFFFFF, ink #18181B, and the semantic four. The previous
+ * version used Tailwind's default sky/slate (#0ea5e9, #0f172a), which is the palette every other
+ * plugin in the directory uses.
+ *
+ * THE SIGNATURE IS THE TRANSFER METER. Most migration plugins show a spinner and a percentage that
+ * is a guess. This shows what is actually moving: pieces sent of total, bytes, throughput, and, when
+ * a piece fails, it says so and says it is retrying. On a 6GB site the honest number is the only
+ * thing that makes a twenty minute wait tolerable. Boldness is spent there; everything else is quiet
+ * on purpose.
+ *
+ * SCOPED AND RESET. wp-admin injects opinionated styles into everything, so every rule is scoped
+ * under .kapsule-mig and the shell resets what wp-admin would otherwise leak in.
+ */
+
+.kapsule-mig {
+  /* Estate tokens */
+  --km-accent:        #14bccf;
+  --km-accent-hover:  #0da8ba;
+  --km-accent-fg:     #ffffff;
+  --km-accent-subtle: rgba(20, 188, 207, 0.08);
+  --km-accent-line:   rgba(20, 188, 207, 0.28);
+
+  --km-bg:        #fafafa;
+  --km-surface:   #ffffff;
+  --km-elev:      #f4f4f5;
+  --km-border:    #e4e4e7;
+  --km-border-st: #d4d4d8;
+
+  --km-ink:       #18181b;
+  --km-ink-2:     #52525b;
+  --km-ink-3:     #a1a1aa;
+
+  --km-success:   #10b981;
+  --km-warning:   #f59e0b;
+  --km-danger:    #ef4444;
+  --km-info:      #3b82f6;
+
+  --km-success-sub: rgba(16, 185, 129, 0.10);
+  --km-warning-sub: rgba(245, 158, 11, 0.10);
+  --km-danger-sub:  rgba(239, 68, 68, 0.10);
+
+  --km-r:    14px;
+  --km-r-sm: 9px;
+  --km-shadow: 0 1px 2px rgba(24, 24, 27, .04), 0 8px 24px -12px rgba(24, 24, 27, .10);
+
+  font-family: 'KapsuleUrbanist', 'Urbanist Variable', 'Urbanist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--km-ink);
+  background: var(--km-bg);
+  margin: 0; margin-inline-start: -20px;   /* bleed past wp-admin's wrap padding, either direction */
+  padding: 34px 30px 60px;
+  min-height: calc(100vh - 32px);
+  -webkit-font-smoothing: antialiased;
 }
 
-.kapsule-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 18px;
-    font-weight: 700;
-    color: #0f172a;
-    line-height: 1;
+.kapsule-mig *,
+.kapsule-mig *::before,
+.kapsule-mig *::after { box-sizing: border-box; }
+
+.kapsule-mig p { margin: 0; }
+.kapsule-mig h1, .kapsule-mig h2, .kapsule-mig h3 { margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+
+/* ── Masthead ─────────────────────────────────────────────────────────────── */
+
+.km-top {
+  display: flex; align-items: center; gap: 11px;
+  margin-bottom: 26px;
+}
+.km-mark {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--km-accent);
+  display: grid; place-items: center;
+  box-shadow: 0 2px 10px -2px var(--km-accent-line);
+  flex-shrink: 0;
+}
+.km-mark svg { width: 17px; height: 17px; display: block; }
+.km-wordmark { font-size: 15px; font-weight: 700; letter-spacing: -0.015em; }
+.km-wordmark span { color: var(--km-ink-3); font-weight: 600; }
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+
+.km-card {
+  background: var(--km-surface);
+  border: 1px solid var(--km-border);
+  border-radius: var(--km-r);
+  box-shadow: var(--km-shadow);
+  max-width: 780px;
+  overflow: hidden;
+}
+.km-card-body { padding: 30px 32px 32px; }
+
+.km-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--km-ink-3); margin-bottom: 9px;
+}
+.km-title { font-size: 25px; line-height: 1.2; margin-bottom: 9px; }
+.km-lede  { font-size: 14.5px; line-height: 1.6; color: var(--km-ink-2); max-width: 60ch; }
+
+/* ── State chip ───────────────────────────────────────────────────────────── */
+
+.km-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding-block: 5px; padding-inline: 9px 12px;
+  border-radius: 999px;
+  font-size: 12.5px; font-weight: 650;
+  border: 1px solid var(--km-border);
+  background: var(--km-elev);
+  color: var(--km-ink-2);
+}
+.km-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--km-ink-3); flex-shrink: 0; }
+
+.km-chip[data-state="connecting"],
+.km-chip[data-state="transferring"] {
+  background: var(--km-accent-subtle); border-color: var(--km-accent-line); color: #0b7c88;
+}
+.km-chip[data-state="connecting"] .km-dot,
+.km-chip[data-state="transferring"] .km-dot {
+  background: var(--km-accent); animation: km-pulse 1.6s ease-in-out infinite;
+}
+.km-chip[data-state="retrying"] {
+  background: var(--km-warning-sub); border-color: rgba(245,158,11,.3); color: #8a5a05;
+}
+.km-chip[data-state="retrying"] .km-dot { background: var(--km-warning); animation: km-pulse 1s ease-in-out infinite; }
+.km-chip[data-state="done"]  { background: var(--km-success-sub); border-color: rgba(16,185,129,.3); color: #05704f; }
+.km-chip[data-state="done"] .km-dot { background: var(--km-success); }
+.km-chip[data-state="error"] { background: var(--km-danger-sub); border-color: rgba(239,68,68,.3); color: #a11b1b; }
+.km-chip[data-state="error"] .km-dot { background: var(--km-danger); }
+
+@keyframes km-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .45; transform: scale(.82); }
 }
 
-.kapsule-header-sub {
-    font-size: 12px;
-    color: #94a3b8;
-    margin: 0;
+/* ── THE TRANSFER METER (signature) ───────────────────────────────────────── */
+
+.km-meter { margin-top: 26px; }
+
+.km-meter-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  margin-bottom: 11px;
+}
+.km-meter-pct {
+  font-size: 34px; font-weight: 750; letter-spacing: -0.03em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.km-meter-pct sub { font-size: 15px; font-weight: 650; color: var(--km-ink-3); vertical-align: baseline; margin-inline-start: 2px; }
+.km-meter-note { font-size: 13px; color: var(--km-ink-2); font-weight: 600; text-align: end; }
+
+.km-rail {
+  position: relative; height: 9px; border-radius: 999px;
+  background: var(--km-elev); border: 1px solid var(--km-border);
+  overflow: hidden;
+}
+.km-fill {
+  position: absolute; inset-block: 0; inset-inline-start: 0; width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--km-accent) 0%, #37d4e4 100%);
+  transition: width .55s cubic-bezier(.22,.61,.36,1);
+}
+/* A moving sheen ONLY while actively transferring, so "working" is visible without a spinner. */
+.km-rail[data-live="1"] .km-fill::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  transform: translateX(-100%);
+  animation: km-sheen 1.9s ease-in-out infinite;
+}
+@keyframes km-sheen { to { transform: translateX(100%); } }
+
+/* The honest detail row: what is actually moving. */
+.km-facts {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 1px; margin-top: 18px;
+  background: var(--km-border); border: 1px solid var(--km-border);
+  border-radius: var(--km-r-sm); overflow: hidden;
+}
+.km-fact { background: var(--km-surface); padding: 12px 14px; }
+.km-fact-k { font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--km-ink-3); }
+.km-fact-v { font-size: 16px; font-weight: 700; margin-top: 3px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+
+/* ── Steps ────────────────────────────────────────────────────────────────── */
+
+.km-steps { margin-top: 26px; display: flex; flex-direction: column; gap: 2px; }
+.km-step {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 11px; border-radius: var(--km-r-sm);
+  font-size: 13.5px; font-weight: 600; color: var(--km-ink-3);
+  transition: background .25s ease, color .25s ease;
+}
+.km-step[data-on="1"] { color: var(--km-ink); background: var(--km-accent-subtle); }
+.km-step[data-done="1"] { color: var(--km-ink-2); }
+.km-step-i {
+  width: 19px; height: 19px; border-radius: 50%; flex-shrink: 0;
+  border: 1.5px solid var(--km-border-st);
+  display: grid; place-items: center;
+}
+.km-step[data-on="1"] .km-step-i { border-color: var(--km-accent); }
+.km-step[data-done="1"] .km-step-i { border-color: var(--km-success); background: var(--km-success); }
+.km-step[data-done="1"] .km-step-i svg { display: block; }
+.km-step-i svg { width: 10px; height: 10px; display: none; }
+
+/* ── Notices ──────────────────────────────────────────────────────────────── */
+
+.km-note {
+  display: flex; gap: 11px; align-items: flex-start;
+  padding: 13px 15px; border-radius: var(--km-r-sm);
+  font-size: 13.5px; line-height: 1.55; font-weight: 550;
+  border: 1px solid var(--km-border); background: var(--km-elev); color: var(--km-ink-2);
+  margin-top: 20px;
+}
+.km-note svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+.km-note[data-tone="warn"]  { background: var(--km-warning-sub); border-color: rgba(245,158,11,.28); color: #7a4f05; }
+.km-note[data-tone="error"] { background: var(--km-danger-sub);  border-color: rgba(239,68,68,.28);  color: #921c1c; }
+.km-note[data-tone="good"]  { background: var(--km-success-sub); border-color: rgba(16,185,129,.28); color: #046244; }
+.km-note strong { font-weight: 750; }
+
+/* ── Form + buttons ───────────────────────────────────────────────────────── */
+
+.km-field { margin-top: 22px; }
+.km-label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 7px; }
+.km-hint  { display: block; font-size: 12.5px; color: var(--km-ink-3); margin-top: 7px; font-weight: 550; line-height: 1.5; }
+.km-input {
+  width: 100%; padding: 11px 13px;
+  border: 1px solid var(--km-border-st); border-radius: var(--km-r-sm);
+  background: var(--km-surface); color: var(--km-ink);
+  font-size: 14px; font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+.km-input:focus {
+  outline: none; border-color: var(--km-accent);
+  box-shadow: 0 0 0 3px var(--km-accent-subtle);
 }
 
-.kapsule-header-sub a {
-    color: #94a3b8;
-    text-decoration: none;
+.km-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; align-items: center; }
+
+.km-btn {
+  appearance: none; border: 1px solid transparent; cursor: pointer;
+  padding: 11px 19px; border-radius: var(--km-r-sm);
+  font-size: 14px; font-weight: 700; font-family: inherit;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: background .18s ease, border-color .18s ease, transform .12s ease, box-shadow .18s ease;
+}
+.km-btn:active { transform: translateY(1px); }
+.km-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--km-accent-subtle); }
+
+.km-btn--primary { background: var(--km-accent); color: var(--km-accent-fg); box-shadow: 0 2px 12px -4px var(--km-accent-line); }
+.km-btn--primary:hover:not(:disabled) { background: var(--km-accent-hover); }
+.km-btn--primary:disabled { background: var(--km-border-st); color: #fff; cursor: not-allowed; box-shadow: none; }
+
+.km-btn--ghost { background: var(--km-surface); border-color: var(--km-border-st); color: var(--km-ink-2); }
+.km-btn--ghost:hover { border-color: var(--km-ink-3); color: var(--km-ink); }
+
+/* ── Trust strip ──────────────────────────────────────────────────────────── */
+
+.km-trust {
+  display: flex; flex-wrap: wrap; gap: 7px 18px;
+  padding: 14px 32px; border-top: 1px solid var(--km-border);
+  background: var(--km-bg);
+}
+.km-trust-i { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--km-ink-2); }
+.km-trust-i svg { width: 13px; height: 13px; color: var(--km-accent); flex-shrink: 0; }
+
+/* ── Success ──────────────────────────────────────────────────────────────── */
+
+.km-done { text-align: center; padding: 14px 0 4px; }
+.km-done-ring {
+  width: 58px; height: 58px; margin: 0 auto 18px; border-radius: 50%;
+  background: var(--km-success-sub); display: grid; place-items: center;
+  animation: km-pop .5s cubic-bezier(.2,.9,.3,1.4) both;
+}
+.km-done-ring svg { width: 27px; height: 27px; color: var(--km-success); }
+.km-done-ring svg path {
+  stroke-dasharray: 26; stroke-dashoffset: 26;
+  animation: km-draw .45s .22s ease-out forwards;
+}
+@keyframes km-pop  { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes km-draw { to { stroke-dashoffset: 0; } }
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 782px) {
+  .kapsule-mig { padding: 22px 16px 48px; margin-inline-start: -10px; }
+  .km-card-body { padding: 24px 20px 26px; }
+  .km-trust { padding: 13px 20px; }
+  .km-title { font-size: 21px; }
+  .km-meter-pct { font-size: 28px; }
+  .km-meter-head { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .km-meter-note { text-align: start; }
 }
 
-.kapsule-header-sub a:hover {
-    color: #0ea5e9;
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+/* Everything expressive here is decorative. Someone who asked for less motion still gets the
+   complete, honest state; they just get it without the sheen, pulse and draw-in. */
+@media (prefers-reduced-motion: reduce) {
+  .kapsule-mig *,
+  .kapsule-mig *::before,
+  .kapsule-mig *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  .km-rail[data-live="1"] .km-fill::after { display: none; }
 }
 
-/* ── Card ── */
-.kapsule-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 32px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-}
+/* ── Right to left (Arabic) ───────────────────────────────────────────────── */
+/* Everything above uses logical properties (margin-inline-start, text-align:end), so it is already
+   correct in both directions and there is NO second stylesheet to keep in sync. Only two things
+   carry real direction and cannot be expressed logically:
 
-.kapsule-card h2 {
-    font-size: 20px;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 8px;
-    padding: 0;
-    border: none;
-    line-height: 1.3;
-}
+   1. The sheen sweeping across the transfer meter. It means "movement in the direction of progress",
+      so in RTL it has to travel the other way or it reads as the transfer running backwards.
+   2. The arrow in the brand mark. An arrow is directional iconography, not decoration: in an RTL
+      layout "forward" points left, and a right-pointing arrow means "back".
 
-.kapsule-subtext {
-    font-size: 14px;
-    color: #475569;
-    line-height: 1.6;
-    margin: 0 0 24px;
-}
+   The progress FILL itself needs nothing: it is a width on a block element, so it already grows from
+   the inline start, which is the right-hand edge under dir="rtl". */
 
-/* ── Trust strip ── */
-.kapsule-trust-strip {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 12px 16px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    margin-bottom: 24px;
-}
+[dir="rtl"] .km-rail[data-live="1"] .km-fill::after { transform: translateX(100%); animation-name: km-sheen-rtl; }
+@keyframes km-sheen-rtl { to { transform: translateX(-100%); } }
 
-.kapsule-trust-item {
-    font-size: 13px;
-    color: #475569;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
+[dir="rtl"] .km-mark svg { transform: scaleX(-1); }
 
-/* ── Form row ── */
-.kapsule-form-row {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-}
+/* `linear-gradient(to inline-end, ...)` would express this directly but is not supported widely
+   enough to rely on in a customer's browser, so the angle is flipped explicitly instead. */
+[dir="rtl"] .km-fill { background: linear-gradient(270deg, var(--km-accent) 0%, #37d4e4 100%); }
 
-.kapsule-form-row input.regular-text {
-    flex: 1;
-    min-width: 200px;
-    height: 42px;
-    font-size: 14px;
-    border-radius: 8px;
-    border: 1px solid #cbd5e1;
-    padding: 0 14px;
-    color: #0f172a;
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.kapsule-form-row .button-primary {
-    height: 42px;
-    background: #0ea5e9;
-    border-color: #0284c7;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 8px;
-    white-space: nowrap;
-    padding: 0 20px;
-}
-
-.kapsule-form-row .button-primary:hover {
-    background: #0284c7;
-    border-color: #0369a1;
-    color: #fff;
-}
-
-/* ── Error ── */
-.kapsule-error {
-    color: #dc2626;
-    font-size: 13px;
-    margin-top: 12px;
-}
-
-/* ── Status card ── */
-.kapsule-status-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.kapsule-status-header h2 {
-    margin: 0 0 4px;
-}
-
-.kapsule-status-label {
-    font-size: 14px;
-    color: #475569;
-    margin: 0;
-    min-height: 20px;
-}
-
-.kapsule-spinner-sm {
-    width: 36px;
-    height: 36px;
-    border: 2.5px solid #e2e8f0;
-    border-top-color: #0ea5e9;
-    border-radius: 50%;
-    animation: kapsule-spin 0.75s linear infinite;
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-@keyframes kapsule-spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ── Progress bar ── */
-.kapsule-progress-bar {
-    height: 8px;
-    background: #f1f5f9;
-    border-radius: 99px;
-    overflow: hidden;
-    margin-bottom: 28px;
-}
-
-.kapsule-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #0ea5e9, #38bdf8);
-    border-radius: 99px;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    min-width: 0;
-}
-
-/* ── Step timeline ── */
-.kapsule-steps {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    margin-bottom: 28px;
-    padding: 16px 20px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-}
-
-.kapsule-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-    min-width: 0;
-}
-
-.kapsule-step span {
-    font-size: 11px;
-    font-weight: 500;
-    color: #94a3b8;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    transition: color 0.2s;
-}
-
-.kapsule-step--active span {
-    color: #0ea5e9;
-    font-weight: 600;
-}
-
-.kapsule-step--done span {
-    color: #16a34a;
-}
-
-.kapsule-step-line {
-    flex: 1;
-    height: 1px;
-    background: #e2e8f0;
-    align-self: flex-start;
-    margin-top: 12px;
-    max-width: 24px;
-}
-
-.kapsule-step-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: #f1f5f9;
-    border: 1.5px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.2s;
-}
-
-.kapsule-step--active .kapsule-step-icon {
-    background: #eff6ff;
-    border-color: #0ea5e9;
-}
-
-.kapsule-step--done .kapsule-step-icon {
-    background: #dcfce7;
-    border-color: #86efac;
-}
-
-.kapsule-step-dot-inner {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #cbd5e1;
-}
-
-.kapsule-step-spinner {
-    width: 10px;
-    height: 10px;
-    border: 1.5px solid #bfdbfe;
-    border-top-color: #0ea5e9;
-    border-radius: 50%;
-    animation: kapsule-spin 0.75s linear infinite;
-}
-
-/* ── Close note ── */
-.kapsule-close-note {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 13px;
-    color: #64748b;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 12px 14px;
-    margin-bottom: 20px;
-    line-height: 1.5;
-}
-
-/* ── Cancel button ── */
-.kapsule-cancel-btn {
-    background: none;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    color: #94a3b8;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 7px 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.kapsule-cancel-btn:hover {
-    border-color: #fca5a5;
-    color: #dc2626;
-    background: #fef2f2;
-}
-
-/* ── Success card ── */
-.kapsule-success-card {
-    text-align: center;
-}
-
-.kapsule-check {
-    width: 56px;
-    height: 56px;
-    background: #dcfce7;
-    color: #16a34a;
-    border-radius: 50%;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-}
-
-.kapsule-success-card .button-primary {
-    background: #0ea5e9;
-    border-color: #0284c7;
-    font-size: 15px;
-    font-weight: 600;
-    padding: 8px 24px;
-    height: auto;
-    border-radius: 8px;
-    color: #fff;
-}
-
-/* ── Error card ── */
-.kapsule-error-card h2 {
-    color: #dc2626;
-}
-
-.kapsule-error-detail {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 13px;
-    color: #dc2626;
-    font-family: monospace;
-    margin-bottom: 16px;
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-/* ── Mode tabs ── */
-.kapsule-tabs {
-    display: flex;
-    gap: 2px;
-    border-bottom: 2px solid #e2e8f0;
-    margin-bottom: 28px;
-}
-
-.kapsule-tab {
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #64748b;
-    cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
-}
-
-.kapsule-tab:hover {
-    color: #0f172a;
-}
-
-.kapsule-tab--active {
-    color: #0ea5e9;
-    border-bottom-color: #0ea5e9;
-}
-
-/* ── Download list ── */
-.kapsule-download-list {
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.kapsule-download-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px;
-    border-bottom: 1px solid #f1f5f9;
-    gap: 12px;
-    transition: background 0.1s;
-}
-
-.kapsule-download-row:last-child {
-    border-bottom: none;
-}
-
-.kapsule-download-row:hover {
-    background: #f8fafc;
-}
-
-.kapsule-download-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.kapsule-download-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #0f172a;
-    font-family: monospace;
-}
-
-.kapsule-download-size {
-    font-size: 12px;
-    color: #94a3b8;
-}
-
-/* ── Focus / accessibility ── */
-.kapsule-tab:focus-visible,
-.button:focus-visible,
-#kapsule-start-btn:focus-visible,
-#kapsule-standalone-btn:focus-visible,
-.kapsule-cancel-btn:focus-visible {
-    outline: 2px solid #0ea5e9;
-    outline-offset: 2px;
-}
-
-#kapsule-token-input:focus {
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
-    outline: none;
-}
-
-/* ── Mobile ── */
-@media (max-width: 600px) {
-    .kapsule-migrator-wrap {
-        margin: 16px 12px 0;
-    }
-
-    .kapsule-card {
-        padding: 20px 16px;
-    }
-
-    .kapsule-form-row {
-        flex-direction: column;
-    }
-
-    .kapsule-form-row input.regular-text {
-        min-width: unset;
-    }
-
-    .kapsule-trust-strip {
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .kapsule-step span {
-        display: none;
-    }
-
-    .kapsule-download-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .kapsule-download-row .button {
-        align-self: flex-start;
-    }
-}

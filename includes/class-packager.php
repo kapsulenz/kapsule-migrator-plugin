@@ -23,7 +23,7 @@ class Kapsule_Packager {
         if ( class_exists( 'ZipArchive' ) )   return 'zip';
         if ( self::shell_tar_available() )     return 'shell-tar';
         if ( class_exists( 'PharData' ) )      return 'phar';
-        throw new Exception( 'No archive backend available (php-zip, system tar, or phar required). Please contact Kapsule support.' );
+        throw new Exception( __( 'This server cannot create archives, so we cannot package your site. Ask your host to enable the PHP zip extension, then contact KapsuleHost support if it still fails.', 'kapsule-migrator' ) );
     }
 
     private static function shell_tar_available(): bool {
@@ -189,10 +189,22 @@ class Kapsule_Packager {
         // shell-tar backend collects files for the current chunk then tars them all at once
         $shell_tar_files = array();
 
-        $open_chunk = function () use ( &$archive, &$chunk_path, &$chunk_bytes, &$chunk_index, &$shell_tar_files, $backend, $ext ) {
+        // RESUME: a chunk the server has already accepted is not rebuilt. Compression is the expensive
+        // half of packaging, and on a resumed 6GB migration re-zipping fifty pieces that already
+        // arrived costs many minutes of the customer's time to produce archives that are immediately
+        // discarded. The file walk still runs, because the byte accounting and the chunk boundaries
+        // have to come out identical or the numbering would drift and later pieces would be misnamed.
+        $skip_chunk = false;
+
+        $open_chunk = function () use ( &$archive, &$chunk_path, &$chunk_bytes, &$chunk_index, &$shell_tar_files, &$skip_chunk, $backend, $ext ) {
             $chunk_path      = $this->tmp_dir . "files-chunk-{$chunk_index}.{$ext}";
             $chunk_bytes     = 0;
             $shell_tar_files = array();
+            $skip_chunk      = in_array( basename( $chunk_path ), Kapsule_Uploader::completed_chunks(), true );
+            if ( $skip_chunk ) {
+                $archive = null;
+                return;
+            }
             if ( $backend === 'zip' ) {
                 $archive = new ZipArchive();
                 $archive->open( $chunk_path, ZipArchive::CREATE );
@@ -203,7 +215,8 @@ class Kapsule_Packager {
             }
         };
 
-        $close_chunk = function () use ( &$archive, &$chunk_path, &$chunk_index, &$shell_tar_files, $backend ) {
+        $close_chunk = function () use ( &$archive, &$chunk_path, &$chunk_index, &$shell_tar_files, &$skip_chunk, $backend ) {
+            if ( $skip_chunk ) return;
             if ( $backend === 'shell-tar' ) {
                 $root      = rtrim( ABSPATH, DIRECTORY_SEPARATOR );
                 $list_file = $this->tmp_dir . "chunk-{$chunk_index}-files.txt";
@@ -248,25 +261,35 @@ class Kapsule_Packager {
             if ( $chunk_bytes > 0 && $chunk_bytes + $size > $chunk_size ) {
                 $close_chunk();
                 $callback( $chunk_path, $bytes_done + $chunk_bytes, $this->total_bytes );
+                // DELETE THE PIECE ONCE IT IS DELIVERED. Without this, packaging a 6GB site leaves a
+                // second 6GB of archives sitting in /tmp on the CUSTOMER'S server for the whole run,
+                // so migrating requires double the site's size in free space and a customer who is
+                // merely low on disk gets a failure that reads as our fault. Resume does not need the
+                // file: it is tracked in the completed-chunk list, and upload_chunk checks that list
+                // before it looks at the disk.
+                @unlink( $chunk_path );
                 $bytes_done += $chunk_bytes;
                 $chunk_index++;
                 $open_chunk();
             }
 
-            if ( $backend === 'zip' ) {
-                $archive->addFile( $path, $rel );
-            } elseif ( $backend === 'shell-tar' ) {
-                $shell_tar_files[] = array( 'path' => $path, 'rel' => $rel );
-            } else {
-                $archive->addFile( $path, $rel );
+            if ( ! $skip_chunk ) {
+                if ( $backend === 'zip' ) {
+                    $archive->addFile( $path, $rel );
+                } elseif ( $backend === 'shell-tar' ) {
+                    $shell_tar_files[] = array( 'path' => $path, 'rel' => $rel );
+                } else {
+                    $archive->addFile( $path, $rel );
+                }
             }
             $chunk_bytes += $size;
         }
 
         // Close and deliver the final (possibly only) chunk
-        if ( $archive !== null && $chunk_bytes > 0 ) {
+        if ( $chunk_bytes > 0 && ( $archive !== null || $skip_chunk ) ) {
             $close_chunk();
             $callback( $chunk_path, $this->total_bytes, $this->total_bytes );
+            @unlink( $chunk_path );
         }
     }
 
