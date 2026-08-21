@@ -237,6 +237,45 @@
 .km-note[data-tone="good"]  { background: var(--km-success-sub); border-color: rgba(16,185,129,.28); color: #046244; }
 .km-note strong { font-weight: 750; }
 
+/* ── Tabs ─────────────────────────────────────────────────────────────────── */
+/* Two ways to leave a host: hand us the keys, or take a copy and go. They are peers, not a primary
+   and a fallback, so they read as two tabs rather than a button and a link. The active one is marked
+   by an accent underline rather than a filled pill: a filled tab competes with the primary action
+   below it, and there is only one thing on this screen worth pressing. */
+
+.km-tabs {
+  display: flex; gap: 2px;
+  padding: 0 32px; border-bottom: 1px solid var(--km-border);
+  background: var(--km-bg);
+}
+.km-tab {
+  appearance: none; background: none; border: 0; cursor: pointer;
+  font-family: inherit; font-size: 13.5px; font-weight: 650; color: var(--km-ink-3);
+  padding: 15px 14px 13px; margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  transition: color .16s ease, border-color .16s ease;
+}
+.km-tab:hover { color: var(--km-ink-2); }
+.km-tab:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--km-accent-subtle); border-radius: 6px 6px 0 0; }
+.km-tab--on { color: var(--km-ink); border-bottom-color: var(--km-accent); }
+
+/* ── Downloadable pieces ──────────────────────────────────────────────────── */
+
+.km-files {
+  margin-top: 22px;
+  border: 1px solid var(--km-border); border-radius: var(--km-r-sm);
+  overflow: hidden;
+}
+.km-file {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--km-border);
+  background: var(--km-surface);
+}
+.km-file:last-child { border-bottom: 0; }
+.km-file-n { font-size: 13.5px; font-weight: 650; word-break: break-all; }
+.km-file-s { font-size: 12px; color: var(--km-ink-3); font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+
 /* ── Form + buttons ───────────────────────────────────────────────────────── */
 
 .km-field { margin-top: 22px; }
