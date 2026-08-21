@@ -1,9 +1,9 @@
-=== Kapsule Migrator ===
+=== KapsuleHost Migrator ===
 Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
-Tested up to: 6.8
-Stable tag: 1.0.7
+Tested up to: 7.1
+Stable tag: 1.2.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,21 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.2.0 =
+* The plugin now speaks all 16 languages KapsuleHost sells in, including right-to-left Arabic. Every
+  screen, every button and every error message, not just the front page.
+* Fixed: choosing "start over" could make the next migration skip files it believed were already
+  sent, and report success having transferred nothing.
+* Fixed: a dropped connection is now retried in your browser, where you can see it happening, with
+  the piece being retried and the time until the next attempt shown. Running out of attempts pauses
+  the move rather than failing it, because everything already copied is kept.
+* Fixed: resuming a migration no longer rebuilds pieces the server already has.
+* Fixed: prepared pieces are now deleted as soon as they are delivered, so migrating no longer needs
+  double your site's size in free space.
+* Fixed: a migration run from the scheduler uploaded the database under a name the server did not
+  recognise, and reported it as a failed upload.
+* Rebuilt the interface around what is actually moving: pieces sent, data transferred, files counted.
 
 = 1.0.7 =
 * Improved upload reliability: server now tracks which chunks have been received, so interrupted transfers resume correctly without re-uploading complete chunks

@@ -3,7 +3,7 @@
  * Plugin Name: KapsuleHost Migrator
  * Plugin URI:  https://kapsulehost.com/migrate
  * Description: Migrate your WordPress site to KapsuleHost, or export your site for manual migration anywhere.
- * Version:     1.1.0
+ * Version:     1.2.0
  * Author:      KapsuleHost
  * Author URI:  https://kapsulehost.com
  * License:     GPL-2.0-or-later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'KAPSULE_MIGRATOR_VERSION',     '1.1.0' );
+define( 'KAPSULE_MIGRATOR_VERSION',     '1.2.0' );
 define( 'KAPSULE_MIGRATOR_PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'KAPSULE_MIGRATOR_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );
 /**
