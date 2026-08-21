@@ -1,7 +1,7 @@
 #!/bin/bash
 # build-zip.sh — packages kapsule-migrator plugin into a distributable zip
 # Usage: bash build-zip.sh [output_dir] [--wporg]
-#   Default:  CDN build — includes Update URI header (for kpanel.kapsulecloud.com distribution)
+#   Default:  CDN build — includes Update URI header (for kpanel.kapsulehost.com distribution)
 #   --wporg:  WP.org build — strips Update URI header (WordPress.org update mechanism takes over)
 
 set -euo pipefail

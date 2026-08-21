@@ -451,7 +451,7 @@ class Kapsule_Admin_Page {
         <div class="wrap kapsule-migrator-wrap">
             <div class="kapsule-header">
                 <div class="kapsule-logo">
-                    <img src="https://kpanel.kapsulecloud.com/logo.svg" alt="Kapsule" height="28" style="display:block;" />
+                    <img src="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/logo.svg" alt="Kapsule" height="28" style="display:block;" />
                 </div>
                 <p class="kapsule-header-sub">Migrator</p>
             </div>
@@ -464,9 +464,9 @@ class Kapsule_Admin_Page {
                     </div>
 
                     <div class="kapsule-tab-panel" id="kapsule-panel-connected">
-                        <h2>Migrate this site to Kapsule Cloud</h2>
+                        <h2>Migrate this site to KapsuleHost</h2>
                         <p class="kapsule-subtext">
-                            Paste your migration token from <a href="https://kpanel.kapsulecloud.com/sites/migrate" target="_blank">kpanel.kapsulecloud.com/sites/migrate</a>.
+                            Paste your migration token from <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/sites/migrate" target="_blank">kpanel.kapsulehost.com/sites/migrate</a>.
                             We'll copy your files and database directly to Kapsule — securely, without any downtime on your current site.
                         </p>
 
@@ -610,7 +610,7 @@ class Kapsule_Admin_Page {
 
                     <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
                         <p class="kapsule-subtext" style="margin-bottom:12px;">
-                            Want a faster path? Migrate directly to <a href="https://kpanel.kapsulecloud.com/sites/migrate" target="_blank">Kapsule Cloud</a>
+                            Want a faster path? Migrate directly to <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/sites/migrate" target="_blank">KapsuleHost</a>
                             &mdash; no manual file handling required.
                         </p>
                         <button id="kapsule-reset-btn" class="button button-secondary">Remove package &amp; start over</button>
@@ -623,7 +623,7 @@ class Kapsule_Admin_Page {
                     <h2>Migration complete</h2>
                     <p class="kapsule-subtext">Your site has been transferred to Kapsule. Head back to your Kapsule dashboard to review it and go live.</p>
                     <?php if ( $job_id ) : ?>
-                        <a href="https://kpanel.kapsulecloud.com/migration/<?php echo esc_attr( $job_id ); ?>" class="button button-primary button-large" target="_blank">
+                        <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/migration/<?php echo esc_attr( $job_id ); ?>" class="button button-primary button-large" target="_blank">
                             View your Kapsule site &rarr;
                         </a>
                     <?php endif; ?>
@@ -637,7 +637,7 @@ class Kapsule_Admin_Page {
                         <p class="kapsule-error-detail"><?php echo esc_html( $error ); ?></p>
                     <?php endif; ?>
                     <p class="kapsule-subtext">
-                        Contact <a href="https://kpanel.kapsulecloud.com/support" target="_blank">Kapsule support</a> with the above error and we'll sort it out.
+                        Contact <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/support" target="_blank">Kapsule support</a> with the above error and we'll sort it out.
                     </p>
                     <button id="kapsule-reset-btn" class="button button-secondary">Reset and try again</button>
                 </div>

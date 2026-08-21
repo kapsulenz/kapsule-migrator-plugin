@@ -1,5 +1,5 @@
 === Kapsule Migrator ===
-Contributors: kapsulecloud
+Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 6.8
@@ -8,7 +8,7 @@ Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Migrate your WordPress site to Kapsule Cloud, or export your site for manual migration to any host.
+Migrate your WordPress site to KapsuleHost, or export your site for manual migration to any host.
 
 == Description ==
 
@@ -17,12 +17,12 @@ Kapsule Migrator does two things:
 **1. Export for manual migration (no account required)**
 Package your WordPress files and database into downloadable archives and move them anywhere you like. No Kapsule account needed.
 
-**2. Direct migration to Kapsule Cloud**
-Transfer your site directly to Kapsule Cloud with one click. Connect with a migration token and the plugin handles everything.
+**2. Direct migration to KapsuleHost**
+Transfer your site directly to KapsuleHost with one click. Connect with a migration token and the plugin handles everything.
 
 = How the direct migration works =
 
-1. Start a migration at kpanel.kapsulecloud.com — choose the "Plugin" path
+1. Start a migration at kpanel.kapsulehost.com — choose the "Plugin" path
 2. Copy your one-time migration token from the Kapsule wizard
 3. Install and activate this plugin on your current site
 4. Paste your token — the plugin handles everything from there
@@ -57,7 +57,7 @@ The plugin scans your site, packages files in chunks (works even on large sites)
 == Installation ==
 
 = For direct migration to Kapsule =
-1. Start a migration at kpanel.kapsulecloud.com/sites/migrate
+1. Start a migration at kpanel.kapsulehost.com/sites/migrate
 2. Choose the Plugin path and copy your migration token
 3. In your WordPress admin, go to Plugins → Add New → Upload Plugin
 4. Upload the zip file and activate
@@ -65,7 +65,7 @@ The plugin scans your site, packages files in chunks (works even on large sites)
 6. Paste your migration token and click Start Migration
 
 = For export / manual migration =
-1. Download from kpanel.kapsulecloud.com/downloads/kapsule-migrator.zip or install from WordPress.org
+1. Download from kpanel.kapsulehost.com/downloads/kapsule-migrator.zip or install from WordPress.org
 2. Activate the plugin
 3. Go to Kapsule Migrate in your admin menu
 4. Click "Export Site" tab, then "Export Site"
@@ -90,7 +90,7 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 
 == Screenshots ==
 
-1. The "Migrate to Kapsule" tab — paste your migration token and start a direct transfer to Kapsule Cloud.
+1. The "Migrate to Kapsule" tab — paste your migration token and start a direct transfer to KapsuleHost.
 2. The "Export Site" tab — package your site for download without a Kapsule account.
 3. Migration running — chunked transfer progress in real time.
 4. Export complete — download your files and database archives when packaging finishes.
@@ -123,4 +123,4 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 * Security: wp-config.php and wp-config-sample.php excluded from all exports and migration packages
 
 = 1.0.0 =
-* Initial release — direct migration to Kapsule Cloud
+* Initial release — direct migration to KapsuleHost

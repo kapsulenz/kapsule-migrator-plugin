@@ -60,6 +60,10 @@ class Kapsule_Migrator {
         update_option( 'kapsule_migration_token', $token );
         update_option( 'kapsule_migration_status', 'preflight' );
         update_option( 'kapsule_migration_progress', array() );
+        // A NEW migration must not inherit the completed-chunk list from a previous one. The uploader
+        // skips any chunk whose name it has already sent, and chunk names repeat between runs, so
+        // without this a second migration would skip real work and report success having sent nothing.
+        Kapsule_Uploader::reset_progress();
         wp_schedule_single_event( time() + 5, 'kapsule_run_migration' );
 
         return new WP_REST_Response( array( 'ok' => true, 'status' => 'preflight' ) );

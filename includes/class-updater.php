@@ -12,7 +12,7 @@ class Kapsule_Updater {
 
     public function register(): void {
         // Fires when WP checks for updates for plugins with Update URI pointing to our host
-        add_filter( 'update_plugins_kpanel.kapsulecloud.com', array( $this, 'check_update' ), 10, 4 );
+        add_filter( 'update_plugins_kpanel.kapsulehost.com', array( $this, 'check_update' ), 10, 4 );
 
         // Provide plugin info for the details popup
         add_filter( 'plugins_api', array( $this, 'plugin_info' ), 20, 3 );
@@ -27,11 +27,11 @@ class Kapsule_Updater {
         if ( ! version_compare( $remote['version'], KAPSULE_MIGRATOR_VERSION, '>' ) ) return $update;
 
         return (object) array(
-            'id'           => 'kpanel.kapsulecloud.com/' . $this->plugin_slug,
+            'id'           => 'kpanel.kapsulehost.com/' . $this->plugin_slug,
             'slug'         => 'kapsule-migrator',
             'plugin'       => $this->plugin_slug,
             'new_version'  => $remote['version'],
-            'url'          => $remote['homepage'] ?? 'https://kapsulecloud.com/migrate',
+            'url'          => $remote['homepage'] ?? KAPSULE_MIGRATOR_SITE . '/migrate',
             'package'      => $remote['download_url'],
             'icons'        => array(),
             'banners'      => array(),
@@ -54,11 +54,11 @@ class Kapsule_Updater {
             'requires'      => '5.0',
             'requires_php'  => '7.4',
             'tested'        => $remote['tested_up_to'] ?? '6.7',
-            'author'        => 'Kapsule Cloud',
-            'homepage'      => 'https://kapsulecloud.com/migrate',
+            'author'        => 'KapsuleHost',
+            'homepage'      => KAPSULE_MIGRATOR_SITE . '/migrate',
             'download_link' => $remote['download_url'] ?? '',
             'sections'      => array(
-                'description' => 'Migrate your WordPress site to Kapsule Cloud — or export your site for manual migration anywhere.',
+                'description' => 'Migrate your WordPress site to KapsuleHost, or export your site for manual migration anywhere.',
                 'changelog'   => $remote['changelog'] ?? '',
             ),
         );

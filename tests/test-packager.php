@@ -9,7 +9,7 @@ $wp_root = sys_get_temp_dir() . '/kapsule-test-wp-' . getmypid() . '/';
 define('ABSPATH',                  $wp_root);
 define('KAPSULE_MIGRATOR_VERSION', '1.0.0');
 define('KAPSULE_MIGRATOR_PLUGIN_DIR', dirname(__DIR__) . '/');
-define('KAPSULE_MIGRATOR_API_BASE',   'https://kpanel.kapsulecloud.com/api/migration/plugin');
+define('KAPSULE_MIGRATOR_API_BASE',   'https://kpanel.kapsulehost.com/api/migration/plugin');
 
 // ── WP stubs ───────────────────────────────────────────────────────────────
 function get_temp_dir() { return sys_get_temp_dir() . '/'; }
