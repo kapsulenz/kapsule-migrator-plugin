@@ -568,6 +568,16 @@ class Kapsule_Admin_Page {
                                 ?></span>
                             </div>
 
+                            <div class="km-note" data-tone="info">
+                                <?php echo $info; ?>
+                                <span><?php
+                                    // HOW LONG IT TAKES depends on THIS server's upload speed, which nothing can know
+                                    // before measuring it, so this sets an expectation without inventing a number. The
+                                    // real figure appears during the transfer, derived from bytes actually moved.
+                                    echo esc_html__( 'How long this takes depends on how fast this server can upload. Small sites finish in a few minutes and large ones take longer; you will see a live estimate once the transfer starts. If it is interrupted, reopen this page and it carries on from the last piece that arrived.', 'kapsule-migrator' );
+                                ?></span>
+                            </div>
+
                             <div class="km-actions">
                                 <button id="kapsule-start-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Start the move', 'kapsule-migrator' ); ?></button>
                             </div>

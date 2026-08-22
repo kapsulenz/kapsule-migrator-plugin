@@ -19,14 +19,16 @@
 #   - readme Stable tag out of step: this repo already drifted that way, sitting at 1.0.7 while the
 #     header said 1.1.0.
 #
-# Run this BEFORE copying the zip into the portal, and again after.
+# Run this BEFORE copying the zip into the portal, and again after. KM_PORTAL points it at the
+# worktree the change is being made in; a lane never edits the deploy tree, so the artefacts are
+# checked where they are authored and the train carries them from there.
 #
 # Usage: tools/verify-release.sh [--live]
 #   --live also asks the running endpoint what it currently announces.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
-PORTAL=/var/www/kapsulecloud-portal
+PORTAL=${KM_PORTAL:-/home/jesse/hd-mailmigrate}
 ROUTE="$PORTAL/src/app/api/migration/plugin-version/route.ts"
 ZIP="$PORTAL/public/downloads/kapsule-migrator.zip"
 ENDPOINT=https://kpanel.kapsulehost.com/api/migration/plugin-version

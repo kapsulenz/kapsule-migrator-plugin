@@ -186,7 +186,7 @@ def placeholders(s):
 BATCH = 35
 
 
-def translate_locale(api_key, locale, entries, dry_run=False):
+def translate_locale(api_key, locale, entries, dry_run=False, only_indices=None):
     """
     Translate in BATCHES.
 
@@ -201,11 +201,17 @@ def translate_locale(api_key, locale, entries, dry_run=False):
         print(f'  {locale}: would translate {len(entries)} strings')
         return None
 
+    # When only some entries need translating, send ONLY those. Re-sending 126 good strings to add
+    # one costs a full run per locale and risks every one of them coming back different.
+    work = [(i, entries[i]) for i in (only_indices if only_indices is not None else range(len(entries)))]
     merged, all_problems = {}, []
-    for start in range(0, len(entries), BATCH):
-        chunk = entries[start:start + BATCH]
-        got, problems = _translate_batch(api_key, locale, name, nplurals, chunk, start)
-        merged.update(got)
+    for start in range(0, len(work), BATCH):
+        pairs = work[start:start + BATCH]
+        got, problems = _translate_batch(api_key, locale, name, nplurals, [e for _, e in pairs], 0)
+        # _translate_batch keys by position within the batch; map back to the real entry index.
+        for local_i, (real_i, _) in enumerate(pairs):
+            if local_i in got:
+                merged[real_i] = got[local_i]
         all_problems.extend(problems)
     return merged, all_problems
 
@@ -325,6 +331,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--locale', action='append', help='WordPress locale, e.g. fr_FR. Repeatable.')
     ap.add_argument('--dry-run', action='store_true')
+    ap.add_argument('--only-missing', action='store_true',
+                    help='Translate only msgids a locale does not already have, and keep the rest verbatim.')
     args = ap.parse_args()
 
     api_key = os.environ.get('ANTHROPIC_API_KEY')
@@ -344,12 +352,43 @@ def main():
     if unknown:
         sys.exit(f'Unknown locale(s): {unknown}. Known: {list(LOCALES)}')
 
+    # When topping up, read what each locale ALREADY has and translate only the gaps.
+    existing_for = {}
+    if args.only_missing:
+        for locale in targets:
+            po = os.path.join(os.path.dirname(POT), f'{DOMAIN}-{locale}.po')
+            have = {}
+            if os.path.exists(po):
+                for i, e in enumerate(entries):
+                    pass
+                for blk in open(po, encoding='utf-8').read().split('\n\n'):
+                    mid, forms, single = None, [], None
+                    for ln in blk.split('\n'):
+                        m = re.match(r'^msgid\s+"(.*)"$', ln)
+                        if m: mid = unescape(m.group(1)); continue
+                        m = re.match(r'^msgstr\[(\d+)\]\s+"(.*)"$', ln)
+                        if m: forms.append(unescape(m.group(2))); continue
+                        m = re.match(r'^msgstr\s+"(.*)"$', ln)
+                        if m: single = unescape(m.group(1))
+                    if mid:
+                        v = forms if forms else single
+                        if v: have[mid] = v
+            existing_for[locale] = {i: have[e['msgid']] for i, e in enumerate(entries) if e['msgid'] in have}
+            missing = len(entries) - len(existing_for[locale])
+            print(f'  {locale}: {missing} missing of {len(entries)}')
+
     failures = []
     for locale in targets:
+        if args.only_missing:
+            gaps = [i for i in range(len(entries)) if i not in existing_for[locale]]
+            if not gaps:
+                print(f'{locale}: nothing missing, untouched')
+                continue
         print(f'{locale} ...', flush=True)
         # One locale failing must never take the others with it.
         try:
-            result = translate_locale(api_key, locale, entries, args.dry_run)
+            gaps = [i for i in range(len(entries)) if i not in existing_for[locale]] if args.only_missing else None
+            result = translate_locale(api_key, locale, entries, args.dry_run, gaps)
         except Exception as e:
             print(f'  FAILED {e}')
             failures.append(locale)
@@ -359,6 +398,11 @@ def main():
         translations, problems = result
         for p in problems:
             print(f'  REJECTED {p}')
+        if args.only_missing:
+            # Carry the EXISTING translation for every msgid that already had one. Re-translating a
+            # whole locale to add one string churns 126 good strings for no reason, and any of them
+            # could come back worse. Only the genuinely new ones are replaced.
+            translations = {**existing_for[locale], **translations}
         path, written = write_po(locale, entries, translations)
         pct = round(written / len(entries) * 100)
         print(f'  wrote {written}/{len(entries)} ({pct}%) -> {os.path.basename(path)}')
