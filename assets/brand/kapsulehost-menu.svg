@@ -1,0 +1,22 @@
+<!--
+  The KapsuleHost mark for the WordPress admin MENU, which is a different problem from the page header.
+
+  WordPress renders a base64 data-URI menu icon as a BACKGROUND IMAGE on .wp-menu-image and does NOT
+  recolour it, so `currentColor` (which the placeholder arrow used) resolves to nothing and the icon
+  cannot inherit the admin scheme. Whatever colours are in here are the colours the customer sees.
+
+  MEASURED AT 20px AGAINST THE REAL SCHEME BACKGROUNDS rather than assumed:
+    solid cyan            reads everywhere, but the capsule disappears and it is just a cloud
+    capsule cut out       shows a black gash on the light scheme, because a cut-out has to hardcode
+                          the sidebar colour and there is more than one sidebar colour
+    white                 invisible on the light scheme
+    #a7aaad WP icon grey  washed out on all three, and off brand
+    cyan + navy           the capsule reads on default (#1d2327), light (#e5e5e5) and midnight
+                          (#26292c), and depends on no background at all
+
+  Two flat brand colours, no gradient: a gradient at 20px is mud.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 366" role="img" aria-label="KapsuleHost">
+  <path fill="#22C3D6" d="M300 18a104 104 0 0 1 104 104 94 94 0 0 1 62 110 98 98 0 0 1-94 90H169a98 98 0 0 1-65-171 88 88 0 0 1 100-99A104 104 0 0 1 300 18Z"/>
+  <g transform="rotate(24 320 217)"><rect x="150" y="150" width="368" height="136" rx="68" fill="#0A4E75"/></g>
+</svg>

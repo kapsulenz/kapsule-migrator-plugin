@@ -21,7 +21,15 @@ class Kapsule_Admin_Page {
             'manage_options',
             'kapsule-migrator',
             array( $this, 'render_page' ),
-            'data:image/svg+xml;base64,' . base64_encode( '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>' ),
+            // The KapsuleHost mark. See assets/brand/kapsulehost-menu.svg for why this carries its own
+            // colours: WordPress renders a data-URI menu icon as a BACKGROUND IMAGE and never recolours
+            // it, so the placeholder's stroke="currentColor" resolved to nothing. Two flat brand colours,
+            // measured at 20px against the default, light and midnight sidebars.
+            'data:image/svg+xml;base64,' . base64_encode(
+                // The file carries a long comment explaining the colour choices, which is worth keeping in
+                // source and not worth base64-encoding into every admin page load.
+                (string) preg_replace( '/<!--.*?-->\s*/s', '', (string) file_get_contents( KAPSULE_MIGRATOR_PLUGIN_DIR . 'assets/brand/kapsulehost-menu.svg' ) )
+            ),
             30
         );
     }
@@ -537,10 +545,14 @@ class Kapsule_Admin_Page {
         <div class="wrap kapsule-mig">
 
             <div class="km-top">
-                <span class="km-mark" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"><path d="M4 12h14M13 6l6 6-6 6" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                <span class="km-wordmark">KapsuleHost <span>Migrator</span></span>
+                <span class="km-mark" aria-hidden="true"><?php
+                    // The real KapsuleHost mark. This was a generic arrow on a teal rounded square: a
+                    // placeholder sitting permanently in a customer's own WordPress admin, which is one of
+                    // the most visible surfaces this brand has. The tile went with it, because the mark IS
+                    // the brand and a coloured square behind it was part of the placeholder.
+                    echo (string) preg_replace( '/<!--.*?-->\s*/s', '', (string) file_get_contents( KAPSULE_MIGRATOR_PLUGIN_DIR . 'assets/brand/kapsulehost-mark.svg' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- first-party static asset shipped with the plugin
+                ?></span>
+                <span class="km-wordmark">Kapsule<span class="km-wordmark-host">Host</span> <span class="km-wordmark-sub">Migrator</span></span>
             </div>
 
             <?php if ( $status === 'idle' ) : ?>

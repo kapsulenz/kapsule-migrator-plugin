@@ -90,16 +90,21 @@
   display: flex; align-items: center; gap: 11px;
   margin-bottom: 26px;
 }
+/* The brand mark stands on its own. It used to be a 17px white arrow centred on a 30px teal rounded
+   square with a glow, which was placeholder styling around a placeholder glyph: the KapsuleHost mark
+   is a full-colour cloud and putting it on a solid teal tile would bury it. */
 .km-mark {
-  width: 30px; height: 30px; border-radius: 8px;
-  background: var(--km-accent);
+  width: 32px; height: 32px;
   display: grid; place-items: center;
-  box-shadow: 0 2px 10px -2px var(--km-accent-line);
   flex-shrink: 0;
 }
-.km-mark svg { width: 17px; height: 17px; display: block; }
-.km-wordmark { font-size: 15px; font-weight: 700; letter-spacing: -0.015em; }
-.km-wordmark span { color: var(--km-ink-3); font-weight: 600; }
+.km-mark svg { width: 32px; height: 32px; display: block; }
+/* The lockup, matching the brand: "Kapsule" in ink, "Host" in the brand teal, and the product name
+   after it in a lighter weight. It used to render "KapsuleHost" flat in one colour, which is not how
+   the wordmark is drawn anywhere else. */
+.km-wordmark { font-size: 15px; font-weight: 700; letter-spacing: -0.015em; color: var(--km-ink); }
+.km-wordmark-host { color: var(--km-accent); font-weight: 700; }
+.km-wordmark-sub  { color: var(--km-ink-3); font-weight: 600; }
 
 /* ── Card ─────────────────────────────────────────────────────────────────── */
 
