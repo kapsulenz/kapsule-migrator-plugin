@@ -90,21 +90,27 @@
   display: flex; align-items: center; gap: 11px;
   margin-bottom: 26px;
 }
-/* The brand mark stands on its own. It used to be a 17px white arrow centred on a 30px teal rounded
-   square with a glow, which was placeholder styling around a placeholder glyph: the KapsuleHost mark
-   is a full-colour cloud and putting it on a solid teal tile would bury it. */
-.km-mark {
-  width: 32px; height: 32px;
-  display: grid; place-items: center;
+/* THE LOCKUP IS AN IMAGE, AND DELIBERATELY SO. Two earlier attempts drew this header out of parts:
+   first a generic arrow on a teal rounded tile, then the real mark next to "Kapsule" + "Host" + the
+   product name set in CSS. The second was closer and still wrong, because a wordmark rebuilt from a
+   font is an approximation of the wordmark: its letterforms, its spacing and the exact teal on "Host"
+   are whatever the admin's font stack and this stylesheet happen to produce, and they drift from the
+   brand the moment either changes. The shipped PNG is the wordmark. */
+.km-lockup {
+  height: 28px; width: auto;
+  display: block;
   flex-shrink: 0;
 }
-.km-mark svg { width: 32px; height: 32px; display: block; }
-/* The lockup, matching the brand: "Kapsule" in ink, "Host" in the brand teal, and the product name
-   after it in a lighter weight. It used to render "KapsuleHost" flat in one colour, which is not how
-   the wordmark is drawn anywhere else. */
-.km-wordmark { font-size: 15px; font-weight: 700; letter-spacing: -0.015em; color: var(--km-ink); }
-.km-wordmark-host { color: var(--km-accent); font-weight: 700; }
-.km-wordmark-sub  { color: var(--km-ink-3); font-weight: 600; }
+/* "Migrator" reads as the product this is, sitting after the company lockup rather than inside it.
+   Lighter and muted so the lockup stays the thing the eye lands on, and sized against the wordmark's
+   own cap height rather than the box, so the two sit as one line. */
+.km-lockup-sub {
+  font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+  color: var(--km-ink-3);
+  /* The PNG carries a little clear space under the baseline, so centring the flex row alone leaves the
+     word sitting low against it. */
+  position: relative; top: 1px;
+}
 
 /* ── Card ─────────────────────────────────────────────────────────────────── */
 

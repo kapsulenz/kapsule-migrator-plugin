@@ -545,14 +545,38 @@ class Kapsule_Admin_Page {
         <div class="wrap kapsule-mig">
 
             <div class="km-top">
-                <span class="km-mark" aria-hidden="true"><?php
-                    // The real KapsuleHost mark. This was a generic arrow on a teal rounded square: a
-                    // placeholder sitting permanently in a customer's own WordPress admin, which is one of
-                    // the most visible surfaces this brand has. The tile went with it, because the mark IS
-                    // the brand and a coloured square behind it was part of the placeholder.
-                    echo (string) preg_replace( '/<!--.*?-->\s*/s', '', (string) file_get_contents( KAPSULE_MIGRATOR_PLUGIN_DIR . 'assets/brand/kapsulehost-mark.svg' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- first-party static asset shipped with the plugin
-                ?></span>
-                <span class="km-wordmark">Kapsule<span class="km-wordmark-host">Host</span> <span class="km-wordmark-sub">Migrator</span></span>
+                <?php
+                // THE SHIPPED LOCKUP, NOT A RECONSTRUCTION OF IT. These are the same two files the
+                // navigation bar on kapsulehost.com serves, copied byte for byte, so the mark and the
+                // wordmark arrive together as the brand draws them and their spacing, weights and the
+                // teal on "Host" cannot drift away from the real thing.
+                //
+                // WHY THE LIGHT VARIANT, AND WHY ONLY ONE. The brand ships two, because WordPress will
+                // not recolour an image: the wordmark is baked into the pixels, so the variant whose
+                // text contrasts with the surface underneath has to be chosen rather than left to a
+                // filter. kapsulehost.com's own nav takes the DARK one (white text) because that bar is
+                // dark. This header takes the LIGHT one (dark text) because the WordPress content area
+                // is not.
+                //
+                // That was measured, not assumed. WordPress bundles NINE admin colour schemes, and the
+                // surface painted behind this lockup was read in every one of them: fresh, light,
+                // modern, blue, coffee, ectoplasm, midnight, ocean and sunrise all put rgb(250,250,250)
+                // there (luminance 0.98). The schemes recolour the sidebar and the admin bar, not the
+                // content. So one variant is correct everywhere and a second would be unreachable.
+                // If a surface here ever does go dark, take kapsulehost-dark@1x/@2x from
+                // kapsulecloud-marketing/public/v13/brand and switch on it; do not redraw the wordmark.
+                $km_lockup = KAPSULE_MIGRATOR_PLUGIN_URL . 'assets/brand/kapsulehost-light@1x.png';
+                $km_lockup_2x = KAPSULE_MIGRATOR_PLUGIN_URL . 'assets/brand/kapsulehost-light@2x.png';
+                ?>
+                <img
+                    class="km-lockup"
+                    src="<?php echo esc_url( $km_lockup ); ?>"
+                    srcset="<?php echo esc_url( $km_lockup ); ?> 1x, <?php echo esc_url( $km_lockup_2x ); ?> 2x"
+                    width="161" height="28"
+                    alt="KapsuleHost"
+                    decoding="async"
+                />
+                <span class="km-lockup-sub">Migrator</span>
             </div>
 
             <?php if ( $status === 'idle' ) : ?>
