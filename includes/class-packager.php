@@ -294,6 +294,87 @@ class Kapsule_Packager {
     }
 
     /**
+     * ESCAPE A VALUE FOR A FILE, WHICH IS NOT THE SAME JOB AS ESCAPING IT FOR A QUERY.
+     *
+     * THE DEFECT THIS FIXES DESTROYED EVERY PERCENT SIGN IN A CUSTOMER'S SITE, and it is the real
+     * reason oaohost.com could not be migrated on 2026-08-24. Measured on that customer's own export:
+     * 120,410 occurrences of ONE token across nine tables.
+     *
+     * `esc_sql()` is `wpdb::_real_escape()`, and the last thing that function does is
+     * `add_placeholder_escape()`, which replaces every `%` with a 66-character token, `{` plus a
+     * 64-character per-request HMAC plus `}`. That is deliberate and correct INSIDE WordPress: the
+     * escaped value is expected to be spliced into a query that then goes through `wpdb::prepare()`,
+     * whose final act is `remove_placeholder_escape()`. The `%` is hidden so `prepare()` does not read
+     * it as one of its own printf placeholders, and it is put back a moment later.
+     *
+     * A DUMP NEVER GOES THROUGH `prepare()`. This writer took the escaped string and wrote it straight
+     * to a file, so the `%` was hidden and never put back. Proven directly, not reasoned:
+     *
+     *     raw      50% off, dall%c2%a0slug                      (23 characters)
+     *     esc_sql  50{9d43023b...218b0b} off, dall{9d43...}c2{9d43...}a0slug   (218 characters)
+     *     repaired 50% off, dall%c2%a0slug                      identical to the raw value
+     *
+     * WHAT IT COST, and it is much worse than it looks. A percent sign is not rare in a WordPress
+     * database: every percent-encoded character in a slug or a URL, every `%` in CSS or in a price, and
+     * every serialised option that contains one. Each became 66 characters, which:
+     *
+     *   * broke PHP-serialised options, because `s:23:"..."` no longer matches a 218-character string
+     *     and WordPress discards the whole option;
+     *   * pushed values past the size of the column they live in, which is what produced the
+     *     `ERROR 1406 Data too long for column 'post_name'` this customer actually saw, and the
+     *     silent truncation to 200 characters on the run that "succeeded";
+     *   * would have rendered the token as visible text anywhere the `%` had been.
+     *
+     * THE SCHEMA WAS NEVER THE PROBLEM. It looked as though the customer's database held values too
+     * long for their own columns, which MySQL will not in fact allow: `varchar(200)` truncates at 200
+     * whatever the SQL mode. The over-long values were manufactured HERE, on the way out.
+     *
+     * `remove_placeholder_escape()` has been public since WordPress 4.8.3; the fallback keeps this
+     * working on anything older, where `placeholder_escape()` is still callable.
+     */
+    private static function escape_for_dump( $wpdb, string $value ): string {
+        $escaped = esc_sql( $value );
+        if ( method_exists( $wpdb, 'remove_placeholder_escape' ) ) {
+            return $wpdb->remove_placeholder_escape( $escaped );
+        }
+        if ( method_exists( $wpdb, 'placeholder_escape' ) ) {
+            return str_replace( $wpdb->placeholder_escape(), '%', $escaped );
+        }
+        return $escaped;
+    }
+
+    /**
+     * Look for a WordPress placeholder token in a finished dump, and return the first one found.
+     *
+     * The token is `{` plus 64 hex characters plus `}`, produced by `wpdb::placeholder_escape()`. It
+     * has no business in a SQL file: it only ever appears where a `%` was hidden and not restored.
+     *
+     * READ IN OVERLAPPING CHUNKS, because a fixed-size read will eventually split a 66 character token
+     * across two buffers and the pattern would then match neither half. The overlap is longer than the
+     * token, so no token can hide in a seam. A scanner that misses the thing it exists to find is the
+     * failure mode this whole incident is made of.
+     */
+    private static function find_placeholder_leak( string $file ): string {
+        $fh = fopen( $file, 'rb' );
+        if ( ! $fh ) return '';
+        $chunk   = 1024 * 1024;
+        $overlap = 128;
+        $tail    = '';
+        while ( ! feof( $fh ) ) {
+            $buf = fread( $fh, $chunk );
+            if ( false === $buf || '' === $buf ) break;
+            $window = $tail . $buf;
+            if ( preg_match( '/\{[0-9a-f]{64}\}/', $window, $m ) ) {
+                fclose( $fh );
+                return $m[0];
+            }
+            $tail = substr( $window, -$overlap );
+        }
+        fclose( $fh );
+        return '';
+    }
+
+    /**
      * Export the WordPress database to a gzip-compressed SQL file.
      */
     public function export_database(): string {
@@ -305,10 +386,36 @@ class Kapsule_Packager {
         $tables = $wpdb->get_col( 'SHOW TABLES' );
         $handle = fopen( $db_file, 'w' );
 
+        // THE SESSION PREAMBLE A REAL mysqldump WRITES, AND THIS WRITER DID NOT.
+        //
+        // Line 1 of every dump this plugin has ever produced was `SET FOREIGN_KEY_CHECKS=0;` followed
+        // straight by a CREATE TABLE. A real mysqldump establishes ten session settings first, and
+        // three of them decide whether the customer's data survives the trip:
+        //
+        //   SET NAMES utf8mb4   without it the import runs at whatever the destination's client
+        //                       default happens to be (measured on our own box: utf8mb3), and a
+        //                       four-byte emoji in a post is rejected with ERROR 1366. That is
+        //                       literally how oaohost.com's first migration failed.
+        //   SET TIME_ZONE       without it every TIMESTAMP is re-interpreted in the destination's
+        //                       offset, so the migrated site's posts change date. Nothing fails, no
+        //                       error appears, and the customer finds out weeks later, if ever.
+        //   SQL_MODE            'NO_AUTO_VALUE_ON_ZERO' is what lets a row with an explicit id of 0
+        //                       keep it instead of being handed a new auto-increment value.
+        //
+        // The list is NOT typed here. It is captured from a real mysqldump by
+        // tools/derive-dump-preamble.sh into includes/class-dump-preamble.php and checked by
+        // tools/verify-dump-preamble.sh, because a hand-written copy drifts silently: the same
+        // mysqldump emits nine of these lines for one set of flags and ten for another, and a list
+        // written from memory would be confidently wrong about which.
+        fwrite( $handle, Kapsule_Dump_Preamble::preamble() );
+        fwrite( $handle, "\n" );
+
         fwrite( $handle, "SET FOREIGN_KEY_CHECKS=0;\n\n" );
 
         foreach ( $tables as $table ) {
-            $table_escaped = esc_sql( $table );
+            // Routed through the same helper as the values. A table name containing a percent sign is
+            // exotic and not impossible, and it would be corrupted by exactly the same mechanism.
+            $table_escaped = self::escape_for_dump( $wpdb, $table );
 
             $create = $wpdb->get_row( "SHOW CREATE TABLE `{$table_escaped}`", ARRAY_N );
             fwrite( $handle, "DROP TABLE IF EXISTS `{$table_escaped}`;\n" );
@@ -323,7 +430,7 @@ class Kapsule_Packager {
                 $col_list = '`' . implode( '`, `', $cols ) . '`';
                 foreach ( $rows as $row ) {
                     $vals = array_map( function ( $v ) use ( $wpdb ) {
-                        return $v === null ? 'NULL' : "'" . esc_sql( $v ) . "'";
+                        return $v === null ? 'NULL' : "'" . self::escape_for_dump( $wpdb, $v ) . "'";
                     }, $row );
                     fwrite( $handle, "INSERT INTO `{$table_escaped}` ({$col_list}) VALUES (" . implode( ', ', $vals ) . ");\n" );
                 }
@@ -334,7 +441,33 @@ class Kapsule_Packager {
         }
 
         fwrite( $handle, "SET FOREIGN_KEY_CHECKS=1;\n" );
+        // The matching epilogue, so the import leaves the session exactly as it found it rather than
+        // leaving TIME_ZONE and SQL_MODE altered for whatever runs next on that connection.
+        fwrite( $handle, Kapsule_Dump_Preamble::epilogue() );
         fclose( $handle );
+
+        // ── REFUSE TO HAND OVER A DUMP THAT CARRIES THE CORRUPTION ────────────────────────────────
+        //
+        // THE CHECK THAT WOULD HAVE CAUGHT THIS, and it is here rather than in pre-flight for a reason
+        // worth stating. The obvious place to look for trouble is the customer's DATABASE, and there
+        // was nothing wrong with it: oaohost.com's schema and data agreed perfectly. The damage was
+        // done by THIS FUNCTION, on the way out, so the only place it is visible is the file this
+        // function just wrote. A check pointed at the source could not have gone red no matter how
+        // carefully it was written.
+        //
+        // (A pre-flight check comparing every column's declared size against its longest value WAS
+        // written first, and then deleted: MySQL will not store more characters than a varchar
+        // declares, in any SQL mode, so it could never fire. A check that cannot go red reads as
+        // protection and provides none, and it cost a full scan of every table on every page load.)
+        $leak = self::find_placeholder_leak( $db_file );
+        if ( '' !== $leak ) {
+            @unlink( $db_file );
+            throw new Exception( sprintf(
+                /* translators: %s: the placeholder token found in the export. */
+                __( 'We built a copy of your database and then found it was not safe to send: it still contains an internal placeholder (%s) where your content has a percent sign. Sending it would have changed your links, styling and settings. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message.', 'kapsule-migrator' ),
+                substr( $leak, 0, 12 ) . '...'
+            ) );
+        }
 
         $gz = gzopen( $gz_file, 'wb9' );
         $in = fopen( $db_file, 'rb' );

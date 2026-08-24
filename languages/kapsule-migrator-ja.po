@@ -46,502 +46,502 @@ msgstr "移行について問い合わせたところ、KapsuleHostから%sと�
 msgid "KapsuleHost sent an answer we could not read."
 msgstr "KapsuleHostから読み取れない応答が送信されました。"
 
-#: admin/class-admin-page.php:255
-#: admin/class-admin-page.php:300
-#: admin/class-admin-page.php:383
-#: admin/class-admin-page.php:468
-#: admin/class-admin-page.php:568
-#: admin/class-admin-page.php:599
+#: admin/class-admin-page.php:260
+#: admin/class-admin-page.php:305
+#: admin/class-admin-page.php:391
+#: admin/class-admin-page.php:492
+#: admin/class-admin-page.php:592
+#: admin/class-admin-page.php:623
 msgid "You do not have permission to do that. Ask an administrator of this site to run the migration."
 msgstr "この操作を実行する権限がありません。このサイトの管理者に移行の実行を依頼してください。"
 
-#: admin/class-admin-page.php:306
+#: admin/class-admin-page.php:311
 #: assets/js/migrator.js:187
 msgid "Paste your migration token first. You will find it in your KapsuleHost panel under Sites, then Migrate."
 msgstr "最初に移行トークンを貼り付けてください。KapsuleHostパネルの「サイト」から「移行」で確認できます。"
 
-#: admin/class-admin-page.php:330
+#: admin/class-admin-page.php:335
 #: assets/js/migrator.js:203
 msgid "We could not connect to KapsuleHost with that token. Check it and try again."
 msgstr "そのトークンでKapsuleHostに接続できませんでした。トークンを確認してもう一度お試しください。"
 
-#: admin/class-admin-page.php:393
-#: admin/class-admin-page.php:476
+#: admin/class-admin-page.php:416
+#: admin/class-admin-page.php:500
 msgid "This migration is no longer in a state we can continue from. Stop and start over to begin a clean run."
 msgstr "この移行は続行できる状態ではなくなりました。停止して最初からやり直し、新しく実行してください。"
 
-#: admin/class-admin-page.php:658
+#: admin/class-admin-page.php:682
 msgid "You do not have permission to download this file."
 msgstr "このファイルをダウンロードする権限がありません。"
 
-#: admin/class-admin-page.php:665
+#: admin/class-admin-page.php:689
 msgid "That download link has expired. Reload this page and try again."
 msgstr "ダウンロードリンクの有効期限が切れました。このページを再読み込みしてもう一度お試しください。"
 
-#: admin/class-admin-page.php:670
+#: admin/class-admin-page.php:694
 msgid "We could not find that file. The package may have been cleaned up, so package this site again."
 msgstr "ファイルが見つかりませんでした。パッケージがクリーンアップされた可能性がありますので、もう一度このサイトをパッケージ化してください。"
 
-#: admin/class-admin-page.php:677
+#: admin/class-admin-page.php:701
 msgid "That file is no longer on this server. Package this site again to rebuild it."
 msgstr "ファイルがこのサーバー上にありません。もう一度このサイトをパッケージ化して再作成してください。"
 
-#: admin/class-admin-page.php:774
+#: admin/class-admin-page.php:798
 msgid "Move to KapsuleHost"
 msgstr "KapsuleHostに移行"
 
-#: admin/class-admin-page.php:775
+#: admin/class-admin-page.php:799
 msgid "Download a copy"
 msgstr "コピーをダウンロード"
 
-#: admin/class-admin-page.php:780
+#: admin/class-admin-page.php:804
 msgid "Step 1 of 1"
 msgstr "ステップ1/1"
 
-#: admin/class-admin-page.php:781
+#: admin/class-admin-page.php:805
 msgid "Move this site to KapsuleHost"
 msgstr "このサイトをKapsuleHostに移行"
 
-#: admin/class-admin-page.php:783
+#: admin/class-admin-page.php:807
 msgid "Paste the migration token from your KapsuleHost panel. We copy your files and your database across and leave this site exactly as it is, serving visitors the whole time."
 msgstr "KapsuleHostパネルから移行トークンを貼り付けてください。ファイルとデータベースをコピーし、このサイトはそのままの状態で訪問者にサービスを提供し続けます。"
 
-#: admin/class-admin-page.php:787
+#: admin/class-admin-page.php:811
 msgid "Migration token"
 msgstr "移行トークン"
 
-#: admin/class-admin-page.php:789
+#: admin/class-admin-page.php:813
 msgid "Paste your token"
 msgstr "トークンを貼り付け"
 
-#: admin/class-admin-page.php:791
+#: admin/class-admin-page.php:815
 msgid "Find it in your panel under Sites, then Migrate. The token works once and is deleted when the move finishes."
 msgstr "パネルの「サイト」から「移行」で確認できます。トークンは一度だけ使用でき、移行が完了すると削除されます。"
 
-#: admin/class-admin-page.php:801
+#: admin/class-admin-page.php:825
 msgid "How long this takes depends on how fast this server can upload. Small sites finish in a few minutes and large ones take longer; you will see a live estimate once the transfer starts. If it is interrupted, reopen this page and it carries on from the last piece that arrived."
 msgstr "所要時間は、このサーバーのアップロード速度によって異なります。小規模なサイトは数分で完了し、大規模なサイトはより時間がかかります。転送が開始されると、リアルタイムの推定時間が表示されます。中断された場合は、このページを再度開くと、最後に到着した部分から続行されます。"
 
-#: admin/class-admin-page.php:806
+#: admin/class-admin-page.php:830
 #: assets/js/migrator.js:204
 #: assets/js/migrator.js:208
 msgid "Start the move"
 msgstr "移行を開始"
 
-#: admin/class-admin-page.php:816
+#: admin/class-admin-page.php:840
 msgid "Encrypted end to end"
 msgstr "エンドツーエンド暗号化"
 
-#: admin/class-admin-page.php:817
+#: admin/class-admin-page.php:841
 msgid "This site is only ever read, never changed"
 msgstr "このサイトは読み取りのみで、変更されません"
 
-#: admin/class-admin-page.php:818
+#: admin/class-admin-page.php:842
 msgid "Token deleted after use"
 msgstr "トークンは使用後削除"
 
-#: admin/class-admin-page.php:824
+#: admin/class-admin-page.php:848
 msgid "No account needed"
 msgstr "アカウント不要"
 
-#: admin/class-admin-page.php:825
+#: admin/class-admin-page.php:849
 msgid "Download a copy of this site"
 msgstr "このサイトのコピーをダウンロード"
 
-#: admin/class-admin-page.php:827
+#: admin/class-admin-page.php:851
 msgid "Package the files and database into archives you can download and take anywhere. Useful if you are moving by hand or want a copy before you change anything."
 msgstr "ファイルとデータベースをアーカイブにパッケージ化して、ダウンロードしてどこにでも持ち運べます。手動で移行する場合や、変更を加える前にコピーが必要な場合に便利です。"
 
-#: admin/class-admin-page.php:831
+#: admin/class-admin-page.php:855
 #: assets/js/migrator.js:227
 #: assets/js/migrator.js:231
 msgid "Package this site"
 msgstr "このサイトをパッケージ化"
 
-#: admin/class-admin-page.php:841
+#: admin/class-admin-page.php:865
 msgid "Files stay on your server until you download them"
 msgstr "ファイルはダウンロードするまでサーバー上に保持されます"
 
-#: admin/class-admin-page.php:842
+#: admin/class-admin-page.php:866
 msgid "wp-config.php is left out on purpose"
 msgstr "wp-config.phpは意図的に除外されています"
 
-#: admin/class-admin-page.php:867
+#: admin/class-admin-page.php:891
 msgid "Packaging your site"
 msgstr "サイトをパッケージ化しています"
 
-#: admin/class-admin-page.php:868
+#: admin/class-admin-page.php:892
 msgid "We are building downloadable archives of your files and database. Keep this tab open."
 msgstr "ファイルとデータベースのダウンロード用アーカイブを作成しています。このタブは開いたままにしてください。"
 
-#: admin/class-admin-page.php:870
-#: admin/class-admin-page.php:1274
+#: admin/class-admin-page.php:894
+#: admin/class-admin-page.php:1302
 msgid "Looking at your site"
 msgstr "サイトを確認しています"
 
-#: admin/class-admin-page.php:871
+#: admin/class-admin-page.php:895
 msgid "We are counting your files and checking the connection to KapsuleHost. Nothing has moved yet."
 msgstr "ファイル数を確認し、KapsuleHostへの接続を確認しています。まだ何も移動していません。"
 
-#: admin/class-admin-page.php:873
+#: admin/class-admin-page.php:897
 #: assets/js/migrator.js:334
 msgid "Moving your site"
 msgstr "サイトを移行しています"
 
-#: admin/class-admin-page.php:874
+#: admin/class-admin-page.php:898
 #: assets/js/migrator.js:335
 msgid "Your site is being copied across in pieces. It stays live and unchanged the whole time."
 msgstr "サイトは複数の部分に分けてコピーされています。その間もサイトは稼働し続け、変更されることはありません。"
 
 #. translators: 1: current piece number, 2: total number of pieces.
-#: admin/class-admin-page.php:893
+#: admin/class-admin-page.php:917
 #: assets/js/migrator.js:156
 msgid "piece %1$s of %2$s"
 msgstr "%2$s個中%1$s個"
 
-#: admin/class-admin-page.php:907
+#: admin/class-admin-page.php:931
 msgid "Pieces sent"
 msgstr "送信済みの部分"
 
-#: admin/class-admin-page.php:911
+#: admin/class-admin-page.php:935
 msgid "Moved"
 msgstr "移行済み"
 
-#: admin/class-admin-page.php:915
+#: admin/class-admin-page.php:939
 msgid "Total"
 msgstr "合計"
 
-#: admin/class-admin-page.php:919
+#: admin/class-admin-page.php:943
 #: assets/js/migrator.js:337
 msgid "Files"
 msgstr "ファイル"
 
-#: admin/class-admin-page.php:927
+#: admin/class-admin-page.php:951
 msgid "Count the files and check the connection"
 msgstr "ファイル数を確認し、接続を確認する"
 
-#: admin/class-admin-page.php:931
+#: admin/class-admin-page.php:955
 msgid "Copy the files across"
 msgstr "ファイルをコピーする"
 
-#: admin/class-admin-page.php:935
+#: admin/class-admin-page.php:959
 msgid "Copy the database across"
 msgstr "データベースをコピーする"
 
-#: admin/class-admin-page.php:939
+#: admin/class-admin-page.php:963
 msgid "KapsuleHost puts it together"
 msgstr "KapsuleHostが統合します"
 
-#: admin/class-admin-page.php:948
+#: admin/class-admin-page.php:972
 msgid "Keep this tab open. We will show your download links the moment packaging finishes."
 msgstr "このタブは開いたままにしてください。パッケージ化が完了次第、ダウンロードリンクを表示します。"
 
-#: admin/class-admin-page.php:950
+#: admin/class-admin-page.php:974
 msgid "<strong>Keep this tab open.</strong> The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived."
 msgstr "<strong>このタブは開いたままにしてください。</strong>移行はこのページから実行されるため、タブを閉じると一時停止します。閉じても失われることはありません。このページを再度開くと、最後に到着した部分から続行されます。"
 
-#: admin/class-admin-page.php:956
+#: admin/class-admin-page.php:980
 msgid "Stop and start over"
 msgstr "停止して最初からやり直す"
 
-#: admin/class-admin-page.php:965
+#: admin/class-admin-page.php:989
 msgid "Package ready"
 msgstr "パッケージ準備完了"
 
-#: admin/class-admin-page.php:966
+#: admin/class-admin-page.php:990
 msgid "Your site is packaged"
 msgstr "サイトのパッケージ化が完了しました"
 
-#: admin/class-admin-page.php:968
+#: admin/class-admin-page.php:992
 msgid "Download the archives below and import them on your new host. This site has not been changed."
 msgstr "以下のアーカイブをダウンロードし、新しいホストでインポートしてください。このサイトは変更されていません。"
 
-#: admin/class-admin-page.php:978
+#: admin/class-admin-page.php:1002
 msgid "Download"
 msgstr "ダウンロード"
 
-#: admin/class-admin-page.php:985
+#: admin/class-admin-page.php:1009
 msgid "Moving to KapsuleHost instead? Use the token path and we do all of this for you, with nothing to download."
 msgstr "KapsuleHostへ移行する場合は、トークン方式をご利用ください。すべて自動で処理され、ダウンロードは不要です。"
 
-#: admin/class-admin-page.php:989
+#: admin/class-admin-page.php:1013
 msgid "Delete the package and start over"
 msgstr "パッケージを削除して最初からやり直す"
 
-#: admin/class-admin-page.php:1007
-#: admin/class-admin-page.php:1091
+#: admin/class-admin-page.php:1031
+#: admin/class-admin-page.php:1115
 msgid "Move stopped"
 msgstr "移行が停止しました"
 
-#: admin/class-admin-page.php:1008
+#: admin/class-admin-page.php:1032
 msgid "We stopped before anything changed"
 msgstr "変更が行われる前に停止しました"
 
-#: admin/class-admin-page.php:1010
+#: admin/class-admin-page.php:1034
 msgid "The move did not finish, so we stopped rather than leave you with half a site. Your site here is untouched and still serving visitors."
 msgstr "移行が完了しなかったため、不完全なサイトを残さないよう停止しました。このサイトは影響を受けておらず、引き続き訪問者に表示されています。"
 
-#: admin/class-admin-page.php:1021
+#: admin/class-admin-page.php:1045
 msgid "Try again"
 msgstr "再試行"
 
-#: admin/class-admin-page.php:1022
-#: admin/class-admin-page.php:1121
-#: admin/class-admin-page.php:1139
+#: admin/class-admin-page.php:1046
+#: admin/class-admin-page.php:1145
+#: admin/class-admin-page.php:1163
 msgid "Contact support"
 msgstr "サポートに問い合わせる"
 
-#: admin/class-admin-page.php:1062
+#: admin/class-admin-page.php:1086
 msgid "Checking"
 msgstr "確認中"
 
-#: admin/class-admin-page.php:1063
+#: admin/class-admin-page.php:1087
 msgid "Your files are with KapsuleHost"
 msgstr "ファイルはKapsuleHostに送信されました"
 
-#: admin/class-admin-page.php:1064
+#: admin/class-admin-page.php:1088
 msgid "Everything uploaded from this site. We cannot reach KapsuleHost right now to tell you what has happened since, so we will not guess: open your panel to see where the move has got to."
 msgstr "このサイトからのアップロードは完了しました。現在KapsuleHostに接続できないため、その後の状況をお伝えできません。パネルを開いて移行の進行状況をご確認ください。"
 
-#: admin/class-admin-page.php:1073
+#: admin/class-admin-page.php:1097
 msgid "This site has not been changed and is still serving visitors, whatever the move is doing."
 msgstr "このサイトは変更されておらず、移行の状況にかかわらず引き続き訪問者に表示されています。"
 
-#: admin/class-admin-page.php:1076
+#: admin/class-admin-page.php:1100
 msgid "Check again"
 msgstr "再確認"
 
-#: admin/class-admin-page.php:1077
+#: admin/class-admin-page.php:1101
 msgid "Open my panel"
 msgstr "パネルを開く"
 
-#: admin/class-admin-page.php:1092
+#: admin/class-admin-page.php:1116
 msgid "The move did not finish"
 msgstr "移行が完了しませんでした"
 
-#: admin/class-admin-page.php:1093
+#: admin/class-admin-page.php:1117
 msgid "Your files reached KapsuleHost, but putting the site together did not finish. Nothing here has changed: this site is untouched and still serving visitors, and nothing has moved for anyone visiting it."
 msgstr "ファイルはKapsuleHostに届きましたが、サイトの構築が完了しませんでした。こちらのサイトは何も変更されておらず、そのまま公開されており、訪問者への影響もありません。"
 
-#: admin/class-admin-page.php:1098
+#: admin/class-admin-page.php:1122
 #: assets/js/migrator.js:399
 msgid "Stopped at"
 msgstr "停止した場所"
 
-#: admin/class-admin-page.php:1102
+#: admin/class-admin-page.php:1126
 msgid "Files placed"
 msgstr "ファイル配置"
 
-#: admin/class-admin-page.php:1103
+#: admin/class-admin-page.php:1127
 msgid "Yes"
 msgstr "完了"
 
-#: admin/class-admin-page.php:1103
+#: admin/class-admin-page.php:1127
 msgid "No"
 msgstr "未完了"
 
-#: admin/class-admin-page.php:1106
-#: admin/class-admin-page.php:1232
+#: admin/class-admin-page.php:1130
+#: admin/class-admin-page.php:1260
 msgid "Database"
 msgstr "データベース"
 
-#: admin/class-admin-page.php:1107
-#: admin/class-admin-page.php:1233
+#: admin/class-admin-page.php:1131
+#: admin/class-admin-page.php:1261
 msgid "Imported"
 msgstr "インポート済み"
 
-#: admin/class-admin-page.php:1107
-#: admin/class-admin-page.php:1233
+#: admin/class-admin-page.php:1131
+#: admin/class-admin-page.php:1261
 msgid "Not imported"
 msgstr "未インポート"
 
-#: admin/class-admin-page.php:1120
+#: admin/class-admin-page.php:1144
 msgid "See the details in my panel"
 msgstr "パネルで詳細を確認"
 
-#: admin/class-admin-page.php:1122
+#: admin/class-admin-page.php:1146
 msgid "Start over from here"
 msgstr "ここからやり直す"
 
-#: admin/class-admin-page.php:1134
+#: admin/class-admin-page.php:1158
 msgid "Needs a look"
 msgstr "確認が必要です"
 
-#: admin/class-admin-page.php:1135
+#: admin/class-admin-page.php:1159
 msgid "Part of your site moved"
 msgstr "サイトの一部が移行されました"
 
-#: admin/class-admin-page.php:1136
+#: admin/class-admin-page.php:1160
 msgid "Some of the move finished and some of it did not, so we are not calling it done. Your panel lists exactly what came across and what is still here. This site is untouched and still serving visitors."
 msgstr "移行の一部は完了し、一部は完了しませんでしたので、完了とはしておりません。パネルには何が移行され、何がまだこちらに残っているかが正確に表示されます。このサイトは何も変更されておらず、そのまま公開されています。"
 
-#: admin/class-admin-page.php:1138
+#: admin/class-admin-page.php:1162
 msgid "See what moved"
 msgstr "移行内容を確認"
 
-#: admin/class-admin-page.php:1154
-#: admin/class-admin-page.php:1317
+#: admin/class-admin-page.php:1178
+#: admin/class-admin-page.php:1345
 msgid "Working"
 msgstr "処理中"
 
-#: admin/class-admin-page.php:1155
+#: admin/class-admin-page.php:1179
 msgid "KapsuleHost is putting your site together"
 msgstr "KapsuleHostがサイトを構築しています"
 
-#: admin/class-admin-page.php:1156
+#: admin/class-admin-page.php:1180
 msgid "Everything uploaded from this site. KapsuleHost is unpacking it, importing your database and checking the result. We will show you the outcome here, and it is safe to close this tab."
 msgstr "このサイトからのアップロードがすべて完了しました。KapsuleHostが展開し、データベースをインポートし、結果を確認しています。結果はここに表示されますので、このタブを閉じても問題ありません。"
 
-#: admin/class-admin-page.php:1170
+#: admin/class-admin-page.php:1198
 msgid "<strong>This site has not been changed.</strong> It is still live and serving visitors, and nothing moves for them until you point your domain at the new copy."
 msgstr "<strong>このサイトは変更されていません。</strong>引き続き公開されており、訪問者への影響もありません。ドメインを新しいコピーに向けるまで、訪問者には何も変わりません。"
 
-#: admin/class-admin-page.php:1174
+#: admin/class-admin-page.php:1202
 msgid "Follow it in my panel"
 msgstr "パネルで進捗を確認"
 
-#: admin/class-admin-page.php:1213
+#: admin/class-admin-page.php:1241
 msgid "Move complete"
 msgstr "移行完了"
 
-#: admin/class-admin-page.php:1214
+#: admin/class-admin-page.php:1242
 msgid "Your site is on KapsuleHost"
 msgstr "サイトがKapsuleHostに移行されました"
 
 #. translators: %s: number of files this site sent, already formatted for the locale.
-#: admin/class-admin-page.php:1217
+#: admin/class-admin-page.php:1245
 msgid "KapsuleHost has finished putting your site together from the %s files this site sent. Open the copy and look around before you point your domain at it."
 msgstr "KapsuleHostは、このサイトから送信された%sファイルからサイトの構築を完了しました。ドメインを向ける前に、コピーを開いて確認してください。"
 
-#: admin/class-admin-page.php:1224
+#: admin/class-admin-page.php:1252
 msgid "Files sent"
 msgstr "送信ファイル数"
 
-#: admin/class-admin-page.php:1228
+#: admin/class-admin-page.php:1256
 msgid "Transferred"
 msgstr "転送済み"
 
-#: admin/class-admin-page.php:1236
+#: admin/class-admin-page.php:1264
 msgid "Your copy"
 msgstr "コピーされたサイト"
 
-#: admin/class-admin-page.php:1237
+#: admin/class-admin-page.php:1265
 msgid "in your panel"
 msgstr "パネル内"
 
-#: admin/class-admin-page.php:1243
+#: admin/class-admin-page.php:1271
 msgid "<strong>This site has not been changed.</strong> It is still live and serving visitors. Nothing moves for your visitors until you point your domain at the new copy."
 msgstr "<strong>このサイトは変更されていません。</strong>引き続き公開されており、訪問者への影響もありません。ドメインを新しいコピーに向けるまで、訪問者には何も変わりません。"
 
-#: admin/class-admin-page.php:1248
+#: admin/class-admin-page.php:1276
 msgid "Open the migrated site"
 msgstr "移行したサイトを開く"
 
-#: admin/class-admin-page.php:1251
+#: admin/class-admin-page.php:1279
 msgid "See the move in my panel"
 msgstr "パネルで移行を確認"
 
-#: admin/class-admin-page.php:1253
+#: admin/class-admin-page.php:1281
 msgid "Back to my panel"
 msgstr "パネルに戻る"
 
-#: admin/class-admin-page.php:1271
+#: admin/class-admin-page.php:1299
 msgid "Waiting to start"
 msgstr "開始待ち"
 
-#: admin/class-admin-page.php:1272
+#: admin/class-admin-page.php:1300
 msgid "Checking what arrived"
 msgstr "到着内容を確認中"
 
-#: admin/class-admin-page.php:1273
+#: admin/class-admin-page.php:1301
 msgid "Connecting"
 msgstr "接続中"
 
-#: admin/class-admin-page.php:1275
+#: admin/class-admin-page.php:1303
 msgid "Building your new environment"
 msgstr "新しい環境を構築中"
 
-#: admin/class-admin-page.php:1276
+#: admin/class-admin-page.php:1304
 msgid "Moving your files to the server"
 msgstr "ファイルをサーバーに移動しています"
 
-#: admin/class-admin-page.php:1277
+#: admin/class-admin-page.php:1305
 msgid "Unpacking your files"
 msgstr "ファイルを展開しています"
 
-#: admin/class-admin-page.php:1278
+#: admin/class-admin-page.php:1306
 msgid "Putting the files in place"
 msgstr "ファイルを配置しています"
 
-#: admin/class-admin-page.php:1279
-#: admin/class-admin-page.php:1313
+#: admin/class-admin-page.php:1307
+#: admin/class-admin-page.php:1341
 #: assets/js/migrator.js:333
 #: assets/js/migrator.js:522
 msgid "Copying files"
 msgstr "ファイルをコピーしています"
 
-#: admin/class-admin-page.php:1280
+#: admin/class-admin-page.php:1308
 msgid "Importing your database"
 msgstr "データベースをインポートしています"
 
-#: admin/class-admin-page.php:1281
+#: admin/class-admin-page.php:1309
 msgid "Rewriting the addresses in your site"
 msgstr "サイト内のアドレスを書き換えています"
 
-#: admin/class-admin-page.php:1282
+#: admin/class-admin-page.php:1310
 msgid "Checking the result serves"
 msgstr "動作確認をしています"
 
-#: admin/class-admin-page.php:1283
+#: admin/class-admin-page.php:1311
 msgid "Finished"
 msgstr "完了しました"
 
-#: admin/class-admin-page.php:1311
+#: admin/class-admin-page.php:1339
 #: assets/js/migrator.js:520
 msgid "Checking the connection"
 msgstr "接続を確認しています"
 
-#: admin/class-admin-page.php:1312
+#: admin/class-admin-page.php:1340
 #: assets/js/migrator.js:521
 msgid "Counting your files"
 msgstr "ファイル数を確認しています"
 
-#: admin/class-admin-page.php:1314
+#: admin/class-admin-page.php:1342
 #: assets/js/migrator.js:434
 #: assets/js/migrator.js:523
 msgid "Copying database"
 msgstr "データベースをコピーしています"
 
-#: admin/class-admin-page.php:1315
+#: admin/class-admin-page.php:1343
 #: assets/js/migrator.js:524
 msgid "KapsuleHost is working on it"
 msgstr "KapsuleHostが処理を行っています"
 
-#: admin/class-admin-page.php:1316
+#: admin/class-admin-page.php:1344
 #: assets/js/migrator.js:525
 msgid "Packaging"
 msgstr "パッケージ化"
 
 #. translators: %s: a formatted number of gigabytes, e.g. "5.9".
-#: admin/class-admin-page.php:1331
+#: admin/class-admin-page.php:1359
 #: assets/js/migrator.js:68
 msgid "%s GB"
 msgstr "%s GB"
 
 #. translators: %s: a formatted number of megabytes.
-#: admin/class-admin-page.php:1335
+#: admin/class-admin-page.php:1363
 #: assets/js/migrator.js:69
 msgid "%s MB"
 msgstr "%s MB"
 
 #. translators: %s: a formatted number of kilobytes.
-#: admin/class-admin-page.php:1339
+#: admin/class-admin-page.php:1367
 #: assets/js/migrator.js:70
 msgid "%s KB"
 msgstr "%s KB"
 
 #. translators: %s: a formatted number of bytes.
-#: admin/class-admin-page.php:1342
+#: admin/class-admin-page.php:1370
 #: assets/js/migrator.js:71
 msgid "%s B"
 msgstr "%s B"
@@ -549,6 +549,11 @@ msgstr "%s B"
 #: includes/class-packager.php:26
 msgid "This server cannot create archives, so we cannot package your site. Ask your host to enable the PHP zip extension, then contact KapsuleHost support if it still fails."
 msgstr "このサーバーはアーカイブを作成できないため、サイトをパッケージ化できません。ホスティング会社にPHP zip拡張機能の有効化を依頼し、それでも失敗する場合はKapsuleHostサポートにご連絡ください。"
+
+#. translators: %s: the placeholder token found in the export.
+#: includes/class-packager.php:467
+msgid "We built a copy of your database and then found it was not safe to send: it still contains an internal placeholder (%s) where your content has a percent sign. Sending it would have changed your links, styling and settings. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message."
+msgstr "データベースのコピーを作成しましたが、送信するには安全ではないことが判明しました。コンテンツにパーセント記号が含まれている箇所に、内部プレースホルダー（%s）が残っています。このまま送信すると、リンク、スタイル、設定が変更される可能性があります。アップロードは行われておらず、サイトには何も影響していません。KapsuleHostサポートにご連絡の上、このメッセージをお伝えください。"
 
 #: includes/class-uploader.php:112
 msgid "We could not read a prepared piece of your site from disk. Free up space on the server and start the migration again."

@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.3.1
+Stable tag: 1.4.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,12 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.4.0 =
+* Fixed, and it is the whole reason for this release: the copy of your database this plugin made replaced every percent sign in your content with a 66 character internal marker, and never put it back. A percent sign is in every percent-encoded link and image name, in stylesheets, in prices, and inside stored settings, where the change also breaks the length count WordPress uses to read them back, so the setting is discarded entirely. On one real site there were 120,410 of them. Percent signs now survive the copy exactly as they are.
+* That marker was also what made some pages fail to move at all. It made page addresses longer than the column that holds them, so the database refused the row or shortened it silently, and pages that arrived with a shortened address would have returned "not found" on the moved site.
+* The export now checks its own work before sending anything, and refuses to hand over a copy that still carries the marker rather than uploading a damaged one.
+* The copy now starts with the same settings a standard database export uses, including the time zone. Without it, every date and time in your site could shift by the difference between your old server's clock setting and the new one, with nothing to say it had happened.
 
 = 1.3.1 =
 * Fixed: when this site could not continue a move (a piece the server no longer knows about, or an

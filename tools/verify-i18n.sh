@@ -51,6 +51,22 @@ for loc in "${EXPECTED_LOCALES[@]}"; do
 
   [ -f "$mo" ] || problems="$problems no-mo"
 
+  # A .mo THAT EXISTS IS NOT A .mo THAT CARRIES TODAY'S COPY, and existence is all this used to check.
+  #
+  # Caught for real on 2026-08-24: a new customer-facing string was written, translated into all
+  # fifteen locales, and every .po was updated. WordPress does not read .po. It reads .mo, which is
+  # COMPILED from the .po by `wp i18n make-mo` as a separate step, and that step had not been run. Every
+  # locale reported "ok" here, the release check reported "15 .mo files", the zip was built, and the
+  # only thing that would have told anyone was a customer reading an English sentence in Japanese.
+  #
+  # So the check is now the ORDER of the two files, which is the cheap fact that distinguishes
+  # "compiled" from "present": a .mo older than its .po is stale by definition. This is the existence
+  # versus fidelity distinction, and the fidelity half is the one that reaches a customer.
+  po="$LANG_DIR/$DOMAIN-$loc.po"
+  if [ -f "$mo" ] && [ -f "$po" ] && [ "$po" -nt "$mo" ]; then
+    problems="$problems STALE-MO(po is newer, run: wp i18n make-mo languages/ languages/)"
+  fi
+
   if [ -f "$js" ]; then
     n=$(python3 -c "import json,sys;d=json.load(open('$js'));print(len(d['locale_data']['messages'])-1)" 2>/dev/null || echo 0)
     [ "$n" -gt 30 ] || problems="$problems js-only-$n-strings"
