@@ -21,13 +21,17 @@ class Kapsule_Admin_Page {
             'manage_options',
             'kapsule-migrator',
             array( $this, 'render_page' ),
-            // The KapsuleHost mark. See assets/brand/kapsulehost-menu.svg for why this carries its own
-            // colours: WordPress renders a data-URI menu icon as a BACKGROUND IMAGE and never recolours
-            // it, so the placeholder's stroke="currentColor" resolved to nothing. Two flat brand colours,
-            // measured at 20px against the default, light and midnight sidebars.
+            // THE REAL KAPSULEHOST MARK, not a redraw of it. This file used to hold a hand-authored
+            // approximation (flat cyan cloud, flat navy bar) which rendered fine and was still not our
+            // logo; it now carries the artwork from brand/masters/kapsule-icon.png, the single source
+            // the brand README names. The data-URI prefix is load-bearing and must stay exactly
+            // "data:image/svg+xml;base64,": that literal is what makes WordPress paint the icon as a
+            // BACKGROUND IMAGE instead of an <img>, and #adminmenu .wp-menu-image img sets opacity 0.6,
+            // which washes a colour logo out. See the comment inside the SVG for the rest.
             'data:image/svg+xml;base64,' . base64_encode(
-                // The file carries a long comment explaining the colour choices, which is worth keeping in
-                // source and not worth base64-encoding into every admin page load.
+                // The file carries a long comment explaining where the artwork comes from and how to
+                // regenerate it, worth keeping in source and not worth base64-encoding into every admin
+                // page load.
                 (string) preg_replace( '/<!--.*?-->\s*/s', '', (string) file_get_contents( KAPSULE_MIGRATOR_PLUGIN_DIR . 'assets/brand/kapsulehost-menu.svg' ) )
             ),
             30
@@ -690,7 +694,6 @@ class Kapsule_Admin_Page {
                 <div class="km-card">
                     <div class="km-card-body">
                         <span class="km-chip" id="km-chip" data-state="<?php echo $step_scan_act || $is_standalone ? 'connecting' : 'transferring'; ?>">
-                            <span class="km-dot"></span>
                             <span id="km-chip-label"><?php echo esc_html( $this->status_label( $status ) ); ?></span>
                         </span>
 
@@ -775,7 +778,7 @@ class Kapsule_Admin_Page {
 
                 <div class="km-card">
                     <div class="km-card-body">
-                        <span class="km-chip" data-state="done"><span class="km-dot"></span> <?php echo esc_html__( 'Package ready', 'kapsule-migrator' ); ?></span>
+                        <span class="km-chip" data-state="done"><?php echo esc_html__( 'Package ready', 'kapsule-migrator' ); ?></span>
                         <h1 class="km-title"><?php echo esc_html__( 'Your site is packaged', 'kapsule-migrator' ); ?></h1>
                         <p class="km-lede"><?php
                             echo esc_html__( 'Download the archives below and import them on your new host. This site has not been changed.', 'kapsule-migrator' );
@@ -817,7 +820,7 @@ class Kapsule_Admin_Page {
                             <div class="km-done-ring">
                                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             </div>
-                            <span class="km-chip" data-state="done"><span class="km-dot"></span> <?php echo esc_html__( 'Move complete', 'kapsule-migrator' ); ?></span>
+                            <span class="km-chip" data-state="done"><?php echo esc_html__( 'Move complete', 'kapsule-migrator' ); ?></span>
                             <h1 class="km-title" style="margin-top:14px;"><?php echo esc_html__( 'Your site is on KapsuleHost', 'kapsule-migrator' ); ?></h1>
                             <p class="km-lede" style="margin:9px auto 0;"><?php
                                 /* translators: %s: number of files copied, already formatted for the locale. */
@@ -870,7 +873,7 @@ class Kapsule_Admin_Page {
 
                 <div class="km-card">
                     <div class="km-card-body">
-                        <span class="km-chip" data-state="error"><span class="km-dot"></span> <?php echo esc_html__( 'Move stopped', 'kapsule-migrator' ); ?></span>
+                        <span class="km-chip" data-state="error"><?php echo esc_html__( 'Move stopped', 'kapsule-migrator' ); ?></span>
                         <h1 class="km-title"><?php echo esc_html__( 'We stopped before anything changed', 'kapsule-migrator' ); ?></h1>
                         <p class="km-lede"><?php
                             echo esc_html__( 'The move did not finish, so we stopped rather than leave you with half a site. Your site here is untouched and still serving visitors.', 'kapsule-migrator' );

@@ -133,38 +133,34 @@
 
 /* ── State chip ───────────────────────────────────────────────────────────── */
 
+/* NO LEADING DOT, AND NO OUTLINE AROUND A TINT.
+   This was a capsule with a 1px border, a tinted fill AND a coloured 7px dot in front of the word:
+   three devices all saying the same thing about a two-word label. The dot is the one that reads as
+   decoration rather than meaning, because a dot before a status is a LIVE indicator convention and
+   "Move complete" is not live, it is over. It also repeated what the page already showed: while the
+   move runs the transfer meter right below it is animating, and when it finishes a large tick ring
+   sits directly above the chip. So the tint carries the state, the word says which state, and nothing
+   else is asked to help. The per-state colour stays, because on a status chip colour IS information.
+   `.km-dot` and `@keyframes km-pulse` are gone rather than left unused, so nothing can quietly grow a
+   dot back by reusing the class. */
 .km-chip {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding-block: 5px; padding-inline: 9px 12px;
-  border-radius: 999px;
-  font-size: 12.5px; font-weight: 650;
-  border: 1px solid var(--km-border);
+  display: inline-flex; align-items: center;
+  padding-block: 4px; padding-inline: 10px;
+  border-radius: 6px;
+  font-size: 12.5px; font-weight: 600;
   background: var(--km-elev);
   color: var(--km-ink-2);
 }
-.km-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--km-ink-3); flex-shrink: 0; }
 
 .km-chip[data-state="connecting"],
 .km-chip[data-state="transferring"] {
-  background: var(--km-accent-subtle); border-color: var(--km-accent-line); color: #0b7c88;
-}
-.km-chip[data-state="connecting"] .km-dot,
-.km-chip[data-state="transferring"] .km-dot {
-  background: var(--km-accent); animation: km-pulse 1.6s ease-in-out infinite;
+  background: var(--km-accent-subtle); color: #0b7c88;
 }
 .km-chip[data-state="retrying"] {
-  background: var(--km-warning-sub); border-color: rgba(245,158,11,.3); color: #8a5a05;
+  background: var(--km-warning-sub); color: #8a5a05;
 }
-.km-chip[data-state="retrying"] .km-dot { background: var(--km-warning); animation: km-pulse 1s ease-in-out infinite; }
-.km-chip[data-state="done"]  { background: var(--km-success-sub); border-color: rgba(16,185,129,.3); color: #05704f; }
-.km-chip[data-state="done"] .km-dot { background: var(--km-success); }
-.km-chip[data-state="error"] { background: var(--km-danger-sub); border-color: rgba(239,68,68,.3); color: #a11b1b; }
-.km-chip[data-state="error"] .km-dot { background: var(--km-danger); }
-
-@keyframes km-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: .45; transform: scale(.82); }
-}
+.km-chip[data-state="done"]  { background: var(--km-success-sub); color: #05704f; }
+.km-chip[data-state="error"] { background: var(--km-danger-sub); color: #a11b1b; }
 
 /* ── THE TRANSFER METER (signature) ───────────────────────────────────────── */
 

@@ -1,22 +1,32 @@
 <!--
-  The KapsuleHost mark for the WordPress admin MENU, which is a different problem from the page header.
+  THE KAPSULEHOST MARK FOR THE WORDPRESS ADMIN MENU. NOT DRAWN BY HAND.
 
-  WordPress renders a base64 data-URI menu icon as a BACKGROUND IMAGE on .wp-menu-image and does NOT
-  recolour it, so `currentColor` (which the placeholder arrow used) resolves to nothing and the icon
-  cannot inherit the admin scheme. Whatever colours are in here are the colours the customer sees.
+  What was here before was a hand-authored approximation: a flat cyan cloud with a flat navy bar
+  laid across it, two colours picked by eye. It rendered, so nothing flagged it, and it was still
+  not our mark. The real KapsuleHost icon is a teal cloud with a pale gradient capsule lying across
+  it whose far end turns deep blue, and none of that survives being redrawn from memory. The brand
+  README is explicit that the artwork has ONE source and that no surface ships its own copy of it:
+  brand/masters/kapsule-icon.png in the portal repo. This file now carries that artwork itself.
 
-  MEASURED AT 20px AGAINST THE REAL SCHEME BACKGROUNDS rather than assumed:
-    solid cyan            reads everywhere, but the capsule disappears and it is just a cloud
-    capsule cut out       shows a black gash on the light scheme, because a cut-out has to hardcode
-                          the sidebar colour and there is more than one sidebar colour
-    white                 invisible on the light scheme
-    #a7aaad WP icon grey  washed out on all three, and off brand
-    cyan + navy           the capsule reads on default (#1d2327), light (#e5e5e5) and midnight
-                          (#26292c), and depends on no background at all
+  WHY THE PIXELS SIT INSIDE AN SVG RATHER THAN BEING LINKED AS A PNG. WordPress only gives a menu
+  icon the background-image treatment when the value passed to add_menu_page() starts with the
+  literal "data:image/svg+xml;base64," (wp-admin/menu-header.php). Anything else is emitted as an
+  img element, and "#adminmenu .wp-menu-image img" in wp-admin/css/admin-menu.css sets opacity 0.6,
+  which washes a colour logo out on every scheme. The background-image path carries no such rule:
+  "#adminmenu div.wp-menu-image.svg" sets only no-repeat, centre, and background-size 20px auto.
+  So the wrapper has to be an SVG, and the real artwork rides inside it.
 
-  Two flat brand colours, no gradient: a gradient at 20px is mud.
+  DO NOT REINTRODUCE currentColor HERE. A menu icon is painted as a BACKGROUND IMAGE, which inherits
+  no colour from the page, so currentColor resolves to nothing and the icon disappears. That is what
+  the original placeholder arrow did. Whatever colours are in this file are the colours the customer
+  sees, which is why it carries the full-colour mark and not a tintable silhouette.
+
+  REGENERATE (from the portal worktree, never by editing the base64 by hand):
+    sharp('brand/masters/kapsule-icon.png').trim().resize({ width: 60 })
+      .png({ compressionLevel: 9, palette: true, effort: 10 })
+  Source master sha256 (first 16 chars): e36c466a1cc31baa
+  Embedded raster: 60x43, three times the 20px WordPress renders it at.
 -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 366" role="img" aria-label="KapsuleHost">
-  <path fill="#22C3D6" d="M300 18a104 104 0 0 1 104 104 94 94 0 0 1 62 110 98 98 0 0 1-94 90H169a98 98 0 0 1-65-171 88 88 0 0 1 100-99A104 104 0 0 1 300 18Z"/>
-  <g transform="rotate(24 320 217)"><rect x="150" y="150" width="368" height="136" rx="68" fill="#0A4E75"/></g>
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="43" viewBox="0 0 60 43" role="img" aria-label="KapsuleHost">
+  <image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAArCAMAAAAT8RtjAAADAFBMVEVMaXECnqsBh6OT7O4Pz86E4eQClKsGpbAHYmgQ0/8TstI1wtwOqbYIob8OrNABkKkBfJgCg5wKiK8For4BnJ4Yt70QuMwQwcoHobMAJFACpbEDoqoCe6MCgJsHO2gDVX4RztQBRn8HkskHm8kRzdIRztAcWn0Zur0Cm6cDtLsCnLENubkCeqEEiaEGisgbs7ER0M8AkZIUyNES1toV0tcOpsIOqNADebkDprMDr7sCfpoDka0BM2EDNGYW29oCfZgV2dcBSoYEn6CV6uxt1t8UpNATrtQJPWcCYqG2/PwhmZmw//8XxNoTx9gEirMSSHIJxccIwsUHwMQLyMkHu8AHub0Coa0Bmq0Ny8sCrbYBn78Bi6YCqKoDtbsBMl4HvsIBo8UBj61F09xl4uUBNmVR2+IBrM5X09oGf7MFgLwyvs0BmrkCpK8BtcECnq0Era8Bm7QCqMkMxcNHytQ8ydRf3OIJjMACqLICsbgCprGP3uABg6EBQnWI7O4GjMgIiLk8ws185egCmLEBSoEBPXAGhcGw6uoBOWoBfptb4eZS0NcDdLADbqpN1Nw/ztgDeLYBnbsBRXsBq7MKwb8BLll+7O9w6OwCsNIKkckOmMkCYJVf1NpCxtJv4uYCaKRt2d8BlbQ3xNEtu8oCVo4BT4UBUYoGtLSL5uiT5ecBW5hY3eKX7/JK3+wyytoPnsxw3uJh2N534eQCZJpn1dpm3OMBl60KksGD5umC3N4Bk6QIsbOb6OoEoqUQpM1X2N5NzdUEcKUBW5B53OABY6ANl8QBr7x26OqK7/Wt8/Vo5epd5/FJz9gFd6oEbp8BlbAGt7l02NwBqbYHuLeb4eKm7e6l+fxJ2eG3+fpy7PN+9Ply8/mY+/0Mn8eh8fApvNEQ1NKt/P2R8vRl8PmL+vwTqNUPo9oWzOYcqbIS2dkU4N8Sia8uw9IBo7cdp8E90+Gg3+Boxs8qssgNnreI19gpk7AJudoYoME30uFJxcgamKg0srYS09ZYucBUw9Y5qKcof57aci4kAAAAmnRSTlMA/v7+/v7+AwEB/g6aMf3+/v4hQv0HGUJl/sSnVO+1OifOf7qz3P7a/eva/q908Hbt/lzHm1Tnz+y2wKbkJN7ZboaEkVTRgk/K1v00jO33+v/////////////////////////////////////////////////////////////////////////////////////////+//////7+wFTSagAAAAlwSFlzAAAOxAAADsQBlSsOGwAABkNJREFUeNqN1nkglGkcB/AH8c44Q44lubLd931td3v1RzEzdjKGXIUZN4MaKzFDoSJHRTIkMtKBHCUp6ypKRO60u7rTfe31e97X2bV9/5j56/N8f+/7vBdCnw2NTkMa06YuNzBYPnWaCh3RaOirQyeQyhIDK1n18PDR6ttGLx5LQ1+t6TT6NAUFWXV19fDROOHbFmsg4n8QjU7HBXSkpe+hZiUruw00FVmDsV/WBEH90miE/sOiIisr4LLbBiL7JU3QoVlLC5oJpPxQQaHISk1NzWowslZqmjDSZywiNJX1Jk/WU9ZEug/z8/MVIJvVNg/LZI3PaDi7eqzrAQHXK/j8RQvdLC0twefX1YWE1B2pO0KmznXJp085gXRZvIkyMqyA62w+H2y+ZQiOh4eH62COuH5ycLABMhMnuoG9XlEhg4stKerhuheyCWevq63pJzANqSxkyeBeAYwd4DaIQzz6oa0t+bdJ5SMNl94itgyLxeIJ2BV8NovCCmp1z549g2aQA3Ey+Wi76EiTDZLHw718WAR0vlpvX2FJY4n8349Ae/YnwfSjUwb7ag04APfyBTyMixT6RM1VkObmqpROW1tPJzIJ85U+mJuOCD1/HtgYfz6fLQjgsdyK3gaKGktK5OSys7ObupvOJnnaOiUkJDglqBp9hJUmsQWCGLa/tbU/OwZw0dsnohuZmceOnRUKhZWVt5uahFGKnpi/VPngoGlIe5I/SQH7xwgCZIqegw2Ul9+BExcXV1nZ1nQ7rxPmfqkzEsOtqz2JwWQwGExrsppX9JfoBtDyU7m5ucnJ8fEtLbdu3brT1hafo5qgibRG3oWa4zdsNLdhMCFYs3qf3AgMLCzPTUnJg9hXV1e3tLS2toIXStcggkYMHbD2+PddJMbdTCbgPhHYaykpZ05CfI9HRETU1PT09JBcbvXPg88kAhmZ3f3FAmMyDIa14B0MXVh+7cyhQ1sgUaWOjo7SGkhPq++LbyHjvicQ9cgw+g6sxQaswUO/dczzJwN2164LtbW1dnY3b0ql0h7Hfx2+wdnPHbeM1Fpz7o2i8EZzHBtGzBtq6DNgL1zw9vb2iY5+/PixVPp0+34ul7sfh7vUEOsV90YNYFLbWE+5URIoD8VnDkGvt3dSkk9qTk7Oa+kLsVjswKU4l7t0GUJK390FDMe8oZ8z2H0i2OFyqhhoUnBq6oMHOa/vh27fHip2gOAFuA7jEJoNxRhbUHijub9EVJIpX16ecpLCwcHBLi4unTkv0tN37gMeKiYXcHAQG6K59yhLYXNzJruwMfOY/KncIQxW8uDRxYtpwHfu2wceFhCLQ1eiOe/BUsXkVrODRdieys07WTqIJZKnVw8eBJ52NB1zPEDo9nFo5oDFtbBNxZlU8XAskbjcP3319OmDsADm4PECxiS2sPDywhSuz5g3VZnHzu6AYl/f0i1Rtd4+qakuEpdHZWVXIdgDxx4WMEZmo/Dxennh6wvuC05ho9xwHO3jkwpj378CKSsrO3xpiKcbo/FdXpDYWBt8Wde7F5d0kDjZHnAphVNTX20lc+VKZNlh8FmYH00zRiu6SItlfX0Gp7ejQ054dkcyxsdLo0jtI/kVB/PduyMjcX1WVlZa1kpkNNMCLKYZxcXFnN5GEv+WbJ9HYrto0K/8Cvwwd966dQ/m0H4JuCFC67tiY6c0NDQUF7u7u3POlVRly5HY3ve4o2OUHeinBZcLCvz8wIc5Ow/xH+Cm1jbzmtKQkYGpO4cz5lpztpwwDmN7wDft7Ox82i9DSO4H2nkPxSPH4ttZ04tJWg6Hc+7cmHfNHdlCIVkdcZzEiu3t7QcO9POwMKyB75mKyFfx7Fgmac9Bxsx63p19G6rjqwGDvtnZfv78iRMngCcmBgUFhVHceYE2+QQmkM6E2AaMx0Bm/VTVNKQdHXNUVc/360Ssw0gdtGDgRU0gpRkTMuoz8OAczqx/mrtJHF8Nj64cRcV+faBfQxKnmwy9Nujw+aIzQ1lfX3/VKt15hmt+7G6rxDoeW9C/4/yBcyIxaPp0UxON4R9ldGLk62O1/J07t1pqpH/ivFRUnT9/7VpT5XUmuvM0VTSU8LC0kc99+AKCbyAydKQxQ3nCBLM54+euXzd7no6KthL9ww8fnP8A8Tmtg1IIb8cAAAAASUVORK5CYII=" width="60" height="43"/>
 </svg>
