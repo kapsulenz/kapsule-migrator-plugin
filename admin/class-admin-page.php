@@ -385,7 +385,11 @@ class Kapsule_Admin_Page {
     public function ajax_upload_chunk(): void {
         check_ajax_referer( 'kapsule_migrator_nonce', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsule-migrator' ) );
+            // Permanent for the same reason: no number of retries grants a capability.
+            wp_send_json_error( array(
+                'retryable' => false,
+                'reason'    => __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsule-migrator' ),
+            ) );
             return;
         }
 
@@ -394,8 +398,23 @@ class Kapsule_Admin_Page {
         $chunks = get_option( 'kapsule_migration_chunks', array() );
         $tmp    = get_option( 'kapsule_migration_tmp_dir', '' );
 
+        // `retryable => false` IS THE POINT, AND ITS ABSENCE PRODUCED A FALSE SENTENCE. Measured on a
+        // real drive 2026-08-24: this branch answered with a bare STRING, so the browser's
+        // `data.retryable === false` test saw `undefined`, treated a PERMANENT refusal as a dropped
+        // packet, retried it five times, and then told the customer:
+        //
+        //   "We could not reach KapsuleHost after 5 tries (This migration is no longer in a state we
+        //    can continue from. Stop and start over to begin a clean run.)"
+        //
+        // It had reached KapsuleHost perfectly. This site answered, clearly, five times. The sentence
+        // names the wrong cause and then quotes the right one inside its own parenthesis, which is the
+        // same class as the rest of this lane: a surface reporting something the system did not say.
+        // A permanent refusal now reloads so the customer reads the real reason on the error card.
         if ( empty( $token ) || ! isset( $chunks[ $index ] ) || ! $tmp ) {
-            wp_send_json_error( __( 'This migration is no longer in a state we can continue from. Stop and start over to begin a clean run.', 'kapsule-migrator' ) );
+            wp_send_json_error( array(
+                'retryable' => false,
+                'reason'    => __( 'This migration is no longer in a state we can continue from. Stop and start over to begin a clean run.', 'kapsule-migrator' ),
+            ) );
             return;
         }
 

@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,12 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.3.1 =
+* Fixed: when this site could not continue a move (a piece the server no longer knows about, or an
+  administrator permission that has gone), the plugin retried five times and then said "We could not
+  reach KapsuleHost after 5 tries", quoting KapsuleHost's own clear answer inside its own apology. It
+  had reached KapsuleHost perfectly. A permanent answer is now shown as what it is, straight away.
 
 = 1.3.0 =
 * Fixed, and it is the reason for this release: this screen used to say "Move complete. Your site is
