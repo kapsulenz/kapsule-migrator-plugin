@@ -415,6 +415,18 @@
         }
     }
 
+    /**
+     * Send the database, then HAND OVER. This function does not decide anything is finished.
+     *
+     * WHAT IT USED TO DO, and it is the browser half of the defect this file's PHP counterpart
+     * describes: on a successful POST it called `setStep('kstep-done')` and `setMeter(100, ...)`. The
+     * fourth step in this plugin's own list is labelled "KapsuleHost puts it together", so ticking it
+     * the instant the upload returned was claiming the far side had done work it had not started. The
+     * customer read 100%, and the reload then drew a completion screen off a local flag.
+     *
+     * The honest end of the browser's job is: the last byte left this server. The meter stops at 97
+     * because 100 is a claim about the whole migration and the browser cannot see the whole migration.
+     */
     function uploadDbAndComplete(totalBytes) {
         if (cancelled) return;
 
@@ -430,13 +442,76 @@
             nonce:  cfg.nonce
         }, function () {
             if (cancelled) return;
-            setStep('kstep-done');
-            setMeter(100, __('finishing', 'kapsule-migrator'));
+            // The upload is over. The fourth step belongs to KapsuleHost and is NOT ticked here: the
+            // page reloads into the awaiting-import screen, which reports what the JOB says.
+            setChip('transferring', __('Handing over to KapsuleHost', 'kapsule-migrator'));
+            setLive(false);
+            setMeter(97, __('everything sent', 'kapsule-migrator'));
             window.location.reload();
         }).fail(function () {
             if (!cancelled) window.location.reload();
         });
     }
+
+    // ── Waiting on the job ───────────────────────────────────────────────────
+    //
+    // Once the upload is done this screen shows the JOB's state and nothing else. Every value below is
+    // read from KapsuleHost through the plugin's own PHP (which is where the state is cached, because
+    // PHP is what renders the card on the next load). There is no local fallback: if the poll fails,
+    // the screen keeps saying what it last knew came from the server, and the reload path renders the
+    // explicit "we cannot check" card rather than anything reassuring.
+
+    /** Statuses after which polling is pointless because the job has stopped moving. */
+    var JOB_TERMINAL = ['COMPLETED', 'COMPLETED_WITH_ERRORS', 'FAILED', 'CANCELLED', 'OPS_ESCALATED'];
+
+    function pollJob(delay) {
+        setTimeout(function () {
+            $.post(cfg.ajaxUrl, {
+                action: 'kapsule_job_status',
+                nonce:  cfg.nonce
+            }, function (resp) {
+                if (cancelled) return;
+
+                if (!resp.success) {
+                    // Unreachable. Say so on the meter note rather than freezing a number that reads
+                    // like progress, and keep trying.
+                    $('#km-job-note').text(__('we cannot reach KapsuleHost just now, still trying', 'kapsule-migrator'));
+                    pollJob(15000);
+                    return;
+                }
+
+                var job = resp.data || {};
+
+                if (JOB_TERMINAL.indexOf(job.status) !== -1) {
+                    // The outcome, whatever it is, is rendered by PHP. Reload rather than build a
+                    // second implementation of the outcome cards out here that could disagree with it.
+                    window.location.reload();
+                    return;
+                }
+
+                var pct = Math.max(0, Math.min(99, parseInt(job.progress, 10) || 0));
+                $('#km-job-pct').text(fmtCount(pct));
+                $('#km-job-fill').css('width', pct + '%');
+                if (job.phaseMessage) $('#km-job-note').text(job.phaseMessage);
+
+                pollJob(8000);
+            }).fail(function () {
+                if (cancelled) return;
+                $('#km-job-note').text(__('we cannot reach KapsuleHost just now, still trying', 'kapsule-migrator'));
+                pollJob(15000);
+            });
+        }, delay);
+    }
+
+    $(document).on('click', '#kapsule-recheck-btn', function () {
+        $(this).prop('disabled', true).text(__('Checking...', 'kapsule-migrator'));
+        $.post(cfg.ajaxUrl, {
+            action: 'kapsule_job_status',
+            nonce:  cfg.nonce
+        }).always(function () {
+            window.location.reload();
+        });
+    });
 
     // ── Boot ─────────────────────────────────────────────────────────────────
 
@@ -446,6 +521,7 @@
             case 'scanning':             return __('Counting your files', 'kapsule-migrator');
             case 'uploading_files':      return __('Copying files', 'kapsule-migrator');
             case 'uploading_db':         return __('Copying database', 'kapsule-migrator');
+            case 'awaiting_import':      return __('KapsuleHost is working on it', 'kapsule-migrator');
             case 'standalone_packaging': return __('Packaging', 'kapsule-migrator');
             default:                     return '';
         }
@@ -467,7 +543,7 @@
                     setMeter(Math.min(95, (data.progress.bytesTransferred / data.progress.totalBytes) * 100));
                 }
 
-                if (data.status === 'complete' || data.status === 'error' || data.status === 'standalone_ready') {
+                if (data.status === 'awaiting_import' || data.status === 'error' || data.status === 'standalone_ready') {
                     window.location.reload();
                 } else if (data.status === 'uploading_db') {
                     pollStatus(3000);
@@ -508,6 +584,10 @@
         setStep('kstep-db');
         setMeter(95, __('database', 'kapsule-migrator'));
         pollStatus(3000);
+
+    } else if (cfg.status === 'awaiting_import') {
+        // The upload is finished and the JOB is the only thing that knows anything now.
+        pollJob(4000);
 
     } else if (cfg.status === 'standalone_packaging') {
         pollStatus(5000);

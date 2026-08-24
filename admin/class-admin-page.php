@@ -2,10 +2,78 @@
 
 class Kapsule_Admin_Page {
 
+    /**
+     * THE PLUGIN HAS NO "COMPLETE" STATE OF ITS OWN, AND THAT IS THE WHOLE FIX.
+     *
+     * WHAT WENT WRONG, from Jesse's real migration of oaohost.com on 2026-08-24. This screen said:
+     *
+     *     Move complete. Your site is on KapsuleHost.
+     *     21,129 files - 472.5 MB - Database: Copied - Took: 4 min
+     *
+     * The panel said "Scanning site files, 10%" at the same moment, and the job then FAILED on the
+     * database import. The customer was told the exact thing that was about to fail had already
+     * succeeded, and "Copied" was a hardcoded English word in the template rather than a fact about
+     * anything.
+     *
+     * The plugin was not confused. It was reporting the only event it could observe: its own uploader
+     * had finished sending. `ajax_upload_db_and_complete` then wrote
+     * `kapsule_migration_status = 'complete'` and this template's `$status === 'complete'` branch drew
+     * a completion screen. Every number on it (files, bytes, minutes) is a LOCAL measurement of what
+     * this plugin sent, which is real, presented under a heading that claims something else entirely.
+     *
+     * "Files uploaded" and "site migrated" are different events separated by everything that can go
+     * wrong: provisioning, unpacking, placing the files, importing the database, rewriting URLs,
+     * proving the result serves. The `complete` POST is not the END of the migration, it is what
+     * DISPATCHES the worker that does all of that.
+     *
+     * SO THIS IS NOT A REWORDING. The local status vocabulary no longer contains a value meaning
+     * finished, `set_status()` refuses to write one, and the completion card is emitted by a method
+     * whose first statement returns unless the PORTAL said `COMPLETED`. There is no local variable,
+     * in any state, that can put "Your site is on KapsuleHost" on this screen.
+     *
+     * The local terminal state is `awaiting_import`: this plugin's work is genuinely finished and the
+     * job's is not. From there every card is chosen by the job state fetched from
+     * `/api/migration/plugin/job-status`, including the honest "we cannot reach KapsuleHost to check"
+     * one, which is a state a customer must be shown rather than a reason to fall back to optimism.
+     */
+    const STATUSES = array(
+        'idle',
+        'preflight',
+        'scanning',
+        'uploading_files',
+        'uploading_db',
+        'awaiting_import',       // upload done, the JOB decides what happens next
+        'standalone_packaging',
+        'standalone_ready',
+        'error',                 // a LOCAL failure: this plugin could not finish sending
+    );
+
+    /** Job statuses the portal can report. Only one of them may draw a completion screen. */
+    const JOB_COMPLETE = 'COMPLETED';
+
+    /**
+     * The only writer of the local status, and it refuses anything not in the vocabulary above.
+     *
+     * A `die()` would be worse than the bug for a customer, so an unknown value is coerced to `error`
+     * and recorded: a migration that stops and says so is recoverable, and a migration that claims to
+     * have finished is not. The value is also the thing a future edit would reach for ('complete',
+     * 'done', 'finished'), so it fails loudly in the log rather than silently rendering.
+     */
+    public static function set_status( string $status ): void {
+        if ( ! in_array( $status, self::STATUSES, true ) ) {
+            error_log( sprintf( '[kapsule-migrator] refused to set unknown migration status "%s"', $status ) );
+            update_option( 'kapsule_migration_status', 'error' );
+            update_option( 'kapsule_migration_error', __( 'The migration ended in a state we do not recognise, so we stopped rather than guess. Your site here is untouched.', 'kapsule-migrator' ) );
+            return;
+        }
+        update_option( 'kapsule_migration_status', $status );
+    }
+
     public function register(): void {
         add_action( 'admin_menu',             array( $this, 'add_menu' ) );
         add_action( 'admin_enqueue_scripts',  array( $this, 'enqueue_scripts' ) );
         add_action( 'wp_ajax_kapsule_get_status',              array( $this, 'ajax_get_status' ) );
+        add_action( 'wp_ajax_kapsule_job_status',              array( $this, 'ajax_job_status' ) );
         add_action( 'wp_ajax_kapsule_start_migration',         array( $this, 'ajax_start_migration' ) );
         add_action( 'wp_ajax_kapsule_start_standalone',        array( $this, 'ajax_start_standalone' ) );
         add_action( 'wp_ajax_kapsule_reset',                   array( $this, 'ajax_reset' ) );
@@ -101,6 +169,108 @@ class Kapsule_Admin_Page {
         ) );
     }
 
+    // ── The job's state, which is the only thing that decides what this screen says ──────────────
+    //
+    // The token is marked USED the moment `action=complete` lands, and the POST handler answers a USED
+    // token with 409, so after the upload this plugin was STRUCTURALLY unable to ask what became of the
+    // customer's site. That is why the fix is a door, not a better sentence: with nothing to read, no
+    // wording could have been true. `GET /api/migration/plugin/job-status` accepts a used token for
+    // exactly that reason.
+
+    /**
+     * Ask KapsuleHost what the JOB is doing, cache it, and return it.
+     *
+     * Returns null when we could not get an answer, and null is rendered as "we cannot reach
+     * KapsuleHost" rather than falling back to the last good state. A stale cache shown as if it were
+     * current is how a customer ends up reading a completion that was true ten minutes ago about a job
+     * that has since failed, which is this whole defect wearing a slightly newer timestamp.
+     */
+    private function fetch_job_state( int $timeout = 15 ): ?array {
+        $token = get_option( 'kapsule_migration_token', '' );
+        if ( empty( $token ) ) return null;
+
+        $response = wp_remote_get(
+            KAPSULE_MIGRATOR_API_BASE . '/job-status?token=' . rawurlencode( $token ),
+            array( 'timeout' => $timeout )
+        );
+        if ( is_wp_error( $response ) ) {
+            update_option( 'kapsule_migration_job_state_error', $response->get_error_message() );
+            return null;
+        }
+        if ( (int) wp_remote_retrieve_response_code( $response ) !== 200 ) {
+            update_option( 'kapsule_migration_job_state_error', sprintf(
+                /* translators: %s: an HTTP status code, e.g. "503". */
+                __( 'KapsuleHost answered %s when we asked about your move.', 'kapsule-migrator' ),
+                (string) wp_remote_retrieve_response_code( $response )
+            ) );
+            return null;
+        }
+
+        $body = json_decode( wp_remote_retrieve_body( $response ), true );
+        // A body without a `status` is not a job state. Treating it as one would let a proxy error page
+        // or an empty response render as a job with no status, and "no status" is one `??` away from
+        // being treated as fine.
+        if ( ! is_array( $body ) || ! isset( $body['status'] ) || ! is_string( $body['status'] ) ) {
+            update_option( 'kapsule_migration_job_state_error', __( 'KapsuleHost sent an answer we could not read.', 'kapsule-migrator' ) );
+            return null;
+        }
+
+        $body['fetchedAt'] = time();
+        update_option( 'kapsule_migration_job_state', $body );
+        delete_option( 'kapsule_migration_job_state_error' );
+
+        if ( ! empty( $body['jobId'] ) && is_string( $body['jobId'] ) ) {
+            update_option( 'kapsule_migration_job_id', $body['jobId'] );
+        }
+        return $body;
+    }
+
+    /**
+     * Read the job state for RENDERING, refreshing it first.
+     *
+     * Deliberately a live call on page load rather than a read of the cache. This screen is looked at
+     * perhaps three times in a migration's life, so the cost is nothing, and a page that renders a
+     * cached completion is exactly the failure being fixed.
+     */
+    private function job_state_for_render(): ?array {
+        // EIGHT SECONDS, NOT FIFTEEN. This runs inside the page render, so the timeout IS how long a
+        // customer stares at a blank admin screen when KapsuleHost is slow. Eight is long enough for a
+        // healthy round trip from a shared host and short enough that the honest "we cannot reach
+        // KapsuleHost" card arrives while they are still looking. The AJAX poll keeps the longer
+        // budget, because nobody is blocked on it.
+        $fresh = $this->fetch_job_state( 8 );
+        if ( is_array( $fresh ) ) return $fresh;
+        return null;
+    }
+
+    /**
+     * THE ONE TEST FOR "IS IT DONE". Nothing else in this file may decide that question.
+     *
+     * Note what it does NOT accept: a null state (unreachable), a missing status, or any other job
+     * status. RUNNING is not done. PENDING is not done. COMPLETED_WITH_ERRORS is not done, because a
+     * partial migration told to a customer as a completion is the same lie in a smaller size.
+     */
+    private static function job_says_complete( ?array $job ): bool {
+        return is_array( $job ) && isset( $job['status'] ) && $job['status'] === self::JOB_COMPLETE;
+    }
+
+    public function ajax_job_status(): void {
+        check_ajax_referer( 'kapsule_migrator_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsule-migrator' ) );
+            return;
+        }
+        $job = $this->fetch_job_state();
+        if ( $job === null ) {
+            wp_send_json_error( array(
+                'reachable' => false,
+                'reason'    => get_option( 'kapsule_migration_job_state_error', '' ),
+            ) );
+            return;
+        }
+        wp_send_json_success( $job );
+    }
+
     public function ajax_get_status(): void {
         check_ajax_referer( 'kapsule_migrator_nonce', 'nonce' );
         $status = get_option( 'kapsule_migration_status', 'idle' );
@@ -193,7 +363,7 @@ class Kapsule_Admin_Page {
         update_option( 'kapsule_migration_file_count',  $packager->get_file_count() );
         update_option( 'kapsule_migration_file_bytes',  $packager->get_total_bytes() );
         update_option( 'kapsule_migration_next_chunk',  0 );
-        update_option( 'kapsule_migration_status',      'uploading_files' );
+        self::set_status( 'uploading_files' );
         update_option( 'kapsule_migration_progress',    array() );
         update_option( 'kapsule_migration_started_at',  time() );
         // A NEW migration must not inherit the completed-chunk list from a previous one. Chunk names
@@ -287,7 +457,7 @@ class Kapsule_Admin_Page {
             ) );
 
         } catch ( Exception $e ) {
-            update_option( 'kapsule_migration_status', 'error' );
+            self::set_status( 'error' );
             update_option( 'kapsule_migration_error',  $e->getMessage() );
             wp_send_json_error( array(
                 'retryable' => false,
@@ -314,7 +484,7 @@ class Kapsule_Admin_Page {
 
         try {
             @set_time_limit( 0 );
-            update_option( 'kapsule_migration_status', 'uploading_db' );
+            self::set_status( 'uploading_db' );
 
             $packager = new Kapsule_Packager( $tmp );
             $db_path  = $packager->export_database();
@@ -357,19 +527,33 @@ class Kapsule_Admin_Page {
             $result_body = is_wp_error( $result ) ? array() : json_decode( wp_remote_retrieve_body( $result ), true );
             $job_id      = $result_body['jobId'] ?? '';
 
-            update_option( 'kapsule_migration_status', 'complete' );
+            // THE EVENT THAT JUST HAPPENED IS "THE UPLOAD FINISHED", AND THAT IS WHAT GETS RECORDED.
+            //
+            // The old line here was `update_option( ..., 'complete' )`, and this is the exact seam the
+            // oaohost migration fell through: everything that can fail (provisioning, unpacking, the
+            // file placement, the database import, the URL rewrite, proving the site serves) happens
+            // AFTER this request returns, driven by the worker that the POST above has only just
+            // dispatched. Reporting completion here is reporting the starting gun as the finish line.
+            //
+            // If the POST failed we have no job id, and that is a state a customer must be shown rather
+            // than have smoothed over: the files are uploaded and nothing is processing them.
             if ( $job_id ) {
                 update_option( 'kapsule_migration_job_id', $job_id );
             }
+            self::set_status( 'awaiting_import' );
+
+            // Read the job state once, straight away, so a customer whose page reloads immediately sees
+            // a real state rather than an empty one. It is only a read; it cannot manufacture progress.
+            $this->fetch_job_state();
 
             $packager->cleanup();
 
             wp_send_json_success( array(
-                'status' => 'complete',
+                'status' => 'awaiting_import',
                 'jobId'  => $job_id,
             ) );
         } catch ( Exception $e ) {
-            update_option( 'kapsule_migration_status', 'error' );
+            self::set_status( 'error' );
             update_option( 'kapsule_migration_error',  $e->getMessage() );
             wp_send_json_error( $e->getMessage() );
         }
@@ -403,7 +587,7 @@ class Kapsule_Admin_Page {
             @rmdir( $old_tmp );
         }
 
-        update_option( 'kapsule_migration_status', 'standalone_packaging' );
+        self::set_status( 'standalone_packaging' );
         update_option( 'kapsule_migration_progress', array() );
         delete_option( 'kapsule_migration_error' );
         delete_option( 'kapsule_standalone_tmp_dir' );
@@ -434,6 +618,11 @@ class Kapsule_Admin_Page {
         delete_option( 'kapsule_migration_file_bytes' );
         delete_option( 'kapsule_migration_next_chunk' );
         delete_option( 'kapsule_migration_started_at' );
+        // The cached job state belongs to the job that is being abandoned. Leaving it behind would let
+        // a NEW run's first paint render the PREVIOUS run's outcome, which is the same defect with a
+        // fresher date on it.
+        delete_option( 'kapsule_migration_job_state' );
+        delete_option( 'kapsule_migration_job_state_error' );
         // Same reason as the start path: leaving this behind makes the NEXT run skip every piece it
         // thinks it already sent. "Start over" that quietly sends nothing is worse than not resetting.
         Kapsule_Uploader::reset_progress();
@@ -807,67 +996,14 @@ class Kapsule_Admin_Page {
                     </div>
                 </div>
 
-            <?php elseif ( $status === 'complete' ) :
-                $file_count  = (int) get_option( 'kapsule_migration_file_count', 0 );
-                $total_bytes = (int) get_option( 'kapsule_migration_file_bytes', 0 );
-                $started     = (int) get_option( 'kapsule_migration_started_at', 0 );
-                $took        = $started > 0 ? max( 1, (int) round( ( time() - $started ) / 60 ) ) : 0;
+            <?php elseif ( $status === 'awaiting_import' ) :
+                // EVERY CARD FROM HERE IS CHOSEN BY THE JOB, NOT BY ANYTHING THIS PLUGIN KNOWS.
+                //
+                // `$job` is null when we could not reach KapsuleHost, and that renders as "we cannot
+                // check" rather than as the last thing we saw. There is deliberately no `?:` here that
+                // could resolve to a completion.
+                $this->render_job_outcome( $this->job_state_for_render(), $tick, $bang, $info, $bold );
             ?>
-
-                <div class="km-card">
-                    <div class="km-card-body">
-                        <div class="km-done">
-                            <div class="km-done-ring">
-                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            </div>
-                            <span class="km-chip" data-state="done"><?php echo esc_html__( 'Move complete', 'kapsule-migrator' ); ?></span>
-                            <h1 class="km-title" style="margin-top:14px;"><?php echo esc_html__( 'Your site is on KapsuleHost', 'kapsule-migrator' ); ?></h1>
-                            <p class="km-lede" style="margin:9px auto 0;"><?php
-                                /* translators: %s: number of files copied, already formatted for the locale. */
-                                printf( esc_html__( '%s files and your database were copied and checked. Open the copy and look around before you point your domain at it.', 'kapsule-migrator' ),
-                                    esc_html( number_format_i18n( $file_count ) ) );
-                            ?></p>
-                        </div>
-
-                        <div class="km-facts">
-                            <div class="km-fact">
-                                <div class="km-fact-k"><?php echo esc_html__( 'Files copied', 'kapsule-migrator' ); ?></div>
-                                <div class="km-fact-v"><?php echo esc_html( number_format_i18n( $file_count ) ); ?></div>
-                            </div>
-                            <div class="km-fact">
-                                <div class="km-fact-k"><?php echo esc_html__( 'Transferred', 'kapsule-migrator' ); ?></div>
-                                <div class="km-fact-v"><?php echo esc_html( $this->format_bytes( $total_bytes ) ); ?></div>
-                            </div>
-                            <div class="km-fact">
-                                <div class="km-fact-k"><?php echo esc_html__( 'Database', 'kapsule-migrator' ); ?></div>
-                                <div class="km-fact-v"><?php echo esc_html__( 'Copied', 'kapsule-migrator' ); ?></div>
-                            </div>
-                            <div class="km-fact">
-                                <div class="km-fact-k"><?php echo esc_html__( 'Took', 'kapsule-migrator' ); ?></div>
-                                <div class="km-fact-v"><?php
-                                    if ( $took > 0 ) {
-                                        /* translators: %s: whole number of minutes the migration took. */
-                                        printf( esc_html( _n( '%s min', '%s min', $took, 'kapsule-migrator' ) ), esc_html( number_format_i18n( $took ) ) );
-                                    } else {
-                                        echo esc_html__( 'not recorded', 'kapsule-migrator' );
-                                    }
-                                ?></div>
-                            </div>
-                        </div>
-
-                        <div class="km-note" data-tone="good">
-                            <?php echo $tick; ?>
-                            <span><?php echo wp_kses( __( '<strong>This site has not been changed.</strong> It is still live and serving visitors. Nothing moves for your visitors until you point your domain at the new copy.', 'kapsule-migrator' ), $bold ); ?></span>
-                        </div>
-
-                        <div class="km-actions">
-                            <?php if ( $job_id ) : ?>
-                                <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/migration/<?php echo esc_attr( $job_id ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'Open the migrated site', 'kapsule-migrator' ); ?></a>
-                            <?php endif; ?>
-                            <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Back to my panel', 'kapsule-migrator' ); ?></a>
-                        </div>
-                    </div>
-                </div>
 
             <?php elseif ( $status === 'error' ) : ?>
 
@@ -899,6 +1035,266 @@ class Kapsule_Admin_Page {
     }
 
     /**
+     * Draw whatever the JOB says is true. The upload is over; nothing local decides anything here.
+     *
+     * The dispatch is exhaustive on purpose and its DEFAULT is "still working", never "finished". A
+     * status this build has not heard of (a new enum value shipped by the portal after this plugin was
+     * installed, which will happen, because a customer's plugin is as old as the day they installed it)
+     * lands on "we are still working on it" plus a link to the panel, which is true of every state that
+     * is not a terminal one and is safe for the ones that are: the panel then tells them the rest.
+     * The opposite default is the entire defect.
+     */
+    private function render_job_outcome( ?array $job, string $tick, string $bang, string $info, array $bold ): void {
+        // ONE call, one place, and it returns false for every input except a job the portal has
+        // reported COMPLETED. If it returns false we fall through to the honest states below.
+        if ( $this->render_complete_card( $job, $tick, $bold ) ) {
+            return;
+        }
+
+        $status  = is_array( $job ) ? (string) ( $job['status'] ?? '' ) : '';
+        $job_id  = is_array( $job ) ? (string) ( $job['jobId'] ?? '' ) : get_option( 'kapsule_migration_job_id', '' );
+        $panel   = $job_id ? KAPSULE_MIGRATOR_HOST . '/migration/' . $job_id : KAPSULE_MIGRATOR_HOST;
+
+        if ( $job === null ) {
+            // UNREACHABLE IS A STATE, NOT A REASON TO GUESS. A payment path that silently falls back to
+            // a lesser method is the same shape as a status screen that falls back to optimism, and this
+            // one has the higher stakes: the customer's next move is deciding whether to switch their
+            // DNS across.
+            $reason = (string) get_option( 'kapsule_migration_job_state_error', '' );
+            ?>
+            <div class="km-card">
+                <div class="km-card-body">
+                    <span class="km-chip" data-state="connecting"><?php echo esc_html__( 'Checking', 'kapsule-migrator' ); ?></span>
+                    <h1 class="km-title"><?php echo esc_html__( 'Your files are with KapsuleHost', 'kapsule-migrator' ); ?></h1>
+                    <p class="km-lede"><?php echo esc_html__( 'Everything uploaded from this site. We cannot reach KapsuleHost right now to tell you what has happened since, so we will not guess: open your panel to see where the move has got to.', 'kapsule-migrator' ); ?></p>
+                    <?php if ( $reason ) : ?>
+                        <div class="km-note" data-tone="warn">
+                            <?php echo $bang; ?>
+                            <span><?php echo esc_html( $reason ); ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <div class="km-note" data-tone="info">
+                        <?php echo $info; ?>
+                        <span><?php echo esc_html__( 'This site has not been changed and is still serving visitors, whatever the move is doing.', 'kapsule-migrator' ); ?></span>
+                    </div>
+                    <div class="km-actions">
+                        <button id="kapsule-recheck-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Check again', 'kapsule-migrator' ); ?></button>
+                        <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Open my panel', 'kapsule-migrator' ); ?></a>
+                    </div>
+                </div>
+            </div>
+            <?php
+            return;
+        }
+
+        if ( $status === 'FAILED' || $status === 'CANCELLED' ) {
+            $why = (string) ( $job['errorMessage'] ?? '' );
+            $at  = $this->phase_label( (string) ( $job['phase'] ?? '' ) );
+            ?>
+            <div class="km-card">
+                <div class="km-card-body">
+                    <span class="km-chip" data-state="error"><?php echo esc_html__( 'Move stopped', 'kapsule-migrator' ); ?></span>
+                    <h1 class="km-title"><?php echo esc_html__( 'The move did not finish', 'kapsule-migrator' ); ?></h1>
+                    <p class="km-lede"><?php echo esc_html__( 'Your files reached KapsuleHost, but putting the site together did not finish. Nothing here has changed: this site is untouched and still serving visitors, and nothing has moved for anyone visiting it.', 'kapsule-migrator' ); ?></p>
+
+                    <?php if ( $at ) : ?>
+                        <div class="km-facts">
+                            <div class="km-fact">
+                                <div class="km-fact-k"><?php echo esc_html__( 'Stopped at', 'kapsule-migrator' ); ?></div>
+                                <div class="km-fact-v"><?php echo esc_html( $at ); ?></div>
+                            </div>
+                            <div class="km-fact">
+                                <div class="km-fact-k"><?php echo esc_html__( 'Files placed', 'kapsule-migrator' ); ?></div>
+                                <div class="km-fact-v"><?php echo esc_html( ! empty( $job['filesPlaced'] ) ? __( 'Yes', 'kapsule-migrator' ) : __( 'No', 'kapsule-migrator' ) ); ?></div>
+                            </div>
+                            <div class="km-fact">
+                                <div class="km-fact-k"><?php echo esc_html__( 'Database', 'kapsule-migrator' ); ?></div>
+                                <div class="km-fact-v"><?php echo esc_html( ! empty( $job['databaseImported'] ) ? __( 'Imported', 'kapsule-migrator' ) : __( 'Not imported', 'kapsule-migrator' ) ); ?></div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ( $why ) : ?>
+                        <div class="km-note" data-tone="error">
+                            <?php echo $bang; ?>
+                            <span><?php echo esc_html( $why ); ?></span>
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="km-actions">
+                        <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'See the details in my panel', 'kapsule-migrator' ); ?></a>
+                        <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/support" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Contact support', 'kapsule-migrator' ); ?></a>
+                        <button id="kapsule-reset-btn" class="km-btn km-btn--ghost"><?php echo esc_html__( 'Start over from here', 'kapsule-migrator' ); ?></button>
+                    </div>
+                </div>
+            </div>
+            <?php
+            return;
+        }
+
+        if ( $status === 'COMPLETED_WITH_ERRORS' || $status === 'OPS_ESCALATED' ) {
+            ?>
+            <div class="km-card">
+                <div class="km-card-body">
+                    <span class="km-chip" data-state="error"><?php echo esc_html__( 'Needs a look', 'kapsule-migrator' ); ?></span>
+                    <h1 class="km-title"><?php echo esc_html__( 'Part of your site moved', 'kapsule-migrator' ); ?></h1>
+                    <p class="km-lede"><?php echo esc_html__( 'Some of the move finished and some of it did not, so we are not calling it done. Your panel lists exactly what came across and what is still here. This site is untouched and still serving visitors.', 'kapsule-migrator' ); ?></p>
+                    <div class="km-actions">
+                        <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'See what moved', 'kapsule-migrator' ); ?></a>
+                        <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/support" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Contact support', 'kapsule-migrator' ); ?></a>
+                    </div>
+                </div>
+            </div>
+            <?php
+            return;
+        }
+
+        // PENDING, RUNNING, PAUSED, NO_JOB and anything this build has never heard of.
+        $pct   = max( 0, min( 99, (int) ( $job['progress'] ?? 0 ) ) );
+        $label = $this->phase_label( (string) ( $job['phase'] ?? '' ) );
+        $msg   = (string) ( $job['phaseMessage'] ?? '' );
+        ?>
+        <div class="km-card">
+            <div class="km-card-body">
+                <span class="km-chip" data-state="transferring"><?php echo esc_html( $label ? $label : __( 'Working', 'kapsule-migrator' ) ); ?></span>
+                <h1 class="km-title"><?php echo esc_html__( 'KapsuleHost is putting your site together', 'kapsule-migrator' ); ?></h1>
+                <p class="km-lede"><?php echo esc_html__( 'Everything uploaded from this site. KapsuleHost is unpacking it, importing your database and checking the result. We will show you the outcome here, and it is safe to close this tab.', 'kapsule-migrator' ); ?></p>
+
+                <div class="km-meter">
+                    <div class="km-meter-head">
+                        <span class="km-meter-pct"><span id="km-job-pct"><?php echo (int) $pct; ?></span><sub>%</sub></span>
+                        <span class="km-meter-note" id="km-job-note"><?php echo esc_html( $msg ); ?></span>
+                    </div>
+                    <?php // data-live="0" ON PURPOSE. The rail's sheen is this plugin's claim that bytes
+                          // are leaving THIS server, and by now they have all left: the work is happening at
+                          // KapsuleHost. The bar still moves, because the job's progress is real, but it does
+                          // not animate a transfer that finished. ?>
+                    <div class="km-rail" id="km-rail" data-live="0">
+                        <div class="km-fill" id="km-job-fill" style="width:<?php echo (int) $pct; ?>%"></div>
+                    </div>
+                </div>
+
+                <div class="km-note" data-tone="info">
+                    <?php echo $info; ?>
+                    <span><?php echo wp_kses( __( '<strong>This site has not been changed.</strong> It is still live and serving visitors, and nothing moves for them until you point your domain at the new copy.', 'kapsule-migrator' ), $bold ); ?></span>
+                </div>
+
+                <div class="km-actions">
+                    <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'Follow it in my panel', 'kapsule-migrator' ); ?></a>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * THE COMPLETION SCREEN, AND THE ONLY GATE IN FRONT OF IT.
+     *
+     * Returns false without emitting a byte unless the PORTAL reported COMPLETED. That early return is
+     * the structural half of this fix: the words "Your site is on KapsuleHost" exist in exactly one
+     * method, and reaching them requires a value this plugin cannot produce for itself. Deleting the
+     * gate deletes the copy with it.
+     *
+     * NOTE WHAT THE FACTS ARE MADE OF NOW. "Database: Copied" used to be a hardcoded string printed
+     * beside a heading, which is how a customer whose database import was about to fail read the word
+     * "Copied". It is now `$job['databaseImported']`, which the portal derives from the worker's stage
+     * journal, so the cell cannot say the import happened unless the import completed. Same for the
+     * files. The file COUNT and the byte total stay local, because they are honest local measurements
+     * of what this plugin sent, and they are now labelled as what they are.
+     */
+    private function render_complete_card( ?array $job, string $tick, array $bold ): bool {
+        if ( ! self::job_says_complete( $job ) ) {
+            return false;
+        }
+
+        $file_count  = (int) get_option( 'kapsule_migration_file_count', 0 );
+        $total_bytes = (int) get_option( 'kapsule_migration_file_bytes', 0 );
+        $job_id      = (string) ( $job['jobId'] ?? get_option( 'kapsule_migration_job_id', '' ) );
+        $staging     = (string) ( $job['stagingDomain'] ?? '' );
+        $db_ok       = ! empty( $job['databaseImported'] );
+        ?>
+        <div class="km-card">
+            <div class="km-card-body">
+                <div class="km-done">
+                    <div class="km-done-ring">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <span class="km-chip" data-state="done"><?php echo esc_html__( 'Move complete', 'kapsule-migrator' ); ?></span>
+                    <h1 class="km-title" style="margin-top:14px;"><?php echo esc_html__( 'Your site is on KapsuleHost', 'kapsule-migrator' ); ?></h1>
+                    <p class="km-lede" style="margin:9px auto 0;"><?php
+                        /* translators: %s: number of files this site sent, already formatted for the locale. */
+                        printf( esc_html__( 'KapsuleHost has finished putting your site together from the %s files this site sent. Open the copy and look around before you point your domain at it.', 'kapsule-migrator' ),
+                            esc_html( number_format_i18n( $file_count ) ) );
+                    ?></p>
+                </div>
+
+                <div class="km-facts">
+                    <div class="km-fact">
+                        <div class="km-fact-k"><?php echo esc_html__( 'Files sent', 'kapsule-migrator' ); ?></div>
+                        <div class="km-fact-v"><?php echo esc_html( number_format_i18n( $file_count ) ); ?></div>
+                    </div>
+                    <div class="km-fact">
+                        <div class="km-fact-k"><?php echo esc_html__( 'Transferred', 'kapsule-migrator' ); ?></div>
+                        <div class="km-fact-v"><?php echo esc_html( $this->format_bytes( $total_bytes ) ); ?></div>
+                    </div>
+                    <div class="km-fact">
+                        <div class="km-fact-k"><?php echo esc_html__( 'Database', 'kapsule-migrator' ); ?></div>
+                        <div class="km-fact-v"><?php echo esc_html( $db_ok ? __( 'Imported', 'kapsule-migrator' ) : __( 'Not imported', 'kapsule-migrator' ) ); ?></div>
+                    </div>
+                    <div class="km-fact">
+                        <div class="km-fact-k"><?php echo esc_html__( 'Your copy', 'kapsule-migrator' ); ?></div>
+                        <div class="km-fact-v"><?php echo esc_html( $staging ? $staging : __( 'in your panel', 'kapsule-migrator' ) ); ?></div>
+                    </div>
+                </div>
+
+                <div class="km-note" data-tone="good">
+                    <?php echo $tick; ?>
+                    <span><?php echo wp_kses( __( '<strong>This site has not been changed.</strong> It is still live and serving visitors. Nothing moves for your visitors until you point your domain at the new copy.', 'kapsule-migrator' ), $bold ); ?></span>
+                </div>
+
+                <div class="km-actions">
+                    <?php if ( $staging ) : ?>
+                        <a href="https://<?php echo esc_attr( $staging ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'Open the migrated site', 'kapsule-migrator' ); ?></a>
+                    <?php endif; ?>
+                    <?php if ( $job_id ) : ?>
+                        <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/migration/<?php echo esc_attr( $job_id ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'See the move in my panel', 'kapsule-migrator' ); ?></a>
+                    <?php endif; ?>
+                    <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Back to my panel', 'kapsule-migrator' ); ?></a>
+                </div>
+            </div>
+        </div>
+        <?php
+        return true;
+    }
+
+    /**
+     * The customer's words for a worker phase.
+     *
+     * A phase this build does not recognise returns EMPTY, not the raw id. Printing `placing_files` at
+     * a customer is worse than printing nothing, and the raw id would also read as translated copy in
+     * every locale. Mirrors src/lib/migration/phases.ts in the portal; that file is the source of the
+     * list and this is where those ids become sentences on the customer's own WordPress.
+     */
+    private function phase_label( string $phase ): string {
+        switch ( $phase ) {
+            case 'queued':         return __( 'Waiting to start', 'kapsule-migrator' );
+            case 'preflight':      return __( 'Checking what arrived', 'kapsule-migrator' );
+            case 'connecting':     return __( 'Connecting', 'kapsule-migrator' );
+            case 'scanning':       return __( 'Looking at your site', 'kapsule-migrator' );
+            case 'provisioning':   return __( 'Building your new environment', 'kapsule-migrator' );
+            case 'receiving':      return __( 'Moving your files to the server', 'kapsule-migrator' );
+            case 'unpacking':      return __( 'Unpacking your files', 'kapsule-migrator' );
+            case 'placing_files':  return __( 'Putting the files in place', 'kapsule-migrator' );
+            case 'pulling_files':  return __( 'Copying files', 'kapsule-migrator' );
+            case 'importing_db':   return __( 'Importing your database', 'kapsule-migrator' );
+            case 'search_replace': return __( 'Rewriting the addresses in your site', 'kapsule-migrator' );
+            case 'verifying':      return __( 'Checking the result serves', 'kapsule-migrator' );
+            case 'done':           return __( 'Finished', 'kapsule-migrator' );
+            default:               return '';
+        }
+    }
+
+    /**
      * A numeric pair like "56 / 119", safe in a right-to-left layout.
      *
      * THE BUG THIS FIXES, measured in Arabic: "56 / 119" is made entirely of NEUTRAL characters
@@ -925,6 +1321,7 @@ class Kapsule_Admin_Page {
             case 'scanning':             return __( 'Counting your files', 'kapsule-migrator' );
             case 'uploading_files':      return __( 'Copying files', 'kapsule-migrator' );
             case 'uploading_db':         return __( 'Copying database', 'kapsule-migrator' );
+            case 'awaiting_import':      return __( 'KapsuleHost is working on it', 'kapsule-migrator' );
             case 'standalone_packaging': return __( 'Packaging', 'kapsule-migrator' );
             default:                     return __( 'Working', 'kapsule-migrator' );
         }

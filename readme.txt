@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,22 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.3.0 =
+* Fixed, and it is the reason for this release: this screen used to say "Move complete. Your site is
+  on KapsuleHost" the moment the upload finished, with "Database: Copied" printed beside it. The
+  upload finishing is not the move finishing. Everything that can go wrong (unpacking your files,
+  putting them in place, importing your database, rewriting your addresses, checking the result
+  serves) happens afterwards, on our side. One customer read that screen while their database import
+  was about to fail.
+* The plugin now reports the state of the JOB, read from KapsuleHost, and cannot say a move finished
+  until KapsuleHost says it finished. If the move fails, this screen says so, says which step it
+  stopped on, and shows what our server actually reported.
+* "Database: Copied" is now a fact rather than a word: it says Imported or Not imported, from what
+  the import actually did.
+* If we cannot reach KapsuleHost to check on your move, the screen says that, instead of showing you
+  the last thing it happened to know.
+* Your site is still only ever read, never changed, at every one of these steps.
 
 = 1.2.0 =
 * The plugin now speaks all 16 languages KapsuleHost sells in, including right-to-left Arabic. Every

@@ -58,7 +58,7 @@ class Kapsule_Migrator {
         }
 
         update_option( 'kapsule_migration_token', $token );
-        update_option( 'kapsule_migration_status', 'preflight' );
+        Kapsule_Admin_Page::set_status( 'preflight' );
         update_option( 'kapsule_migration_progress', array() );
         // A NEW migration must not inherit the completed-chunk list from a previous one. The uploader
         // skips any chunk whose name it has already sent, and chunk names repeat between runs, so
@@ -74,7 +74,7 @@ class Kapsule_Migrator {
         if ( empty( $token ) ) return;
 
         try {
-            update_option( 'kapsule_migration_status', 'scanning' );
+            Kapsule_Admin_Page::set_status( 'scanning' );
             $preflight = new Kapsule_Preflight();
             $scan = $preflight->scan();
 
@@ -84,7 +84,7 @@ class Kapsule_Migrator {
                 'preflight' => $scan,
             ) );
 
-            update_option( 'kapsule_migration_status', 'uploading_files' );
+            Kapsule_Admin_Page::set_status( 'uploading_files' );
             $packager = new Kapsule_Packager();
             $uploader = new Kapsule_Uploader( $token );
 
@@ -104,7 +104,7 @@ class Kapsule_Migrator {
                 ) );
             } );
 
-            update_option( 'kapsule_migration_status', 'uploading_db' );
+            Kapsule_Admin_Page::set_status( 'uploading_db' );
             $db_path = $packager->export_database();
             $uploader->upload_chunk( $db_path, Kapsule_Uploader::DB_REMOTE_NAME );
             $this->call_kapsule_api( array(
@@ -113,7 +113,11 @@ class Kapsule_Migrator {
                 'phase'  => 'database',
             ) );
 
-            update_option( 'kapsule_migration_status', 'complete' );
+            // THE SECOND WRITER OF THE SAME LIE, and it was worse than the one on the admin screen: it
+            // declared the migration complete BEFORE it had even POSTed `action=complete`, so a
+            // customer on the WP-Cron path was told their site had moved while the request that starts
+            // the worker had not been sent. The upload finishing is `awaiting_import`; whether the
+            // migration finished is a question only the job can answer. See Kapsule_Admin_Page::STATUSES.
             $manifest = array(
                 'files_count'  => $packager->get_file_count(),
                 'files_bytes'  => $packager->get_total_bytes(),
@@ -131,18 +135,19 @@ class Kapsule_Migrator {
             if ( ! empty( $result['jobId'] ) ) {
                 update_option( 'kapsule_migration_job_id', $result['jobId'] );
             }
+            Kapsule_Admin_Page::set_status( 'awaiting_import' );
 
             $packager->cleanup();
 
         } catch ( Exception $e ) {
-            update_option( 'kapsule_migration_status', 'error' );
+            Kapsule_Admin_Page::set_status( 'error' );
             update_option( 'kapsule_migration_error', $e->getMessage() );
         }
     }
 
     public function run_standalone() {
         try {
-            update_option( 'kapsule_migration_status', 'standalone_packaging' );
+            Kapsule_Admin_Page::set_status( 'standalone_packaging' );
             update_option( 'kapsule_migration_progress', array(
                 'phase'            => 'scanning',
                 'bytesTransferred' => 0,
@@ -189,11 +194,11 @@ class Kapsule_Migrator {
 
             update_option( 'kapsule_standalone_tmp_dir', $tmp_dir );
             update_option( 'kapsule_standalone_files', $files );
-            update_option( 'kapsule_migration_status', 'standalone_ready' );
+            Kapsule_Admin_Page::set_status( 'standalone_ready' );
             update_option( 'kapsule_migration_progress', array() );
 
         } catch ( Exception $e ) {
-            update_option( 'kapsule_migration_status', 'error' );
+            Kapsule_Admin_Page::set_status( 'error' );
             update_option( 'kapsule_migration_error', $e->getMessage() );
         }
     }
@@ -234,6 +239,10 @@ class Kapsule_Migrator {
         delete_option( 'kapsule_migration_progress' );
         delete_option( 'kapsule_migration_error' );
         delete_option( 'kapsule_migration_job_id' );
+        // Same reason as ajax_reset: a cached job state outliving its job would render a previous
+        // run's outcome on a fresh install's first paint.
+        delete_option( 'kapsule_migration_job_state' );
+        delete_option( 'kapsule_migration_job_state_error' );
 
         // Clean up any standalone temp files
         $tmp_dir = get_option( 'kapsule_standalone_tmp_dir', '' );

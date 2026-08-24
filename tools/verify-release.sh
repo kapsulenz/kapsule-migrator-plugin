@@ -37,6 +37,17 @@ fail=0
 say() { printf '  %-34s %s\n' "$1" "$2"; }
 bad() { fail=1; printf '  %-34s FAIL: %s\n' "$1" "$2"; }
 
+# A RELEASE THAT COULD LIE ABOUT COMPLETION IS NOT RELEASABLE, whatever its version numbers say. This
+# gate PRECEDES the artefact checks on purpose: the point of a release check is to stop a build
+# reaching a customer, and consistent version numbers on a build that reports a migration finished
+# before it has are three artefacts agreeing on the wrong thing.
+if ! bash tools/verify-no-local-completion.sh >/dev/null 2>&1; then
+  echo "RELEASE BLOCKED: this build can report a completion the job has not reached."
+  echo "Run tools/verify-no-local-completion.sh for the failing rules."
+  exit 1
+fi
+say "completion-truth gate" "passed"
+
 HEADER_V=$(grep -oP '^\s*\*\s*Version:\s*\K[0-9.]+' kapsule-migrator.php | head -1)
 CONST_V=$(grep -oP "KAPSULE_MIGRATOR_VERSION',\s*'\K[0-9.]+" kapsule-migrator.php | head -1)
 README_V=$(grep -oP '^Stable tag:\s*\K[0-9.]+' readme.txt | head -1)

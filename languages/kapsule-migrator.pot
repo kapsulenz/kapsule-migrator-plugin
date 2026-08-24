@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: KapsuleHost Migrator 1.2.0\n"
+"Project-Id-Version: KapsuleHost Migrator 1.3.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/kapsule-migrator-plugin\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-22T06:24:34+00:00\n"
+"POT-Creation-Date: 2026-08-24T12:41:26+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: kapsule-migrator\n"
@@ -39,359 +39,521 @@ msgstr ""
 msgid "https://kapsulehost.com"
 msgstr ""
 
-#: admin/class-admin-page.php:123
-#: admin/class-admin-page.php:206
-#: admin/class-admin-page.php:291
-#: admin/class-admin-page.php:377
-#: admin/class-admin-page.php:408
+#: admin/class-admin-page.php:66
+msgid "The migration ended in a state we do not recognise, so we stopped rather than guess. Your site here is untouched."
+msgstr ""
+
+#. translators: %s: an HTTP status code, e.g. "503".
+#: admin/class-admin-page.php:203
+#, php-format
+msgid "KapsuleHost answered %s when we asked about your move."
+msgstr ""
+
+#: admin/class-admin-page.php:214
+msgid "KapsuleHost sent an answer we could not read."
+msgstr ""
+
+#: admin/class-admin-page.php:255
+#: admin/class-admin-page.php:300
+#: admin/class-admin-page.php:383
+#: admin/class-admin-page.php:468
+#: admin/class-admin-page.php:568
+#: admin/class-admin-page.php:599
 msgid "You do not have permission to do that. Ask an administrator of this site to run the migration."
 msgstr ""
 
-#: admin/class-admin-page.php:129
+#: admin/class-admin-page.php:306
 #: assets/js/migrator.js:187
 msgid "Paste your migration token first. You will find it in your KapsuleHost panel under Sites, then Migrate."
 msgstr ""
 
-#: admin/class-admin-page.php:153
+#: admin/class-admin-page.php:330
 #: assets/js/migrator.js:203
 msgid "We could not connect to KapsuleHost with that token. Check it and try again."
 msgstr ""
 
-#: admin/class-admin-page.php:216
-#: admin/class-admin-page.php:299
+#: admin/class-admin-page.php:393
+#: admin/class-admin-page.php:476
 msgid "This migration is no longer in a state we can continue from. Stop and start over to begin a clean run."
 msgstr ""
 
-#: admin/class-admin-page.php:462
+#: admin/class-admin-page.php:658
 msgid "You do not have permission to download this file."
 msgstr ""
 
-#: admin/class-admin-page.php:469
+#: admin/class-admin-page.php:665
 msgid "That download link has expired. Reload this page and try again."
 msgstr ""
 
-#: admin/class-admin-page.php:474
+#: admin/class-admin-page.php:670
 msgid "We could not find that file. The package may have been cleaned up, so package this site again."
 msgstr ""
 
-#: admin/class-admin-page.php:481
+#: admin/class-admin-page.php:677
 msgid "That file is no longer on this server. Package this site again to rebuild it."
 msgstr ""
 
-#: admin/class-admin-page.php:550
+#: admin/class-admin-page.php:774
 msgid "Move to KapsuleHost"
 msgstr ""
 
-#: admin/class-admin-page.php:551
+#: admin/class-admin-page.php:775
 msgid "Download a copy"
 msgstr ""
 
-#: admin/class-admin-page.php:556
+#: admin/class-admin-page.php:780
 msgid "Step 1 of 1"
 msgstr ""
 
-#: admin/class-admin-page.php:557
+#: admin/class-admin-page.php:781
 msgid "Move this site to KapsuleHost"
 msgstr ""
 
-#: admin/class-admin-page.php:559
+#: admin/class-admin-page.php:783
 msgid "Paste the migration token from your KapsuleHost panel. We copy your files and your database across and leave this site exactly as it is, serving visitors the whole time."
 msgstr ""
 
-#: admin/class-admin-page.php:563
+#: admin/class-admin-page.php:787
 msgid "Migration token"
 msgstr ""
 
-#: admin/class-admin-page.php:565
+#: admin/class-admin-page.php:789
 msgid "Paste your token"
 msgstr ""
 
-#: admin/class-admin-page.php:567
+#: admin/class-admin-page.php:791
 msgid "Find it in your panel under Sites, then Migrate. The token works once and is deleted when the move finishes."
 msgstr ""
 
-#: admin/class-admin-page.php:577
+#: admin/class-admin-page.php:801
 msgid "How long this takes depends on how fast this server can upload. Small sites finish in a few minutes and large ones take longer; you will see a live estimate once the transfer starts. If it is interrupted, reopen this page and it carries on from the last piece that arrived."
 msgstr ""
 
-#: admin/class-admin-page.php:582
+#: admin/class-admin-page.php:806
 #: assets/js/migrator.js:204
 #: assets/js/migrator.js:208
 msgid "Start the move"
 msgstr ""
 
-#: admin/class-admin-page.php:592
+#: admin/class-admin-page.php:816
 msgid "Encrypted end to end"
 msgstr ""
 
-#: admin/class-admin-page.php:593
+#: admin/class-admin-page.php:817
 msgid "This site is only ever read, never changed"
 msgstr ""
 
-#: admin/class-admin-page.php:594
+#: admin/class-admin-page.php:818
 msgid "Token deleted after use"
 msgstr ""
 
-#: admin/class-admin-page.php:600
+#: admin/class-admin-page.php:824
 msgid "No account needed"
 msgstr ""
 
-#: admin/class-admin-page.php:601
+#: admin/class-admin-page.php:825
 msgid "Download a copy of this site"
 msgstr ""
 
-#: admin/class-admin-page.php:603
+#: admin/class-admin-page.php:827
 msgid "Package the files and database into archives you can download and take anywhere. Useful if you are moving by hand or want a copy before you change anything."
 msgstr ""
 
-#: admin/class-admin-page.php:607
+#: admin/class-admin-page.php:831
 #: assets/js/migrator.js:227
 #: assets/js/migrator.js:231
 msgid "Package this site"
 msgstr ""
 
-#: admin/class-admin-page.php:617
+#: admin/class-admin-page.php:841
 msgid "Files stay on your server until you download them"
 msgstr ""
 
-#: admin/class-admin-page.php:618
+#: admin/class-admin-page.php:842
 msgid "wp-config.php is left out on purpose"
 msgstr ""
 
-#: admin/class-admin-page.php:643
+#: admin/class-admin-page.php:867
 msgid "Packaging your site"
 msgstr ""
 
-#: admin/class-admin-page.php:644
+#: admin/class-admin-page.php:868
 msgid "We are building downloadable archives of your files and database. Keep this tab open."
 msgstr ""
 
-#: admin/class-admin-page.php:646
+#: admin/class-admin-page.php:870
+#: admin/class-admin-page.php:1274
 msgid "Looking at your site"
 msgstr ""
 
-#: admin/class-admin-page.php:647
+#: admin/class-admin-page.php:871
 msgid "We are counting your files and checking the connection to KapsuleHost. Nothing has moved yet."
 msgstr ""
 
-#: admin/class-admin-page.php:649
+#: admin/class-admin-page.php:873
 #: assets/js/migrator.js:334
 msgid "Moving your site"
 msgstr ""
 
-#: admin/class-admin-page.php:650
+#: admin/class-admin-page.php:874
 #: assets/js/migrator.js:335
 msgid "Your site is being copied across in pieces. It stays live and unchanged the whole time."
 msgstr ""
 
 #. translators: 1: current piece number, 2: total number of pieces.
-#: admin/class-admin-page.php:670
+#: admin/class-admin-page.php:893
 #: assets/js/migrator.js:156
 #, php-format,js-format
 msgid "piece %1$s of %2$s"
 msgstr ""
 
-#: admin/class-admin-page.php:684
+#: admin/class-admin-page.php:907
 msgid "Pieces sent"
 msgstr ""
 
-#: admin/class-admin-page.php:688
+#: admin/class-admin-page.php:911
 msgid "Moved"
 msgstr ""
 
-#: admin/class-admin-page.php:692
+#: admin/class-admin-page.php:915
 msgid "Total"
 msgstr ""
 
-#: admin/class-admin-page.php:696
+#: admin/class-admin-page.php:919
 #: assets/js/migrator.js:337
 msgid "Files"
 msgstr ""
 
-#: admin/class-admin-page.php:704
+#: admin/class-admin-page.php:927
 msgid "Count the files and check the connection"
 msgstr ""
 
-#: admin/class-admin-page.php:708
+#: admin/class-admin-page.php:931
 msgid "Copy the files across"
 msgstr ""
 
-#: admin/class-admin-page.php:712
+#: admin/class-admin-page.php:935
 msgid "Copy the database across"
 msgstr ""
 
-#: admin/class-admin-page.php:716
+#: admin/class-admin-page.php:939
 msgid "KapsuleHost puts it together"
 msgstr ""
 
-#: admin/class-admin-page.php:725
+#: admin/class-admin-page.php:948
 msgid "Keep this tab open. We will show your download links the moment packaging finishes."
 msgstr ""
 
-#: admin/class-admin-page.php:727
+#: admin/class-admin-page.php:950
 msgid "<strong>Keep this tab open.</strong> The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived."
 msgstr ""
 
-#: admin/class-admin-page.php:733
+#: admin/class-admin-page.php:956
 msgid "Stop and start over"
 msgstr ""
 
-#: admin/class-admin-page.php:742
+#: admin/class-admin-page.php:965
 msgid "Package ready"
 msgstr ""
 
-#: admin/class-admin-page.php:743
+#: admin/class-admin-page.php:966
 msgid "Your site is packaged"
 msgstr ""
 
-#: admin/class-admin-page.php:745
+#: admin/class-admin-page.php:968
 msgid "Download the archives below and import them on your new host. This site has not been changed."
 msgstr ""
 
-#: admin/class-admin-page.php:755
+#: admin/class-admin-page.php:978
 msgid "Download"
 msgstr ""
 
-#: admin/class-admin-page.php:762
+#: admin/class-admin-page.php:985
 msgid "Moving to KapsuleHost instead? Use the token path and we do all of this for you, with nothing to download."
 msgstr ""
 
-#: admin/class-admin-page.php:766
+#: admin/class-admin-page.php:989
 msgid "Delete the package and start over"
 msgstr ""
 
-#: admin/class-admin-page.php:784
-msgid "Move complete"
-msgstr ""
-
-#: admin/class-admin-page.php:785
-msgid "Your site is on KapsuleHost"
-msgstr ""
-
-#. translators: %s: number of files copied, already formatted for the locale.
-#: admin/class-admin-page.php:788
-#, php-format
-msgid "%s files and your database were copied and checked. Open the copy and look around before you point your domain at it."
-msgstr ""
-
-#: admin/class-admin-page.php:795
-msgid "Files copied"
-msgstr ""
-
-#: admin/class-admin-page.php:799
-msgid "Transferred"
-msgstr ""
-
-#: admin/class-admin-page.php:803
-msgid "Database"
-msgstr ""
-
-#: admin/class-admin-page.php:804
-msgid "Copied"
-msgstr ""
-
-#: admin/class-admin-page.php:807
-msgid "Took"
-msgstr ""
-
-#. translators: %s: whole number of minutes the migration took.
-#: admin/class-admin-page.php:811
-#, php-format
-msgid "%s min"
-msgid_plural "%s min"
-msgstr[0] ""
-msgstr[1] ""
-
-#: admin/class-admin-page.php:813
-msgid "not recorded"
-msgstr ""
-
-#: admin/class-admin-page.php:821
-msgid "<strong>This site has not been changed.</strong> It is still live and serving visitors. Nothing moves for your visitors until you point your domain at the new copy."
-msgstr ""
-
-#: admin/class-admin-page.php:826
-msgid "Open the migrated site"
-msgstr ""
-
-#: admin/class-admin-page.php:828
-msgid "Back to my panel"
-msgstr ""
-
-#: admin/class-admin-page.php:837
+#: admin/class-admin-page.php:1007
+#: admin/class-admin-page.php:1091
 msgid "Move stopped"
 msgstr ""
 
-#: admin/class-admin-page.php:838
+#: admin/class-admin-page.php:1008
 msgid "We stopped before anything changed"
 msgstr ""
 
-#: admin/class-admin-page.php:840
+#: admin/class-admin-page.php:1010
 msgid "The move did not finish, so we stopped rather than leave you with half a site. Your site here is untouched and still serving visitors."
 msgstr ""
 
-#: admin/class-admin-page.php:851
+#: admin/class-admin-page.php:1021
 msgid "Try again"
 msgstr ""
 
-#: admin/class-admin-page.php:852
+#: admin/class-admin-page.php:1022
+#: admin/class-admin-page.php:1121
+#: admin/class-admin-page.php:1139
 msgid "Contact support"
 msgstr ""
 
-#: admin/class-admin-page.php:885
-#: assets/js/migrator.js:445
-msgid "Checking the connection"
+#: admin/class-admin-page.php:1062
+msgid "Checking"
 msgstr ""
 
-#: admin/class-admin-page.php:886
-#: assets/js/migrator.js:446
-msgid "Counting your files"
+#: admin/class-admin-page.php:1063
+msgid "Your files are with KapsuleHost"
 msgstr ""
 
-#: admin/class-admin-page.php:887
-#: assets/js/migrator.js:333
-#: assets/js/migrator.js:447
-msgid "Copying files"
+#: admin/class-admin-page.php:1064
+msgid "Everything uploaded from this site. We cannot reach KapsuleHost right now to tell you what has happened since, so we will not guess: open your panel to see where the move has got to."
 msgstr ""
 
-#: admin/class-admin-page.php:888
-#: assets/js/migrator.js:422
-#: assets/js/migrator.js:448
-msgid "Copying database"
+#: admin/class-admin-page.php:1073
+msgid "This site has not been changed and is still serving visitors, whatever the move is doing."
 msgstr ""
 
-#: admin/class-admin-page.php:889
-#: assets/js/migrator.js:449
-msgid "Packaging"
+#: admin/class-admin-page.php:1076
+msgid "Check again"
 msgstr ""
 
-#: admin/class-admin-page.php:890
+#: admin/class-admin-page.php:1077
+msgid "Open my panel"
+msgstr ""
+
+#: admin/class-admin-page.php:1092
+msgid "The move did not finish"
+msgstr ""
+
+#: admin/class-admin-page.php:1093
+msgid "Your files reached KapsuleHost, but putting the site together did not finish. Nothing here has changed: this site is untouched and still serving visitors, and nothing has moved for anyone visiting it."
+msgstr ""
+
+#: admin/class-admin-page.php:1098
+#: assets/js/migrator.js:399
+msgid "Stopped at"
+msgstr ""
+
+#: admin/class-admin-page.php:1102
+msgid "Files placed"
+msgstr ""
+
+#: admin/class-admin-page.php:1103
+msgid "Yes"
+msgstr ""
+
+#: admin/class-admin-page.php:1103
+msgid "No"
+msgstr ""
+
+#: admin/class-admin-page.php:1106
+#: admin/class-admin-page.php:1232
+msgid "Database"
+msgstr ""
+
+#: admin/class-admin-page.php:1107
+#: admin/class-admin-page.php:1233
+msgid "Imported"
+msgstr ""
+
+#: admin/class-admin-page.php:1107
+#: admin/class-admin-page.php:1233
+msgid "Not imported"
+msgstr ""
+
+#: admin/class-admin-page.php:1120
+msgid "See the details in my panel"
+msgstr ""
+
+#: admin/class-admin-page.php:1122
+msgid "Start over from here"
+msgstr ""
+
+#: admin/class-admin-page.php:1134
+msgid "Needs a look"
+msgstr ""
+
+#: admin/class-admin-page.php:1135
+msgid "Part of your site moved"
+msgstr ""
+
+#: admin/class-admin-page.php:1136
+msgid "Some of the move finished and some of it did not, so we are not calling it done. Your panel lists exactly what came across and what is still here. This site is untouched and still serving visitors."
+msgstr ""
+
+#: admin/class-admin-page.php:1138
+msgid "See what moved"
+msgstr ""
+
+#: admin/class-admin-page.php:1154
+#: admin/class-admin-page.php:1317
 msgid "Working"
 msgstr ""
 
+#: admin/class-admin-page.php:1155
+msgid "KapsuleHost is putting your site together"
+msgstr ""
+
+#: admin/class-admin-page.php:1156
+msgid "Everything uploaded from this site. KapsuleHost is unpacking it, importing your database and checking the result. We will show you the outcome here, and it is safe to close this tab."
+msgstr ""
+
+#: admin/class-admin-page.php:1170
+msgid "<strong>This site has not been changed.</strong> It is still live and serving visitors, and nothing moves for them until you point your domain at the new copy."
+msgstr ""
+
+#: admin/class-admin-page.php:1174
+msgid "Follow it in my panel"
+msgstr ""
+
+#: admin/class-admin-page.php:1213
+msgid "Move complete"
+msgstr ""
+
+#: admin/class-admin-page.php:1214
+msgid "Your site is on KapsuleHost"
+msgstr ""
+
+#. translators: %s: number of files this site sent, already formatted for the locale.
+#: admin/class-admin-page.php:1217
+#, php-format
+msgid "KapsuleHost has finished putting your site together from the %s files this site sent. Open the copy and look around before you point your domain at it."
+msgstr ""
+
+#: admin/class-admin-page.php:1224
+msgid "Files sent"
+msgstr ""
+
+#: admin/class-admin-page.php:1228
+msgid "Transferred"
+msgstr ""
+
+#: admin/class-admin-page.php:1236
+msgid "Your copy"
+msgstr ""
+
+#: admin/class-admin-page.php:1237
+msgid "in your panel"
+msgstr ""
+
+#: admin/class-admin-page.php:1243
+msgid "<strong>This site has not been changed.</strong> It is still live and serving visitors. Nothing moves for your visitors until you point your domain at the new copy."
+msgstr ""
+
+#: admin/class-admin-page.php:1248
+msgid "Open the migrated site"
+msgstr ""
+
+#: admin/class-admin-page.php:1251
+msgid "See the move in my panel"
+msgstr ""
+
+#: admin/class-admin-page.php:1253
+msgid "Back to my panel"
+msgstr ""
+
+#: admin/class-admin-page.php:1271
+msgid "Waiting to start"
+msgstr ""
+
+#: admin/class-admin-page.php:1272
+msgid "Checking what arrived"
+msgstr ""
+
+#: admin/class-admin-page.php:1273
+msgid "Connecting"
+msgstr ""
+
+#: admin/class-admin-page.php:1275
+msgid "Building your new environment"
+msgstr ""
+
+#: admin/class-admin-page.php:1276
+msgid "Moving your files to the server"
+msgstr ""
+
+#: admin/class-admin-page.php:1277
+msgid "Unpacking your files"
+msgstr ""
+
+#: admin/class-admin-page.php:1278
+msgid "Putting the files in place"
+msgstr ""
+
+#: admin/class-admin-page.php:1279
+#: admin/class-admin-page.php:1313
+#: assets/js/migrator.js:333
+#: assets/js/migrator.js:522
+msgid "Copying files"
+msgstr ""
+
+#: admin/class-admin-page.php:1280
+msgid "Importing your database"
+msgstr ""
+
+#: admin/class-admin-page.php:1281
+msgid "Rewriting the addresses in your site"
+msgstr ""
+
+#: admin/class-admin-page.php:1282
+msgid "Checking the result serves"
+msgstr ""
+
+#: admin/class-admin-page.php:1283
+msgid "Finished"
+msgstr ""
+
+#: admin/class-admin-page.php:1311
+#: assets/js/migrator.js:520
+msgid "Checking the connection"
+msgstr ""
+
+#: admin/class-admin-page.php:1312
+#: assets/js/migrator.js:521
+msgid "Counting your files"
+msgstr ""
+
+#: admin/class-admin-page.php:1314
+#: assets/js/migrator.js:434
+#: assets/js/migrator.js:523
+msgid "Copying database"
+msgstr ""
+
+#: admin/class-admin-page.php:1315
+#: assets/js/migrator.js:524
+msgid "KapsuleHost is working on it"
+msgstr ""
+
+#: admin/class-admin-page.php:1316
+#: assets/js/migrator.js:525
+msgid "Packaging"
+msgstr ""
+
 #. translators: %s: a formatted number of gigabytes, e.g. "5.9".
-#: admin/class-admin-page.php:904
+#: admin/class-admin-page.php:1331
 #: assets/js/migrator.js:68
 #, php-format,js-format
 msgid "%s GB"
 msgstr ""
 
 #. translators: %s: a formatted number of megabytes.
-#: admin/class-admin-page.php:908
+#: admin/class-admin-page.php:1335
 #: assets/js/migrator.js:69
 #, php-format,js-format
 msgid "%s MB"
 msgstr ""
 
 #. translators: %s: a formatted number of kilobytes.
-#: admin/class-admin-page.php:912
+#: admin/class-admin-page.php:1339
 #: assets/js/migrator.js:70
 #, php-format,js-format
 msgid "%s KB"
 msgstr ""
 
 #. translators: %s: a formatted number of bytes.
-#: admin/class-admin-page.php:915
+#: admin/class-admin-page.php:1342
 #: assets/js/migrator.js:71
 #, php-format,js-format
 msgid "%s B"
@@ -561,10 +723,6 @@ msgstr ""
 msgid "We could not reach KapsuleHost after %1$s tries (%2$s). Nothing is lost. Everything already copied is still there, and this site has not been changed."
 msgstr ""
 
-#: assets/js/migrator.js:399
-msgid "Stopped at"
-msgstr ""
-
 #. translators: %s: describes which piece the transfer stopped on, e.g. "piece 57 of 119".
 #: assets/js/migrator.js:401
 #, js-format
@@ -579,19 +737,32 @@ msgstr ""
 msgid "Pick up where it stopped"
 msgstr ""
 
-#: assets/js/migrator.js:423
+#: assets/js/migrator.js:435
 msgid "Copying your database"
 msgstr ""
 
-#: assets/js/migrator.js:424
+#: assets/js/migrator.js:436
 msgid "The files are across. We are copying your database now, which is usually the quickest part."
 msgstr ""
 
-#: assets/js/migrator.js:426
-#: assets/js/migrator.js:509
+#: assets/js/migrator.js:438
+#: assets/js/migrator.js:585
 msgid "database"
 msgstr ""
 
-#: assets/js/migrator.js:434
-msgid "finishing"
+#: assets/js/migrator.js:447
+msgid "Handing over to KapsuleHost"
+msgstr ""
+
+#: assets/js/migrator.js:449
+msgid "everything sent"
+msgstr ""
+
+#: assets/js/migrator.js:478
+#: assets/js/migrator.js:500
+msgid "we cannot reach KapsuleHost just now, still trying"
+msgstr ""
+
+#: assets/js/migrator.js:507
+msgid "Checking..."
 msgstr ""
