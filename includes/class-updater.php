@@ -66,7 +66,13 @@ class Kapsule_Updater {
 
     private function fetch_version_info(): ?array {
         $transient_key = 'kapsule_updater_' . KAPSULE_MIGRATOR_VERSION;
-        $cached = get_transient( $transient_key );
+
+        // "Check again" on the Updates screen sets force-check, and it has to mean it. Somebody who
+        // has been told to update, and who clicks the one button in WordPress that says it will look
+        // again, must not be handed a six hour old answer and conclude there is nothing to install.
+        $force = ! empty( $_GET['force-check'] ) && current_user_can( 'update_plugins' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+        $cached = $force ? false : get_transient( $transient_key );
         if ( $cached !== false ) return $cached;
 
         $response = wp_remote_get( KAPSULE_MIGRATOR_VERSION_API, array(
