@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,11 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.4.1 =
+* Fixed, and it is the whole reason for this release: starting a migration could make your existing site slow to a crawl or stop loading altogether, including the Kapsule screen you started it from. The plugin kept the list of every file it was going to move in a place WordPress reads back into memory on every single visit to your site. On a site with 127,977 files that list was 34 MB, and reading it needed 150 MB of memory, more than most hosting plans allow. The list now sits in a file next to the copy being prepared, and each piece reads only its own part of it.
+* That list was also never removed once a migration finished, so a site that had already moved kept paying for it on every visit indefinitely. Updating to this version removes it.
+* If your browser tab was closed or the page stopped responding part way through, it always did pick up where it left off rather than starting again, and it still does.
 
 = 1.4.0 =
 * Fixed, and it is the whole reason for this release: the copy of your database this plugin made replaced every percent sign in your content with a 66 character internal marker, and never put it back. A percent sign is in every percent-encoded link and image name, in stylesheets, in prices, and inside stored settings, where the change also breaks the length count WordPress uses to read them back, so the setting is discarded entirely. On one real site there were 120,410 of them. Percent signs now survive the copy exactly as they are.

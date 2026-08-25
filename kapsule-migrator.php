@@ -3,7 +3,7 @@
  * Plugin Name: KapsuleHost Migrator
  * Plugin URI:  https://kapsulehost.com/migrate
  * Description: Migrate your WordPress site to KapsuleHost, or export your site for manual migration anywhere.
- * Version:     1.4.0
+ * Version:     1.4.1
  * Author:      KapsuleHost
  * Author URI:  https://kapsulehost.com
  * License:     GPL-2.0-or-later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'KAPSULE_MIGRATOR_VERSION',     '1.4.0' );
+define( 'KAPSULE_MIGRATOR_VERSION',     '1.4.1' );
 define( 'KAPSULE_MIGRATOR_PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'KAPSULE_MIGRATOR_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );
 /**
@@ -49,7 +49,47 @@ require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'includes/class-uploader.php';
 require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'includes/class-updater.php';
 require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'admin/class-admin-page.php';
 
+/**
+ * Runs once per version change, before anything else this plugin does.
+ *
+ * WHY IT EXISTS. Up to 1.4.0 the file manifest was written as one autoloaded option, and NOTHING
+ * removed it when a migration finished. Only "start over" deleted it. So a site that migrated
+ * successfully was left with a row WordPress loads into memory on every single request, for the
+ * rest of that site's life, long after the plugin had any use for it. Shipping the fixed code
+ * alone would leave every already-migrated site paying for it forever, because the row is data,
+ * not code, and an update replaces only the code.
+ *
+ * It is deliberately hooked on the version STRING rather than on activation: a plugin update does
+ * not deactivate and reactivate, so the activation hook never fires for the sites that need this.
+ */
+function kapsule_migrator_upgrade() {
+    if ( KAPSULE_MIGRATOR_VERSION === get_option( 'kapsule_migrator_version', '' ) ) {
+        return;
+    }
+
+    // 1.4.1. Not needed by any version of the plugin: the manifest now lives on disk beside the
+    // archive. Safe to remove outright, mid-migration included, because the code that used to read
+    // it no longer exists.
+    delete_option( 'kapsule_migration_chunks' );
+
+    // Same defect, but this option is still in use, so keep the value and change only how it is
+    // loaded. Re-adding is how that is done on every WordPress this plugin supports, since
+    // update_option with an unchanged value returns early and leaves autoload as it was.
+    $standalone = get_option( 'kapsule_standalone_files', null );
+    if ( null !== $standalone ) {
+        delete_option( 'kapsule_standalone_files' );
+        add_option( 'kapsule_standalone_files', $standalone, '', false );
+    }
+
+    // This one IS autoloaded, on purpose: it is a short version string, and the check above runs on
+    // every request. Making it a database query to avoid a few bytes in memory would cost more than
+    // it saves, which is the mistake this whole release is about, pointed the other way.
+    update_option( 'kapsule_migrator_version', KAPSULE_MIGRATOR_VERSION );
+}
+
 function kapsule_migrator_init() {
+    kapsule_migrator_upgrade();
+
     load_plugin_textdomain( 'kapsule-migrator', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
     $updater = new Kapsule_Updater( __FILE__ );
