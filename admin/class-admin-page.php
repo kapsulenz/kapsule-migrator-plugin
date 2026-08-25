@@ -358,8 +358,26 @@ class Kapsule_Admin_Page {
 
         update_option( 'kapsule_migration_token',       $token );
         update_option( 'kapsule_migration_tmp_dir',     $packager->get_tmp_dir() );
-        update_option( 'kapsule_migration_chunks',      $chunks );
-        update_option( 'kapsule_migration_chunk_count', count( $chunks ) );
+        /*
+         * THE FILE MANIFEST GOES TO DISK, NOT INTO AN OPTION, AND THIS IS NOT TIDINESS.
+         *
+         * It used to be `update_option( 'kapsule_migration_chunks', $chunks )` with no autoload
+         * argument, so WordPress stored it AUTOLOADED. Measured on a 127,977 file site: the manifest
+         * serialises to 34.0 MB and costs 150.8 MB of PHP memory to unserialise. Autoloaded means
+         * EVERY request on that site pays it, admin pages, AJAX and the front end alike, from the
+         * moment the migration starts. On a shared host with a 128M limit that kills the site, and
+         * what a customer sees is the migrator page loading and then dying, which is exactly the
+         * report. It would take the whole site with it, not just this page.
+         *
+         * `autoload=false` alone would not have been enough: the chunk upload reads the manifest on
+         * every piece, so that one request would still need 150 MB. Splitting it per chunk means a
+         * piece loads only its own list, about 300 KB, and the peak stops scaling with site size.
+         *
+         * It lives beside the archive in the tmp dir, which is already where the chunk files go and
+         * is already cleaned up by reset.
+         */
+        self::write_chunk_manifest( $packager->get_tmp_dir(), $chunks );
+        update_option( 'kapsule_migration_chunk_count', count( $chunks ), false );
         update_option( 'kapsule_migration_file_count',  $packager->get_file_count() );
         update_option( 'kapsule_migration_file_bytes',  $packager->get_total_bytes() );
         update_option( 'kapsule_migration_next_chunk',  0 );
@@ -395,8 +413,9 @@ class Kapsule_Admin_Page {
 
         $index  = absint( $_POST['index'] ?? 0 );
         $token  = get_option( 'kapsule_migration_token', '' );
-        $chunks = get_option( 'kapsule_migration_chunks', array() );
         $tmp    = get_option( 'kapsule_migration_tmp_dir', '' );
+        // Only this piece's file list, so memory does not scale with the size of the site.
+        $chunk  = self::read_chunk_manifest( $tmp, $index );
 
         // `retryable => false` IS THE POINT, AND ITS ABSENCE PRODUCED A FALSE SENTENCE. Measured on a
         // real drive 2026-08-24: this branch answered with a bare STRING, so the browser's
@@ -410,7 +429,7 @@ class Kapsule_Admin_Page {
         // names the wrong cause and then quotes the right one inside its own parenthesis, which is the
         // same class as the rest of this lane: a surface reporting something the system did not say.
         // A permanent refusal now reloads so the customer reads the real reason on the error card.
-        if ( empty( $token ) || ! isset( $chunks[ $index ] ) || ! $tmp ) {
+        if ( empty( $token ) || null === $chunk || ! $tmp ) {
             wp_send_json_error( array(
                 'retryable' => false,
                 'reason'    => __( 'This migration is no longer in a state we can continue from. Stop and start over to begin a clean run.', 'kapsule-migrator' ),
@@ -420,19 +439,25 @@ class Kapsule_Admin_Page {
 
         try {
             $packager   = new Kapsule_Packager( $tmp );
-            $chunk_path = $packager->package_chunk( $chunks[ $index ], $index );
+            $chunk_path = $packager->package_chunk( $chunk, $index );
 
             $uploader = new Kapsule_Uploader( $token );
             // ONE attempt. The browser owns the retry loop so the customer can watch it happen and so
             // no single request sits long enough for the customer's own nginx to 504 it.
             $uploader->upload_chunk( $chunk_path, null, 1 );
 
-            // Accumulate progress
+            /*
+             * Progress comes from a small table of per-chunk totals, not from re-reading manifests.
+             * Summing "every chunk before this one" out of the manifests would put the whole file
+             * list back into memory one piece at a time, which is the cost this change removes.
+             * 118 integers instead of 128,000 paths.
+             */
+            $chunk_bytes_table = get_option( 'kapsule_migration_chunk_bytes', array() );
             $bytes_before = 0;
             for ( $i = 0; $i < $index; $i++ ) {
-                $bytes_before += array_sum( array_column( $chunks[ $i ], 'size' ) );
+                $bytes_before += (int) ( $chunk_bytes_table[ $i ] ?? 0 );
             }
-            $chunk_bytes = array_sum( array_column( $chunks[ $index ], 'size' ) );
+            $chunk_bytes = (int) ( $chunk_bytes_table[ $index ] ?? array_sum( array_column( $chunk, 'size' ) ) );
             $bytes_done  = $bytes_before + $chunk_bytes;
             $total_bytes = (int) get_option( 'kapsule_migration_file_bytes', 0 );
 
@@ -631,7 +656,10 @@ class Kapsule_Admin_Page {
         delete_option( 'kapsule_migration_progress' );
         delete_option( 'kapsule_migration_error' );
         delete_option( 'kapsule_migration_job_id' );
+        // Still deleted by name: a site upgrading from a version that wrote the 34 MB autoloaded
+        // option must have that row removed, or it keeps paying for it on every request forever.
         delete_option( 'kapsule_migration_chunks' );
+        delete_option( 'kapsule_migration_chunk_bytes' );
         delete_option( 'kapsule_migration_chunk_count' );
         delete_option( 'kapsule_migration_file_count' );
         delete_option( 'kapsule_migration_file_bytes' );
@@ -1369,4 +1397,42 @@ class Kapsule_Admin_Page {
         /* translators: %s: a formatted number of bytes. */
         return sprintf( __( '%s B', 'kapsule-migrator' ), number_format_i18n( $bytes ) );
     }
+
+    /**
+     * Write the file manifest to disk, one JSON file per chunk, plus a small table of byte totals.
+     *
+     * Beside the archive in the tmp dir, which reset already cleans up. Per chunk rather than one
+     * file so a piece can be read without holding the whole site's file list in memory.
+     */
+    private static function write_chunk_manifest( string $tmp, array $chunks ): void {
+        $totals = array();
+        foreach ( $chunks as $i => $entries ) {
+            $totals[ $i ] = array_sum( array_column( $entries, 'size' ) );
+            $path = trailingslashit( $tmp ) . 'manifest-' . (int) $i . '.json';
+            // JSON rather than serialize(): a truncated write fails to decode loudly instead of
+            // unserialising into a half array that would silently skip files.
+            file_put_contents( $path, wp_json_encode( $entries ), LOCK_EX );
+        }
+        update_option( 'kapsule_migration_chunk_bytes', $totals, false );
+    }
+
+    /** One chunk's file list, or null when it cannot be read. Never returns a partial list. */
+    private static function read_chunk_manifest( string $tmp, int $index ) {
+        if ( ! $tmp ) {
+            return null;
+        }
+        $path = trailingslashit( $tmp ) . 'manifest-' . $index . '.json';
+        if ( ! is_readable( $path ) ) {
+            return null;
+        }
+        $raw = file_get_contents( $path );
+        if ( false === $raw || '' === $raw ) {
+            return null;
+        }
+        $entries = json_decode( $raw, true );
+        // A decode failure is a TRUNCATED manifest, and continuing would package a chunk missing
+        // files while reporting success. Refusing sends it down the retryable path instead.
+        return is_array( $entries ) ? $entries : null;
+    }
+
 }

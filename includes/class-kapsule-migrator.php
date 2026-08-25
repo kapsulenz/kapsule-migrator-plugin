@@ -193,7 +193,13 @@ class Kapsule_Migrator {
             }
 
             update_option( 'kapsule_standalone_tmp_dir', $tmp_dir );
-            update_option( 'kapsule_standalone_files', $files );
+            /*
+             * autoload=false for the same reason the chunk manifest moved to disk: this is a file
+             * list whose size scales with the customer's site, and autoloading it makes every
+             * request on that site pay for it. Measured on the migration manifest: 34 MB serialised,
+             * 150 MB to unserialise, on every request. This list is smaller but the same shape.
+             */
+            update_option( 'kapsule_standalone_files', $files, false );
             Kapsule_Admin_Page::set_status( 'standalone_ready' );
             update_option( 'kapsule_migration_progress', array() );
 
