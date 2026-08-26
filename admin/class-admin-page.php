@@ -649,6 +649,28 @@ class Kapsule_Admin_Page {
             return;
         }
 
+        /*
+         * TELL KAPSULE FIRST. Stopping used to be entirely local: this handler deleted local options
+         * and cleaned the temp directory, and made no request to KapsuleHost at all. So a customer
+         * who stopped a migration on their own site left our panel still claiming to be working on
+         * it, with no way for them to tell whether anything was still running against their server.
+         *
+         * BEFORE the token is deleted, because the token is how we authenticate the stop. Doing it
+         * after would mean announcing the stop with a credential we had just thrown away.
+         *
+         * Short timeout and the result is ignored on purpose: the customer pressed stop, and their
+         * site's cleanup must not hang or fail because our end was slow. If the call does not land,
+         * the panel still notices the silence, because it knows when the last piece arrived.
+         */
+        $stop_token = get_option( 'kapsule_migration_token', '' );
+        if ( ! empty( $stop_token ) ) {
+            wp_remote_post( KAPSULE_MIGRATOR_API_BASE . '/stop', array(
+                'timeout'  => 5,
+                'blocking' => true,
+                'headers'  => array( 'X-Migration-Token' => $stop_token ),
+            ) );
+        }
+
         wp_clear_scheduled_hook( 'kapsule_run_migration' );
         wp_clear_scheduled_hook( 'kapsule_run_standalone' );
         delete_option( 'kapsule_migration_token' );

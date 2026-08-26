@@ -308,7 +308,23 @@
   font-size: 14px; font-weight: 700; font-family: inherit;
   display: inline-flex; align-items: center; gap: 8px;
   transition: background .18s ease, border-color .18s ease, transform .12s ease, box-shadow .18s ease;
+  /*
+   * THE WHITE UNDERLINES. Eleven of this plugin's buttons are ANCHORS, four of them primary, which
+   * is white text on cyan. WordPress admin underlines every `a` inside #wpbody, so those four drew a
+   * WHITE line under their own label, which is exactly what was reported.
+   *
+   * This stylesheet had ZERO text-decoration rules before this line, so there was never a fix here
+   * to regress: whatever was fixed previously was the panel, not the plugin. Worth stating, because
+   * "reported fixed" and "fixed in the thing you are looking at" were different places.
+   *
+   * `!important` is deliberate and is not laziness: wp-admin's `a` rules are more specific than a
+   * single class, they load after this file, and the plugin cannot control either. The alternative
+   * is a specificity war with a stylesheet that changes with every WordPress release.
+   */
+  text-decoration: none !important;
 }
+/* Hover and focus re-apply it in wp-admin, so they are named rather than assumed. */
+.km-btn:hover, .km-btn:focus, .km-btn:active, .km-btn:visited { text-decoration: none !important; }
 .km-btn:active { transform: translateY(1px); }
 .km-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--km-accent-subtle); }
 
