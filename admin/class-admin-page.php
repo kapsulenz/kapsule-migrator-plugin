@@ -476,6 +476,11 @@ class Kapsule_Admin_Page {
                     'phase'            => 'files',
                     'bytesTransferred' => $bytes_done,
                     'totalBytes'       => $total_bytes,
+                    // SENT SO THE PANEL CAN SHOW WHAT THIS SCREEN SHOWS. The plugin has always known
+                    // the piece count and the file census and never told KapsuleHost, so the panel
+                    // could not render "piece 10 of 118" or a file count no matter how it was built.
+                    'totalChunks'      => (int) get_option( 'kapsule_migration_chunk_count', 0 ),
+                    'fileCount'        => (int) get_option( 'kapsule_migration_file_count', 0 ),
                 ) ),
                 'timeout'     => 10,
                 'data_format' => 'body',
