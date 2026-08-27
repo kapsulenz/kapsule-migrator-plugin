@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,9 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.5.1 =
+* Fixed, and it is the reason for this release: this plugin has never been able to update itself. WordPress asks a plugin with its own update address for a version, and requires that answer to contain a field called "version". This plugin sent the same number under a different name, so WordPress discarded the answer without an error and every site stayed on whatever version it was first installed with, no matter how many releases came out. That is why fixes reported as done kept coming back: they were correct, they were published, and they could not reach you. Update to this release once by hand and every release after it arrives on its own.
 
 = 1.5.0 =
 * Fixed: the percentage on this screen and the percentage on your KapsuleHost panel were different numbers. Both were honest and they were answering different questions: this screen showed how far through the upload you were, and the panel showed how far through the whole move, which carries on after the upload with unpacking, importing and rewriting the addresses inside your site. There is now one number and both screens show it.

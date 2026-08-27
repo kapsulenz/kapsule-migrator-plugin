@@ -71,6 +71,49 @@ if ! bash tools/verify-no-local-completion.sh >/dev/null 2>&1; then
 fi
 say "completion-truth gate" "passed"
 
+# ── CAN THIS BUILD ACTUALLY BE DELIVERED? ─────────────────────────────────────────────────────────
+#
+# Every other check in this file asks whether the version NUMBERS agree. This asks whether WordPress
+# would accept the update object at all, and it is the check whose absence meant none of the others
+# mattered.
+#
+# WordPress's own loop (wp-includes/update.php) does this immediately after calling our filter:
+#
+#     // Is it valid? We require at least a version.
+#     if ( ! isset( $update->version ) ) { continue; }
+#
+# `Kapsule_Updater::check_update()` returned `new_version` and no `version`, so core silently
+# `continue`d and the plugin was filed in NEITHER `response` NOR `no_update`. Measured on a real
+# WordPress 7.1 install: header parsed, hostname matched, callback attached, cache correct, filter
+# returning 1.5.0, and `wp plugin list` still said `update: none`.
+#
+# So a release could be perfectly consistent across all four version numbers and reach nobody, which
+# is exactly what happened. This is a SOURCE check rather than a live one on purpose: it must fail in
+# the lane, before the zip is built, not on somebody's WordPress six weeks later.
+UPDATER=includes/class-updater.php
+if [ -f "$UPDATER" ]; then
+  # SCOPE IT TO check_update()'s OWN RETURN, and this took two attempts to get right.
+  #
+  # `'version' appears in this file in prose, so grep the returned object` was the first version, and
+  # it read TWO objects: `plugin_info()` further down also does `return (object) array(...)` and DOES
+  # carry a `version` key. So the range matched both and the guard would have passed on the wrong
+  # function's object while the one core validates had no version at all. That is the same defect
+  # this check exists to catch, living inside the check.
+  #
+  # The range is now anchored to `check_update`'s signature and stops at the first `);`, so it can
+  # only ever read the object WordPress is handed.
+  RET=$(awk '/public function check_update/,/^\s*\);/' "$UPDATER" | awk '/return \(object\) array\(/,0')
+  if [ -z "$RET" ]; then
+    bad "updater update-object" "could not find the returned object in $UPDATER, so this is BLIND, not a pass"
+  elif printf '%s' "$RET" | grep -qE "^\s*'version'\s*=>"; then
+    say "updater update-object" "carries 'version', which is the field core validates on"
+  else
+    bad "updater update-object" "the object returned to WordPress has NO 'version' key. Core does \`if ( ! isset( \$update->version ) ) continue;\`, so it is dropped silently and every install stays frozen. 'new_version' alone is NOT enough: core DERIVES that from 'version'."
+  fi
+else
+  bad "updater update-object" "no $UPDATER, so this is BLIND"
+fi
+
 HEADER_V=$(grep -oP '^\s*\*\s*Version:\s*\K[0-9.]+' kapsule-migrator.php | head -1)
 CONST_V=$(grep -oP "KAPSULE_MIGRATOR_VERSION',\s*'\K[0-9.]+" kapsule-migrator.php | head -1)
 README_V=$(grep -oP '^Stable tag:\s*\K[0-9.]+' readme.txt | head -1)
