@@ -468,7 +468,28 @@ class Kapsule_Admin_Page {
                 'totalBytes'       => $total_bytes,
             ) );
 
-            wp_remote_post( KAPSULE_MIGRATOR_API_BASE, array(
+            /*
+             * THE ANSWER TO THIS CALL WAS THROWN AWAY, AND IT IS THE ANSWER TO THREE OF THE REPORTS.
+             *
+             * The return value of `wp_remote_post` was discarded. KapsuleHost now replies to every
+             * progress call with the job's real state, so capturing it costs nothing (the request
+             * was already being made after every piece) and closes all three:
+             *
+             *   THE TWO SURFACES DISAGREED ON THE PERCENTAGE. This screen computed its own from
+             *   bytes sent, and KapsuleHost computed a different one covering the whole job,
+             *   including the work that happens after the upload. Both were honest and the customer
+             *   had two numbers for one migration. There is now ONE number, theirs, rendered here.
+             *
+             *   THE PIECE COUNTS DISAGREED. This screen counted what it had SENT and the panel
+             *   counted what had LANDED, which differ by whatever is in flight. `chunksReceived` is
+             *   what they actually hold, so both screens show one count and it is the truthful one.
+             *
+             *   AND THIS PLUGIN NEVER LEARNED IT HAD BEEN STOPPED. A stop from the KapsuleHost
+             *   panel wrote the stop on the job and nothing told this screen, so it carried on
+             *   rendering a live transfer for a migration that had ended. `stopped` comes back on
+             *   this same call, so the very next piece finds out.
+             */
+            $api = wp_remote_post( KAPSULE_MIGRATOR_API_BASE, array(
                 'headers'     => array( 'Content-Type' => 'application/json' ),
                 'body'        => wp_json_encode( array(
                     'token'            => $token,
@@ -486,12 +507,57 @@ class Kapsule_Admin_Page {
                 'data_format' => 'body',
             ) );
 
+            /*
+             * EVERY FIELD DEFAULTS TO NULL, NEVER TO A NUMBER.
+             *
+             * An older server, a timeout, or a body we cannot parse must leave this screen showing
+             * what it showed before rather than dropping to 0%. Null means "we were not told" and 0
+             * is a measurement, and rendering the first as the second is how a screen claims nothing
+             * has moved when it simply did not hear back. The JS treats null as "keep what you have".
+             */
+            $srv = array( 'progress' => null, 'chunksReceived' => null, 'chunkCount' => null, 'stopped' => null, 'stoppedBy' => null );
+            if ( ! is_wp_error( $api ) ) {
+                $decoded = json_decode( (string) wp_remote_retrieve_body( $api ), true );
+                if ( is_array( $decoded ) ) {
+                    foreach ( array_keys( $srv ) as $k ) {
+                        if ( isset( $decoded[ $k ] ) ) {
+                            $srv[ $k ] = $decoded[ $k ];
+                        }
+                    }
+                }
+            }
+
+            /*
+             * A STOP HANDS THE SCREEN OVER TO THE JOB, it does not invent a local state.
+             *
+             * `awaiting_import` is the status whose render calls `render_job_outcome()` with the job
+             * state fetched from KapsuleHost, and that function's own comment is the rule being
+             * followed here: "EVERY CARD FROM HERE IS CHOSEN BY THE JOB, NOT BY ANYTHING THIS PLUGIN
+             * KNOWS." So the stop is announced by the job carrying `stopped`, and the card is chosen
+             * from that.
+             *
+             * Two things deliberately NOT done. A new status word like 'stopped' would fall through
+             * every `elseif ( $status === ... )` branch in the render and land on the idle screen,
+             * silently losing the explanation. And `kapsule_migration_job_state` holds the whole job
+             * BODY as an array, so writing a word into it would corrupt the cache that
+             * `job_state_for_render()` reads: the option name reads like a status and is not one.
+             */
+            if ( ! empty( $srv['stopped'] ) ) {
+                update_option( 'kapsule_migration_status', 'awaiting_import' );
+                $this->fetch_job_state();
+            }
+
             @unlink( $chunk_path );
 
             wp_send_json_success( array(
-                'chunkIndex' => $index,
-                'bytesDone'  => $bytes_done,
-                'totalBytes' => $total_bytes,
+                'chunkIndex'     => $index,
+                'bytesDone'      => $bytes_done,
+                'totalBytes'     => $total_bytes,
+                'progress'       => $srv['progress'],
+                'chunksReceived' => $srv['chunksReceived'],
+                'chunkCount'     => $srv['chunkCount'],
+                'stopped'        => $srv['stopped'],
+                'stoppedBy'      => $srv['stoppedBy'],
             ) );
 
         } catch ( Kapsule_Retryable_Exception $e ) {
@@ -1128,6 +1194,52 @@ class Kapsule_Admin_Page {
         $status  = is_array( $job ) ? (string) ( $job['status'] ?? '' ) : '';
         $job_id  = is_array( $job ) ? (string) ( $job['jobId'] ?? '' ) : get_option( 'kapsule_migration_job_id', '' );
         $panel   = $job_id ? KAPSULE_MIGRATOR_HOST . '/migration/' . $job_id : KAPSULE_MIGRATOR_HOST;
+
+        /*
+         * STOPPED, AND IT OUTRANKS FAILED, because a stop is not a failure and must not be dressed
+         * as one.
+         *
+         * KapsuleHost records a stop by marking the job FAILED, which is the only terminal status
+         * that schema has, plus a `stopped` timestamp saying what really happened. Read `status`
+         * alone and a customer who deliberately halted their own move is shown a red error card
+         * about something breaking. They know why it stopped: they did it, or they did it from the
+         * other screen. This branch is placed BEFORE any status test for that reason.
+         *
+         * `stoppedBy` decides the sentence, because a stop the customer did not perform HERE is the
+         * one that actually needs explaining: 'customer_plugin' means this screen, anything else
+         * means their KapsuleHost panel, and being told which is what stops it reading as the site
+         * having done something on its own.
+         */
+        $stopped_at = is_array( $job ) ? (string) ( $job['stopped'] ?? '' ) : '';
+        if ( $stopped_at !== '' ) {
+            $by_plugin = is_array( $job ) && ( $job['stoppedBy'] ?? '' ) === 'customer_plugin';
+            ?>
+            <div class="km-card">
+                <div class="km-card-body">
+                    <span class="km-chip"><?php echo esc_html__( 'Move stopped', 'kapsule-migrator' ); ?></span>
+                    <h1 class="km-title"><?php echo esc_html__( 'This move was stopped', 'kapsule-migrator' ); ?></h1>
+                    <p class="km-lede"><?php
+                        echo esc_html(
+                            $by_plugin
+                                ? __( 'You stopped this move from this screen. Nothing further is being sent and nothing on this site was changed.', 'kapsule-migrator' )
+                                : __( 'This move was stopped from your KapsuleHost panel. Nothing further is being sent and nothing on this site was changed.', 'kapsule-migrator' )
+                        );
+                    ?></p>
+
+                    <div class="km-note" data-tone="info">
+                        <?php echo $info; ?>
+                        <span><?php echo esc_html__( 'Your site here is untouched and still serving visitors exactly as it was. The pieces that had already reached KapsuleHost are discarded, so starting again starts from the beginning rather than from a half delivered copy.', 'kapsule-migrator' ); ?></span>
+                    </div>
+
+                    <div class="km-actions">
+                        <button id="kapsule-reset-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Start over', 'kapsule-migrator' ); ?></button>
+                        <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Open my panel', 'kapsule-migrator' ); ?></a>
+                    </div>
+                </div>
+            </div>
+            <?php
+            return;
+        }
 
         if ( $job === null ) {
             // UNREACHABLE IS A STATE, NOT A REASON TO GUESS. A payment path that silently falls back to

@@ -28,10 +28,33 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
-PORTAL=${KM_PORTAL:-/home/jesse/hd-mailmigrate}
+# THIS GATE COULD NOT NAME THE TREE IT WAS GRADING, AND ITS DEFAULT WAS THE WRONG ONE.
+#
+# The default was `/home/jesse/hd-mailmigrate`, a LANE WORKTREE. Not the deploy tree, not the lane
+# actually running the check, and not anything that serves a customer. It happened to sit at 1.4.0,
+# so on 2026-08-27 this file reported "portal endpoint constant announces 1.4.0" against a tree
+# holding 1.4.1 and a lane holding 1.5.0. Three versions, none of them wrong, and the output named
+# none of the trees they came from. (`hd-mailmigrate` is separately the worktree CLAUDE.md flags for
+# naming the PRODUCTION database and carrying live processes, so it is the worst available default.)
+#
+# A wrong ANSWER gets caught. A right answer about the WRONG SUBJECT does not, and this one had just
+# been wired into build-zip.sh, where it would have graded a stale worktree on every release forever.
+#
+# So: the default is the DEPLOY TREE, which is the thing that actually serves, and the resolved paths
+# are PRINTED. A gate that cannot name what it measured is not a gate.
+PORTAL=${KM_PORTAL:-/var/www/kapsulecloud-portal}
 ROUTE="$PORTAL/src/app/api/migration/plugin-version/route.ts"
 ZIP="$PORTAL/public/downloads/kapsule-migrator.zip"
 ENDPOINT=https://kpanel.kapsulehost.com/api/migration/plugin-version
+
+echo "  subject: plugin=$(pwd)"
+echo "           portal=$PORTAL$([ -n "${KM_PORTAL:-}" ] && echo '  (KM_PORTAL)' || echo '  (default: the deploy tree)')"
+if [ ! -f "$ROUTE" ]; then
+  echo "  REFUSING: no plugin-version route under $PORTAL. Point KM_PORTAL at the portal tree you mean."
+  echo "  This is BLIND, not a pass."
+  exit 2
+fi
+echo
 
 fail=0
 say() { printf '  %-34s %s\n' "$1" "$2"; }
@@ -84,6 +107,44 @@ if [ -f "$ZIP" ]; then
   # And it must carry the catalogues, or it ships English to everyone regardless of the .po files here.
   n=$(unzip -l "$ZIP" 2>/dev/null | grep -c 'languages/.*\.mo')
   [ "${n:-0}" -ge 15 ] && say "catalogues in the zip" "$n .mo files" || bad "catalogues in the zip" "only ${n:-0} .mo files, expected 15"
+
+  # ── TWO DIFFERENT BUILDS UNDER ONE VERSION ────────────────────────────────────────────────────
+  #
+  # THE DEFECT THIS EXISTS TO CATCH, and every check above is blind to it BY CONSTRUCTION.
+  #
+  # 1.4.1 was published twice, on 2026-08-25 and again on 2026-08-26, with different contents. The
+  # second carried the fix removing the white underlines from the plugin's buttons. Everything above
+  # compares version strings TO EACH OTHER, and all of them said 1.4.1 on both days, so this file
+  # would have passed both publishes while reporting "Release artefacts agree on 1.4.1". It did agree.
+  # It agreed on a version that named two different builds.
+  #
+  # WHAT IT COST A CUSTOMER, exactly. WordPress offers an update only when the ANNOUNCED version is
+  # greater than the installed one, so anyone who installed on the 25th was never offered the 26th and
+  # keeps the underlines forever. Worse for everyone else: WordPress enqueues the stylesheet as
+  # `admin.css?ver=KAPSULE_MIGRATOR_VERSION`, so a browser that cached `?ver=1.4.1` on the 25th serves
+  # that copy against the new plugin indefinitely. Jesse reported the underlines as fixed and back
+  # twice. The fix was in the source AND in the zip both times; it could not reach him.
+  #
+  # SO THE VERSION IS A CACHE KEY AND A DELIVERY KEY, NOT A LABEL. Changing what is inside it without
+  # changing it is not a small release, it is an undeliverable one.
+  #
+  # The ledger is a plain file of `version sha256` lines, committed. Comparing against the LAST
+  # PUBLISHED hash rather than against a rebuild is deliberate: rebuilding the same tree does not
+  # produce a byte-identical zip (timestamps and compression vary), so a rebuild check would fire on
+  # every honest run and be turned off within a week.
+  LEDGER="published-versions.txt"
+  ZIP_SHA=$(sha256sum "$ZIP" 2>/dev/null | cut -d' ' -f1)
+  if [ -n "$ZIP_SHA" ]; then
+    PREV_SHA=$(grep -E "^${HEADER_V//./\\.} " "$LEDGER" 2>/dev/null | tail -1 | awk '{print $2}')
+    if [ -z "$PREV_SHA" ]; then
+      say "version/content ledger" "$HEADER_V not published before, nothing to contradict"
+    elif [ "$PREV_SHA" = "$ZIP_SHA" ]; then
+      say "version/content ledger" "$HEADER_V unchanged since it was published"
+    else
+      bad "version/content ledger" \
+        "$HEADER_V was ALREADY PUBLISHED with different contents (was ${PREV_SHA:0:12}, now ${ZIP_SHA:0:12}). Every install that already has $HEADER_V will never be offered this build, and cached CSS and JS will not reload. BUMP THE VERSION."
+    fi
+  fi
 else
   say "published zip" "not yet copied into the portal (expected before release)"
 fi

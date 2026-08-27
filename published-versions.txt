@@ -1,0 +1,10 @@
+# WHAT WAS ACTUALLY PUBLISHED, one line per release: <version> <sha256 of the zip> <date>
+#
+# Read by tools/verify-release.sh, which refuses a publish whose contents differ from the line here
+# under the same version. Seeded 2026-08-27 from the zip serving at that moment, which is the
+# SECOND 1.4.1 (the one carrying the underline fix). The FIRST 1.4.1, published 2026-08-25, is not
+# recorded because its bytes are only recoverable from git history and nothing needs them: the
+# check answers "has this version already gone out with different contents", and one recorded
+# answer per version is enough to make it fire.
+1.4.1 1bc47f3597e52081e94fb25cf77130253aaf715ee1f38f0a663a1a0eee594370 2026-08-26
+1.5.0 34fa502c61364e4f6c04e19f2814349d6306531b2c4b94648f7d3a2dc0cc1044 2026-08-27

@@ -204,9 +204,22 @@
   background: var(--km-border); border: 1px solid var(--km-border);
   border-radius: var(--km-r-sm); overflow: hidden;
 }
-.km-fact { background: var(--km-surface); padding: 12px 14px; }
+/* `min-width: 0` on the CELL and `overflow-wrap: anywhere` on the VALUE, and it needs both.
+   A grid item's default `min-width: auto` refuses to shrink below its content, so a long value
+   pushes the cell wider than its track and the whole row overflows the card no matter what the
+   value's own wrapping rules say.
+
+   REPORTED: the fourth cell reads "Your copy" once the move finishes, and it carries the new
+   address, `oaohost-7pdt54.kapsulesites.com`. That is 31 characters at 16px bold in a 132px
+   column, and it ran straight out of its box. Counts fit and hostnames do not, and this grid has
+   always held both. `anywhere` rather than `break-word` because a hostname has no spaces to break
+   at, so `break-word` leaves it exactly as it was. */
+.km-fact { background: var(--km-surface); padding: 12px 14px; min-width: 0; }
 .km-fact-k { font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--km-ink-3); }
-.km-fact-v { font-size: 16px; font-weight: 700; margin-top: 3px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.km-fact-v {
+  font-size: 16px; font-weight: 700; margin-top: 3px; font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em; overflow-wrap: anywhere; line-height: 1.3;
+}
 
 /* ── Steps ────────────────────────────────────────────────────────────────── */
 

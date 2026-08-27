@@ -21,7 +21,7 @@ msgstr "https://kapsulehost.com/migrate"
 #. Description of the plugin
 #: kapsule-migrator.php
 msgid "Migrate your WordPress site to KapsuleHost, or export your site for manual migration anywhere."
-msgstr "Neke i tō pae WordPress ki KapsuleHost, kaweake rānei tō pae mō te neke ā-ringa ki hea rawa."
+msgstr "Nuku i tō pae WordPress ki KapsuleHost, kaweake rānei tō pae mō te nuku ā-ringa ki hea atu."
 
 #. Author of the plugin
 #: kapsule-migrator.php
@@ -35,12 +35,12 @@ msgstr "https://kapsulehost.com"
 
 #: admin/class-admin-page.php:66
 msgid "The migration ended in a state we do not recognise, so we stopped rather than guess. Your site here is untouched."
-msgstr "I mutu te neke i roto i tētahi āhua kāore mātou e mōhio ana, nō reira i tū mātou kia kaua e matapae. Kei konei tonu tō pae, kāore i pāhia."
+msgstr "I mutu te nuku i tētahi āhua kāore mātou e mōhio ana, nō reira i tū mātou kei matapaki noa. Kāore i pāngia tō pae i konei."
 
 #. translators: %s: an HTTP status code, e.g. "503".
 #: admin/class-admin-page.php:203
 msgid "KapsuleHost answered %s when we asked about your move."
-msgstr "I whakautu a KapsuleHost i te %s i te wā i pātai mātou mō tō neke."
+msgstr "I whakautu mai a KapsuleHost i te %s i te wā i pātai mātou mō tō nuku."
 
 #: admin/class-admin-page.php:214
 msgid "KapsuleHost sent an answer we could not read."
@@ -48,570 +48,592 @@ msgstr "I tuku mai a KapsuleHost i tētahi whakautu kāore mātou i taea te pān
 
 #: admin/class-admin-page.php:260
 #: admin/class-admin-page.php:305
-#: admin/class-admin-page.php:391
-#: admin/class-admin-page.php:492
-#: admin/class-admin-page.php:592
-#: admin/class-admin-page.php:623
+#: admin/class-admin-page.php:409
+#: admin/class-admin-page.php:588
+#: admin/class-admin-page.php:688
+#: admin/class-admin-page.php:719
 msgid "You do not have permission to do that. Ask an administrator of this site to run the migration."
-msgstr "Kāore ō mana ki te mahi i tērā. Tonoa tētahi kaiwhakahaere o tēnei pae ki te whakahaere i te neke."
+msgstr "Kāore ōu mana ki te mahi i tērā. Me tono ki tētahi kaiwhakahaere o tēnei pae kia whakahaere i te nuku."
 
 #: admin/class-admin-page.php:311
 #: assets/js/migrator.js:187
 msgid "Paste your migration token first. You will find it in your KapsuleHost panel under Sites, then Migrate."
-msgstr "Whakapirihia tō tōkena neke i te tuatahi. Ka kitea e koe i roto i tō pae KapsuleHost i raro i ngā Pae, ka Neke."
+msgstr "Whakapirihia tō tohu nuku i te tuatahi. Ka kitea e koe i tō paetukutuku KapsuleHost i raro i ngā Pae, ka mutu ko te Nuku."
 
 #: admin/class-admin-page.php:335
 #: assets/js/migrator.js:203
 msgid "We could not connect to KapsuleHost with that token. Check it and try again."
-msgstr "Kāore mātou i taea te hono ki KapsuleHost mā tērā tōkena. Tirohia ka ngana anō."
+msgstr "Kāore mātou i taea te hono ki KapsuleHost mā tērā tohu. Tirohia ka ngana anō."
 
-#: admin/class-admin-page.php:416
-#: admin/class-admin-page.php:500
+#: admin/class-admin-page.php:435
+#: admin/class-admin-page.php:596
 msgid "This migration is no longer in a state we can continue from. Stop and start over to begin a clean run."
-msgstr "Kāore anō tēnei neke i roto i tētahi āhua ka taea e mātou te haere tonu. Tū ka tīmata anō ki te tīmata i tētahi rere mā."
+msgstr "Kāhore anō tēnei nuku i tētahi āhua ka taea e mātou te haere tonu. Whakatū ka tīmata anō ki te whakatīmata i tētahi rere hōhonu."
 
-#: admin/class-admin-page.php:682
+#: admin/class-admin-page.php:803
 msgid "You do not have permission to download this file."
-msgstr "Kāore ō mana ki te tikiake i tēnei kōnae."
+msgstr "Kāore ōu mana ki te tikiake i tēnei kōnae."
 
-#: admin/class-admin-page.php:689
+#: admin/class-admin-page.php:810
 msgid "That download link has expired. Reload this page and try again."
 msgstr "Kua pau te wā o tērā hononga tikiake. Utaina anō tēnei whārangi ka ngana anō."
 
-#: admin/class-admin-page.php:694
-msgid "We could not find that file. The package may have been cleaned up, so package this site again."
-msgstr "Kāore mātou i kitea tērā kōnae. Kua horoia pea te kōpaki, nō reira kōpakihia anō tēnei pae."
-
-#: admin/class-admin-page.php:701
-msgid "That file is no longer on this server. Package this site again to rebuild it."
-msgstr "Kāore anō tērā kōnae i runga i tēnei tūmau. Kōpakihia anō tēnei pae ki te hanga anō."
-
-#: admin/class-admin-page.php:798
-msgid "Move to KapsuleHost"
-msgstr "Neke ki KapsuleHost"
-
-#: admin/class-admin-page.php:799
-msgid "Download a copy"
-msgstr "Tikiake i tētahi tārua"
-
-#: admin/class-admin-page.php:804
-msgid "Step 1 of 1"
-msgstr "Mahi 1 o 1"
-
-#: admin/class-admin-page.php:805
-msgid "Move this site to KapsuleHost"
-msgstr "Neke i tēnei pae ki KapsuleHost"
-
-#: admin/class-admin-page.php:807
-msgid "Paste the migration token from your KapsuleHost panel. We copy your files and your database across and leave this site exactly as it is, serving visitors the whole time."
-msgstr "Whakapirihia te tōkena neke mai i tō pae KapsuleHost. Ka tārua mātou i ō kōnae me tō pātengi raraunga ka waiho i tēnei pae i tōna tūnga tonu, e mahi ana ki ngā manuhiri i ngā wā katoa."
-
-#: admin/class-admin-page.php:811
-msgid "Migration token"
-msgstr "Tōkena neke"
-
-#: admin/class-admin-page.php:813
-msgid "Paste your token"
-msgstr "Whakapirihia tō tōkena"
-
 #: admin/class-admin-page.php:815
+msgid "We could not find that file. The package may have been cleaned up, so package this site again."
+msgstr "Kāore mātou i kitea tērā kōnae. Kua taea pea te horoi i te kete, nō reira me kete anō i tēnei pae."
+
+#: admin/class-admin-page.php:822
+msgid "That file is no longer on this server. Package this site again to rebuild it."
+msgstr "Kāhore anō tērā kōnae i runga i tēnei tūmau. Me kete anō i tēnei pae kia hanga anō."
+
+#: admin/class-admin-page.php:919
+msgid "Move to KapsuleHost"
+msgstr "Nuku ki KapsuleHost"
+
+#: admin/class-admin-page.php:920
+msgid "Download a copy"
+msgstr "Tikiake tētahi tārua"
+
+#: admin/class-admin-page.php:925
+msgid "Step 1 of 1"
+msgstr "Māherenga 1 o te 1"
+
+#: admin/class-admin-page.php:926
+msgid "Move this site to KapsuleHost"
+msgstr "Nuku i tēnei pae ki KapsuleHost"
+
+#: admin/class-admin-page.php:928
+msgid "Paste the migration token from your KapsuleHost panel. We copy your files and your database across and leave this site exactly as it is, serving visitors the whole time."
+msgstr "Whakapirihia te tohu nuku mai i tō paetukutuku KapsuleHost. Ka tārua mātou i ō kōnae me tō pātengi raraunga katoa, ka waiho tēnei pae i tōna tūnga tonu, e mahi tonu ana ki ngā manuhiri i te wā katoa."
+
+#: admin/class-admin-page.php:932
+msgid "Migration token"
+msgstr "Tohu nuku"
+
+#: admin/class-admin-page.php:934
+msgid "Paste your token"
+msgstr "Whakapirihia tō tohu"
+
+#: admin/class-admin-page.php:936
 msgid "Find it in your panel under Sites, then Migrate. The token works once and is deleted when the move finishes."
-msgstr "Kitea i roto i tō pae i raro i ngā Pae, ka Neke. Ka mahi te tōkena kotahi wā ka mukua ina oti te neke."
+msgstr "Ka kitea i tō paetukutuku i raro i ngā Pae, ka mutu ko te Nuku. Ka mahi te tohu kotahi wā ka mukua i te mutunga o te nuku."
 
-#: admin/class-admin-page.php:825
+#: admin/class-admin-page.php:946
 msgid "How long this takes depends on how fast this server can upload. Small sites finish in a few minutes and large ones take longer; you will see a live estimate once the transfer starts. If it is interrupted, reopen this page and it carries on from the last piece that arrived."
-msgstr "Ko te roa o tēnei wā e whakawhirinaki ana ki te tere o te tuku atu a tēnei tūmau. Ka oti ngā pae iti i roto i ētahi meneti ka roa ake ngā pae nui; ka kite koe i tētahi tatau ora ina tīmata te whakawhiti. Ki te aukati, huakina anō tēnei whārangi ka haere tonu mai i te wāhanga whakamutunga i tae mai."
+msgstr "Ko te roa o tēnei ka whakawhirinaki ki te tere o te tukuatu a tēnei tūmau. Ka oti ngā pae iti i roto i ētahi meneti ka roa ake ngā mea nui; ka kite koe i tētahi tauwhitiwhiti ora ina tīmata te whakawhiti. Mēnā ka whakapāhekeheke, huakina anō tēnei whārangi ka haere tonu mai i te wāhanga whakamutunga i tae mai."
 
-#: admin/class-admin-page.php:830
+#: admin/class-admin-page.php:951
 #: assets/js/migrator.js:204
 #: assets/js/migrator.js:208
 msgid "Start the move"
-msgstr "Tīmata te neke"
+msgstr "Tīmata te nuku"
 
-#: admin/class-admin-page.php:840
+#: admin/class-admin-page.php:961
 msgid "Encrypted end to end"
-msgstr "Kua whakamuna mai i te pito ki te pito"
+msgstr "Kua whakamunatia mai i te pito ki te pito"
 
-#: admin/class-admin-page.php:841
+#: admin/class-admin-page.php:962
 msgid "This site is only ever read, never changed"
-msgstr "E pānuitia anake tēnei pae, kāore e whakarerekeina"
+msgstr "Ka pānuitia anake tēnei pae, kāore e whakarerekētia"
 
-#: admin/class-admin-page.php:842
+#: admin/class-admin-page.php:963
 msgid "Token deleted after use"
-msgstr "Ka mukua te tōkena i muri i te whakamahinga"
+msgstr "Ka mukua te tohu i muri i te whakamahi"
 
-#: admin/class-admin-page.php:848
+#: admin/class-admin-page.php:969
 msgid "No account needed"
-msgstr "Kāore e hiahiatia he pūkete"
+msgstr "Kāore he pūkete e hiahiatia ana"
 
-#: admin/class-admin-page.php:849
+#: admin/class-admin-page.php:970
 msgid "Download a copy of this site"
-msgstr "Tikiake i tētahi tārua o tēnei pae"
+msgstr "Tikiake tētahi tārua o tēnei pae"
 
-#: admin/class-admin-page.php:851
+#: admin/class-admin-page.php:972
 msgid "Package the files and database into archives you can download and take anywhere. Useful if you are moving by hand or want a copy before you change anything."
-msgstr "Kōpaki i ngā kōnae me te pātengi raraunga ki roto i ngā pūranga ka taea e koe te tikiake me te kawe ki hea. He āwhina mēnā kei te neke koe ā-ringa, e hiahia ana rānei i tētahi tārua i mua i tō whakarerekētanga i ngā mea katoa."
+msgstr "Kete i ngā kōnae me te pātengi raraunga hei pūkete ka taea e koe te tikiake me te kawe ki hea. He āwhina mēnā e nuku ā-ringa ana koe, e hiahia ana rānei i tētahi tārua i mua i tō whakarerekētanga i ngā mea katoa."
 
-#: admin/class-admin-page.php:855
+#: admin/class-admin-page.php:976
 #: assets/js/migrator.js:227
 #: assets/js/migrator.js:231
 msgid "Package this site"
-msgstr "Kōpakihia tēnei pae"
+msgstr "Kete i tēnei pae"
 
-#: admin/class-admin-page.php:865
+#: admin/class-admin-page.php:986
 msgid "Files stay on your server until you download them"
-msgstr "Ka noho ngā kōnae i runga i tō tūmau kia tae rā anō koe ki te tikiake"
+msgstr "Ka noho ngā kōnae i runga i tō tūmau tae noa koe ka tikiake"
 
-#: admin/class-admin-page.php:866
+#: admin/class-admin-page.php:987
 msgid "wp-config.php is left out on purpose"
-msgstr "Kua waiho ki waho a wp-config.php i runga i te whakaaro"
+msgstr "Kua waiho wp-config.php i waho mā te tūmahi"
 
-#: admin/class-admin-page.php:891
+#: admin/class-admin-page.php:1012
 msgid "Packaging your site"
-msgstr "E tuku ana i tō pae"
+msgstr "E pūkete ana i tō pae tukutuku"
 
-#: admin/class-admin-page.php:892
+#: admin/class-admin-page.php:1013
 msgid "We are building downloadable archives of your files and database. Keep this tab open."
-msgstr "Kei te hanga mātou i ngā kōpaki tikiake o ō kōnae me tō pātengi raraunga. Kia tuwhera tēnei ripa."
+msgstr "E hanga ana mātou i ngā kōpaki tikiake o ō kōnae me tō pātengi raraunga. Kia tuwhera tēnei ripa."
 
-#: admin/class-admin-page.php:894
-#: admin/class-admin-page.php:1302
+#: admin/class-admin-page.php:1015
+#: admin/class-admin-page.php:1469
 msgid "Looking at your site"
-msgstr "E titiro ana ki tō pae"
+msgstr "E titiro ana ki tō pae tukutuku"
 
-#: admin/class-admin-page.php:895
+#: admin/class-admin-page.php:1016
 msgid "We are counting your files and checking the connection to KapsuleHost. Nothing has moved yet."
-msgstr "Kei te tatau mātou i ō kōnae me te whakamātau i te hononga ki KapsuleHost. Kāore anō kia nuku tētahi mea."
+msgstr "E tatau ana mātou i ō kōnae me te tirotiro i te hononga ki KapsuleHost. Kāore anō kia neke tētahi mea."
 
-#: admin/class-admin-page.php:897
-#: assets/js/migrator.js:334
+#: admin/class-admin-page.php:1018
+#: assets/js/migrator.js:377
 msgid "Moving your site"
-msgstr "E nuku ana tō pae"
+msgstr "E neke ana i tō pae tukutuku"
 
-#: admin/class-admin-page.php:898
-#: assets/js/migrator.js:335
+#: admin/class-admin-page.php:1019
+#: assets/js/migrator.js:378
 msgid "Your site is being copied across in pieces. It stays live and unchanged the whole time."
-msgstr "Kei te tāruatia tō pae ki te taha i roto i ngā wāhanga. Ka noho ora tonu, kāore e panoni i te wā katoa."
+msgstr "E tāruatia ana tō pae tukutuku poka ki poka. Ka noho ora, kāore e panoni i ngā wā katoa."
 
 #. translators: 1: current piece number, 2: total number of pieces.
-#: admin/class-admin-page.php:917
+#: admin/class-admin-page.php:1038
 #: assets/js/migrator.js:156
 msgid "piece %1$s of %2$s"
-msgstr "wāhanga %1$s o %2$s"
+msgstr "poka %1$s o %2$s"
 
-#: admin/class-admin-page.php:931
+#: admin/class-admin-page.php:1052
 msgid "Pieces sent"
-msgstr "Ngā wāhanga kua tukuna"
+msgstr "Ngā poka kua tukuna"
 
-#: admin/class-admin-page.php:935
+#: admin/class-admin-page.php:1056
 msgid "Moved"
 msgstr "Kua nekehia"
 
-#: admin/class-admin-page.php:939
+#: admin/class-admin-page.php:1060
 msgid "Total"
 msgstr "Tapeke"
 
-#: admin/class-admin-page.php:943
-#: assets/js/migrator.js:337
+#: admin/class-admin-page.php:1064
+#: assets/js/migrator.js:380
 msgid "Files"
 msgstr "Ngā kōnae"
 
-#: admin/class-admin-page.php:951
+#: admin/class-admin-page.php:1072
 msgid "Count the files and check the connection"
-msgstr "Tatau i ngā kōnae me te whakamātau i te hononga"
+msgstr "Tatau i ngā kōnae me te tirotiro i te hononga"
 
-#: admin/class-admin-page.php:955
+#: admin/class-admin-page.php:1076
 msgid "Copy the files across"
-msgstr "Tārua ngā kōnae ki te taha"
+msgstr "Tāruatia ngā kōnae"
 
-#: admin/class-admin-page.php:959
+#: admin/class-admin-page.php:1080
 msgid "Copy the database across"
-msgstr "Tārua te pātengi raraunga ki te taha"
+msgstr "Tāruatia te pātengi raraunga"
 
-#: admin/class-admin-page.php:963
+#: admin/class-admin-page.php:1084
 msgid "KapsuleHost puts it together"
 msgstr "Ka whakakotahi a KapsuleHost"
 
-#: admin/class-admin-page.php:972
+#: admin/class-admin-page.php:1093
 msgid "Keep this tab open. We will show your download links the moment packaging finishes."
-msgstr "Kia tuwhera tēnei ripa. Ka whakaatu mātou i ō hononga tikiake i te wā ka oti te tuku."
+msgstr "Kia tuwhera tēnei ripa. Ka whakaatuhia ō hononga tikiake ina mutu te pūkete."
 
-#: admin/class-admin-page.php:974
+#: admin/class-admin-page.php:1095
 msgid "<strong>Keep this tab open.</strong> The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived."
-msgstr "<strong>Kia tuwhera tēnei ripa.</strong> Kei konei te nekehanga e mahi ana, nō reira ka tatari mēnā ka katia te ripa. Kāore e ngaro tētahi mea: whakatuwheratia anō tēnei whārangi, ka haere tonu mai i te wāhanga whakamutunga i tae mai."
+msgstr "<strong>Kia tuwhera tēnei ripa.</strong> E rere ana te nekenga mai i konei, nō reira ka okioki mēnā ka katia te ripa. Kāore he mea ka ngaro mēnā pēnā koe: huakina anō tēnei whārangi ā ka haere tonu mai i te poka whakamutunga i tae mai."
 
-#: admin/class-admin-page.php:980
+#: admin/class-admin-page.php:1101
 msgid "Stop and start over"
-msgstr "Whakamutu, ka tīmata anō"
+msgstr "Whakatū me te tīmata anō"
 
-#: admin/class-admin-page.php:989
+#: admin/class-admin-page.php:1110
 msgid "Package ready"
-msgstr "Kua rite te kōpaki"
+msgstr "Kua rite te pūkete"
 
-#: admin/class-admin-page.php:990
+#: admin/class-admin-page.php:1111
 msgid "Your site is packaged"
-msgstr "Kua oti te tuku o tō pae"
+msgstr "Kua pūketengia tō pae tukutuku"
 
-#: admin/class-admin-page.php:992
+#: admin/class-admin-page.php:1113
 msgid "Download the archives below and import them on your new host. This site has not been changed."
-msgstr "Tikiake ngā kōpaki i raro nei, ka kawemai ki tō kaihautū hōu. Kāore tēnei pae kia panoni."
+msgstr "Tikiake i ngā kōpaki i raro nei, ā kawemai ki tō kaiwhakarato hōu. Kāore tēnei pae tukutuku kia panoni."
 
-#: admin/class-admin-page.php:1002
+#: admin/class-admin-page.php:1123
 msgid "Download"
 msgstr "Tikiake"
 
-#: admin/class-admin-page.php:1009
+#: admin/class-admin-page.php:1130
 msgid "Moving to KapsuleHost instead? Use the token path and we do all of this for you, with nothing to download."
-msgstr "E nuku ana ki KapsuleHost? Whakamahia te ara tohu, ka mahia e mātou ngā mea katoa mōu, kāore he mea hei tikiake."
+msgstr "E neke ana ki KapsuleHost kē? Whakamahia te ara tohu ā ka mahia e mātou ēnei mea katoa mōu, kāore he mea hei tikiake."
 
-#: admin/class-admin-page.php:1013
+#: admin/class-admin-page.php:1134
 msgid "Delete the package and start over"
-msgstr "Mukua te kōpaki, ka tīmata anō"
+msgstr "Mukua te pūkete me te tīmata anō"
 
-#: admin/class-admin-page.php:1031
-#: admin/class-admin-page.php:1115
+#: admin/class-admin-page.php:1152
+#: admin/class-admin-page.php:1219
+#: admin/class-admin-page.php:1282
 msgid "Move stopped"
-msgstr "Kua mutu te neke"
+msgstr "Kua whakatū te nekenga"
 
-#: admin/class-admin-page.php:1032
+#: admin/class-admin-page.php:1153
 msgid "We stopped before anything changed"
-msgstr "I whakamutu mātou i mua i te panoni o tētahi mea"
+msgstr "I whakatū mātou i mua i te panoni o tētahi mea"
 
-#: admin/class-admin-page.php:1034
+#: admin/class-admin-page.php:1155
 msgid "The move did not finish, so we stopped rather than leave you with half a site. Your site here is untouched and still serving visitors."
-msgstr "Kāore i oti te nekehanga, nō reira i whakamutu mātou kei waiho koe ki te hawhe pae. Kei konei tonu tō pae, kāore kia pā, ā, kei te mahi tonu ki ngā manuhiri."
+msgstr "Kāore i mutu te nekenga, nō reira i whakatū mātou kia kore ai koe e waiho ki te hawhe o te pae tukutuku. Kei konei tonu tō pae tukutuku kāore anō kia pāngia, ā e mahi tonu ana ki ngā manuhiri."
 
-#: admin/class-admin-page.php:1045
+#: admin/class-admin-page.php:1166
 msgid "Try again"
 msgstr "Whakamātau anō"
 
-#: admin/class-admin-page.php:1046
-#: admin/class-admin-page.php:1145
-#: admin/class-admin-page.php:1163
+#: admin/class-admin-page.php:1167
+#: admin/class-admin-page.php:1312
+#: admin/class-admin-page.php:1330
 msgid "Contact support"
 msgstr "Whakapā atu ki te tautoko"
 
-#: admin/class-admin-page.php:1086
-msgid "Checking"
-msgstr "E whakamātau ana"
+#: admin/class-admin-page.php:1220
+msgid "This move was stopped"
+msgstr "I whakatūngia tēnei nekenga"
 
-#: admin/class-admin-page.php:1087
+#: admin/class-admin-page.php:1224
+msgid "You stopped this move from this screen. Nothing further is being sent and nothing on this site was changed."
+msgstr "I whakatū koe i tēnei nekenga mai i tēnei mata. Kāore he mea atu e tukuna ana, ā kāore he mea o tēnei pae tukutuku i panoni."
+
+#: admin/class-admin-page.php:1225
+msgid "This move was stopped from your KapsuleHost panel. Nothing further is being sent and nothing on this site was changed."
+msgstr "I whakatūngia tēnei nekenga mai i tō papa KapsuleHost. Kāore he mea atu e tukuna ana, ā kāore he mea o tēnei pae tukutuku i panoni."
+
+#: admin/class-admin-page.php:1231
+msgid "Your site here is untouched and still serving visitors exactly as it was. The pieces that had already reached KapsuleHost are discarded, so starting again starts from the beginning rather than from a half delivered copy."
+msgstr "Kei konei tonu tō pae tukutuku kāore anō kia pāngia, ā e mahi tonu ana ki ngā manuhiri pērā i mua. Ko ngā poka kua tae atu ki KapsuleHost ka maka atu, nō reira ko te tīmata anō ka tīmata mai i te tīmatanga kaua ko te tāruatanga hawhe."
+
+#: admin/class-admin-page.php:1235
+msgid "Start over"
+msgstr "Tīmata anō"
+
+#: admin/class-admin-page.php:1236
+#: admin/class-admin-page.php:1268
+msgid "Open my panel"
+msgstr "Huaki i tōku papa"
+
+#: admin/class-admin-page.php:1253
+msgid "Checking"
+msgstr "E tirotiro ana"
+
+#: admin/class-admin-page.php:1254
 msgid "Your files are with KapsuleHost"
 msgstr "Kei a KapsuleHost ō kōnae"
 
-#: admin/class-admin-page.php:1088
+#: admin/class-admin-page.php:1255
 msgid "Everything uploaded from this site. We cannot reach KapsuleHost right now to tell you what has happened since, so we will not guess: open your panel to see where the move has got to."
-msgstr "Kua tukuna katoa mai i tēnei pae. Kāore mātou e taea te toro atu ki KapsuleHost ināianei hei kōrero i ngā mea kua puta mai, nō reira kāore mātou e matapae: whakatuwheratia tō papa hei kite i te tūnga o te nekehanga."
+msgstr "Kua tukuna katoa mai i tēnei pae. Kāore mātou e taea te toro atu ki a KapsuleHost ināianei hei kōrero i ngā mea kua puta mai, nō reira kāore mātou e matapaki noa: whakatūwhera i tō papa kia kite i te wāhi kua tae atu te nekenga."
 
-#: admin/class-admin-page.php:1097
+#: admin/class-admin-page.php:1264
 msgid "This site has not been changed and is still serving visitors, whatever the move is doing."
-msgstr "Kāore tēnei pae kia panoni, ā, kei te mahi tonu ki ngā manuhiri, ahakoa te mahi a te nekehanga."
+msgstr "Kāore anō tēnei pae kia whakarerekētia, ā, e mahi tonu ana ki ngā manuhiri, ahakoa ngā mahi neke."
 
-#: admin/class-admin-page.php:1100
+#: admin/class-admin-page.php:1267
 msgid "Check again"
-msgstr "Whakamātau anō"
+msgstr "Tirotiro anō"
 
-#: admin/class-admin-page.php:1101
-msgid "Open my panel"
-msgstr "Whakatuwheratia taku papa"
-
-#: admin/class-admin-page.php:1116
+#: admin/class-admin-page.php:1283
 msgid "The move did not finish"
-msgstr "Kāore i oti te neke"
+msgstr "Kāore te nekenga i oti"
 
-#: admin/class-admin-page.php:1117
+#: admin/class-admin-page.php:1284
 msgid "Your files reached KapsuleHost, but putting the site together did not finish. Nothing here has changed: this site is untouched and still serving visitors, and nothing has moved for anyone visiting it."
-msgstr "I tae ō kōnae ki KapsuleHost, engari kāore i oti te whakarite i te pae. Kāore he mea i panoni ki konei: kei te noho tonu tēnei pae, kei te mahi tonu ki ngā manuhiri, ā, kāore he mea i neke mā ngā tangata e toro mai ana."
+msgstr "I tae atu ō kōnae ki a KapsuleHost, engari kāore te whakarite i te pae i oti. Kāore he mea kua rerekē ki konei: kāore tēnei pae i pāngia, ā, e mahi tonu ana ki ngā manuhiri, kāore hoki he mea i neke mā ngā manuhiri e toro mai ana."
 
-#: admin/class-admin-page.php:1122
-#: assets/js/migrator.js:399
+#: admin/class-admin-page.php:1289
+#: assets/js/migrator.js:442
 msgid "Stopped at"
 msgstr "I tū ki"
 
-#: admin/class-admin-page.php:1126
+#: admin/class-admin-page.php:1293
 msgid "Files placed"
-msgstr "Kua whakatū ngā kōnae"
+msgstr "Kua whakatakotoria ngā kōnae"
 
-#: admin/class-admin-page.php:1127
+#: admin/class-admin-page.php:1294
 msgid "Yes"
 msgstr "Āe"
 
-#: admin/class-admin-page.php:1127
+#: admin/class-admin-page.php:1294
 msgid "No"
 msgstr "Kāo"
 
-#: admin/class-admin-page.php:1130
-#: admin/class-admin-page.php:1260
+#: admin/class-admin-page.php:1297
+#: admin/class-admin-page.php:1427
 msgid "Database"
 msgstr "Pātengi raraunga"
 
-#: admin/class-admin-page.php:1131
-#: admin/class-admin-page.php:1261
+#: admin/class-admin-page.php:1298
+#: admin/class-admin-page.php:1428
 msgid "Imported"
 msgstr "Kua kawemai"
 
-#: admin/class-admin-page.php:1131
-#: admin/class-admin-page.php:1261
+#: admin/class-admin-page.php:1298
+#: admin/class-admin-page.php:1428
 msgid "Not imported"
 msgstr "Kāore i kawemai"
 
-#: admin/class-admin-page.php:1144
+#: admin/class-admin-page.php:1311
 msgid "See the details in my panel"
-msgstr "Tiro i ngā taipitopito i taku papa"
+msgstr "Tirohia ngā taipitopito i tōku papa"
 
-#: admin/class-admin-page.php:1146
+#: admin/class-admin-page.php:1313
 msgid "Start over from here"
 msgstr "Tīmata anō mai i konei"
 
-#: admin/class-admin-page.php:1158
+#: admin/class-admin-page.php:1325
 msgid "Needs a look"
 msgstr "Me titiro"
 
-#: admin/class-admin-page.php:1159
+#: admin/class-admin-page.php:1326
 msgid "Part of your site moved"
 msgstr "I neke tētahi wāhanga o tō pae"
 
-#: admin/class-admin-page.php:1160
+#: admin/class-admin-page.php:1327
 msgid "Some of the move finished and some of it did not, so we are not calling it done. Your panel lists exactly what came across and what is still here. This site is untouched and still serving visitors."
-msgstr "I oti tētahi wāhanga o te neke, ā, kāore i oti tētahi atu, nō reira kāore mātou e kī ana kua oti. Ko tō papa e whakaatu ana i ngā mea katoa i whiti mai me ngā mea kei konei tonu. Kei te noho tonu tēnei pae, kei te mahi tonu ki ngā manuhiri."
+msgstr "I oti tētahi wāhanga o te nekenga, ā, kāore tētahi atu i oti, nō reira kāore mātou e kī ana kua oti. Ka whakaraupapa tō papa i ngā mea i whitiwhiti mai me ngā mea kei konei tonu. Kāore tēnei pae i pāngia, ā, e mahi tonu ana ki ngā manuhiri."
 
-#: admin/class-admin-page.php:1162
+#: admin/class-admin-page.php:1329
 msgid "See what moved"
-msgstr "Tiro i ngā mea i neke"
+msgstr "Tirohia ngā mea i neke"
 
-#: admin/class-admin-page.php:1178
 #: admin/class-admin-page.php:1345
+#: admin/class-admin-page.php:1512
 msgid "Working"
-msgstr "Kei te mahi"
+msgstr "E mahi ana"
 
-#: admin/class-admin-page.php:1179
+#: admin/class-admin-page.php:1346
 msgid "KapsuleHost is putting your site together"
-msgstr "Kei te whakarite a KapsuleHost i tō pae"
+msgstr "E whakarite ana a KapsuleHost i tō pae"
 
-#: admin/class-admin-page.php:1180
+#: admin/class-admin-page.php:1347
 msgid "Everything uploaded from this site. KapsuleHost is unpacking it, importing your database and checking the result. We will show you the outcome here, and it is safe to close this tab."
-msgstr "Kua tukuna katoa mai i tēnei pae. Kei te wewete a KapsuleHost, kei te kawemai i tō pātengi raraunga, kei te whakamātau i te hua. Ka whakaatu mātou i te hua ki konei, ā, ka pai te kati i tēnei ripa."
+msgstr "Kua tukuna katoa mai i tēnei pae. E whakatuwhera ana a KapsuleHost, e kawemai ana i tō pātengi raraunga, ā, e tirotiro ana i te otinga. Ka whakaatu mātou i te hua ki konei, ā, ka tau te kati i tēnei ripa."
 
-#: admin/class-admin-page.php:1198
+#: admin/class-admin-page.php:1365
 msgid "<strong>This site has not been changed.</strong> It is still live and serving visitors, and nothing moves for them until you point your domain at the new copy."
-msgstr "<strong>Kāore tēnei pae i panoni.</strong> Kei te ora tonu, kei te mahi tonu ki ngā manuhiri, ā, kāore he mea e neke ana mā rātou tae noa ki tō tohunga i tō rohe ki te kape hou."
+msgstr "<strong>Kāore tēnei pae kia whakarerekētia.</strong> E ora tonu ana, ā, e mahi ana ki ngā manuhiri, kāore hoki he mea e neke ana mā rātou, kia tūtohi koe i tō rohe ki te kape hou."
 
-#: admin/class-admin-page.php:1202
+#: admin/class-admin-page.php:1369
 msgid "Follow it in my panel"
-msgstr "Whai i roto i taku papa"
+msgstr "Whai i tōku papa"
 
-#: admin/class-admin-page.php:1241
+#: admin/class-admin-page.php:1408
 msgid "Move complete"
 msgstr "Kua oti te neke"
 
-#: admin/class-admin-page.php:1242
+#: admin/class-admin-page.php:1409
 msgid "Your site is on KapsuleHost"
-msgstr "Kei KapsuleHost tō pae"
+msgstr "Kei a KapsuleHost tō pae"
 
 #. translators: %s: number of files this site sent, already formatted for the locale.
-#: admin/class-admin-page.php:1245
+#: admin/class-admin-page.php:1412
 msgid "KapsuleHost has finished putting your site together from the %s files this site sent. Open the copy and look around before you point your domain at it."
-msgstr "Kua oti i a KapsuleHost te whakarite i tō pae mai i ngā kōnae %s i tukuna mai e tēnei pae. Huakina te kape ka titiro haere i mua i tō tohunga i tō rohe ki reira."
+msgstr "Kua oti te whakarite a KapsuleHost i tō pae mai i ngā kōnae %s i tukuna e tēnei pae. Whakatūwhera i te kape, ā, titiro ki ngā taha katoa i mua i tō tūtohi i tō rohe ki reira."
 
-#: admin/class-admin-page.php:1252
+#: admin/class-admin-page.php:1419
 msgid "Files sent"
 msgstr "Ngā kōnae i tukuna"
 
-#: admin/class-admin-page.php:1256
+#: admin/class-admin-page.php:1423
 msgid "Transferred"
-msgstr "Kua whakahaerehia"
+msgstr "Kua whakawhitiwhiti"
 
-#: admin/class-admin-page.php:1264
+#: admin/class-admin-page.php:1431
 msgid "Your copy"
 msgstr "Tō kape"
 
-#: admin/class-admin-page.php:1265
+#: admin/class-admin-page.php:1432
 msgid "in your panel"
 msgstr "i tō papa"
 
-#: admin/class-admin-page.php:1271
+#: admin/class-admin-page.php:1438
 msgid "<strong>This site has not been changed.</strong> It is still live and serving visitors. Nothing moves for your visitors until you point your domain at the new copy."
-msgstr "<strong>Kāore tēnei pae i panoni.</strong> Kei te ora tonu, kei te mahi tonu ki ngā manuhiri. Kāore he mea e neke ana mō ō manuhiri tae noa ki tō tohunga i tō rohe ki te kape hou."
+msgstr "<strong>Kāore tēnei pae kia whakarerekētia.</strong> E ora tonu ana, ā, e mahi ana ki ngā manuhiri. Kāore he mea e neke ana mō ō manuhiri, kia tūtohi koe i tō rohe ki te kape hou."
 
-#: admin/class-admin-page.php:1276
+#: admin/class-admin-page.php:1443
 msgid "Open the migrated site"
-msgstr "Huaki i te pae kua nekehia"
+msgstr "Whakatūwhera i te pae kua nekehia"
 
-#: admin/class-admin-page.php:1279
+#: admin/class-admin-page.php:1446
 msgid "See the move in my panel"
-msgstr "Tiro i te neke i taku papa"
+msgstr "Tirohia te nekenga i tōku papa"
 
-#: admin/class-admin-page.php:1281
+#: admin/class-admin-page.php:1448
 msgid "Back to my panel"
-msgstr "Hoki ki taku papa"
+msgstr "Hoki ki tōku paetukutuku"
 
-#: admin/class-admin-page.php:1299
+#: admin/class-admin-page.php:1466
 msgid "Waiting to start"
-msgstr "Kei te tatari ki te tīmata"
+msgstr "E tatari ana kia tīmata"
 
-#: admin/class-admin-page.php:1300
+#: admin/class-admin-page.php:1467
 msgid "Checking what arrived"
-msgstr "Kei te titiro i ngā mea i tae mai"
+msgstr "E tirotiro ana i ngā mea i tae mai"
 
-#: admin/class-admin-page.php:1301
+#: admin/class-admin-page.php:1468
 msgid "Connecting"
-msgstr "Kei te hono"
+msgstr "E hono ana"
 
-#: admin/class-admin-page.php:1303
+#: admin/class-admin-page.php:1470
 msgid "Building your new environment"
-msgstr "Kei te hanga i tō taiao hou"
+msgstr "E hanga ana i tō taiao hōu"
 
-#: admin/class-admin-page.php:1304
+#: admin/class-admin-page.php:1471
 msgid "Moving your files to the server"
-msgstr "E neke ana ō kōnae ki te tūmau"
+msgstr "E neke ana i ō kōnae ki te tūmau"
 
-#: admin/class-admin-page.php:1305
+#: admin/class-admin-page.php:1472
 msgid "Unpacking your files"
-msgstr "E whakatuwhera ana i ō kōnae"
+msgstr "E wewete ana i ō kōnae"
 
-#: admin/class-admin-page.php:1306
+#: admin/class-admin-page.php:1473
 msgid "Putting the files in place"
 msgstr "E whakarite ana i ngā kōnae ki tō rātou wāhi"
 
-#: admin/class-admin-page.php:1307
-#: admin/class-admin-page.php:1341
-#: assets/js/migrator.js:333
-#: assets/js/migrator.js:522
+#: admin/class-admin-page.php:1474
+#: admin/class-admin-page.php:1508
+#: assets/js/migrator.js:376
+#: assets/js/migrator.js:565
 msgid "Copying files"
 msgstr "E tārua ana i ngā kōnae"
 
-#: admin/class-admin-page.php:1308
+#: admin/class-admin-page.php:1475
 msgid "Importing your database"
-msgstr "E kawemai ana i tō pātengi raraunga"
+msgstr "E kawe ana i tō pātengi raraunga"
 
-#: admin/class-admin-page.php:1309
+#: admin/class-admin-page.php:1476
 msgid "Rewriting the addresses in your site"
-msgstr "E tuhi anō ana i ngā wāhitau o tō pae"
+msgstr "E tuhituhi anō ana i ngā wāhitau i roto i tō pae"
 
-#: admin/class-admin-page.php:1310
+#: admin/class-admin-page.php:1477
 msgid "Checking the result serves"
-msgstr "E tirotiro ana mēnā ka tika te whakarato"
+msgstr "E tirotiro ana mēnā ka mahia te whakaoti"
 
-#: admin/class-admin-page.php:1311
+#: admin/class-admin-page.php:1478
 msgid "Finished"
 msgstr "Kua oti"
 
-#: admin/class-admin-page.php:1339
-#: assets/js/migrator.js:520
+#: admin/class-admin-page.php:1506
+#: assets/js/migrator.js:563
 msgid "Checking the connection"
 msgstr "E tirotiro ana i te hononga"
 
-#: admin/class-admin-page.php:1340
-#: assets/js/migrator.js:521
+#: admin/class-admin-page.php:1507
+#: assets/js/migrator.js:564
 msgid "Counting your files"
 msgstr "E tatau ana i ō kōnae"
 
-#: admin/class-admin-page.php:1342
-#: assets/js/migrator.js:434
-#: assets/js/migrator.js:523
+#: admin/class-admin-page.php:1509
+#: assets/js/migrator.js:477
+#: assets/js/migrator.js:566
 msgid "Copying database"
 msgstr "E tārua ana i te pātengi raraunga"
 
-#: admin/class-admin-page.php:1343
-#: assets/js/migrator.js:524
+#: admin/class-admin-page.php:1510
+#: assets/js/migrator.js:567
 msgid "KapsuleHost is working on it"
-msgstr "Kei te mahi a KapsuleHost i tēnei wā"
+msgstr "Kei te mahi tonu a KapsuleHost"
 
-#: admin/class-admin-page.php:1344
-#: assets/js/migrator.js:525
+#: admin/class-admin-page.php:1511
+#: assets/js/migrator.js:568
 msgid "Packaging"
-msgstr "E tākai ana"
+msgstr "E whakapūkete ana"
 
 #. translators: %s: a formatted number of gigabytes, e.g. "5.9".
-#: admin/class-admin-page.php:1359
+#: admin/class-admin-page.php:1526
 #: assets/js/migrator.js:68
 msgid "%s GB"
 msgstr "%s GB"
 
 #. translators: %s: a formatted number of megabytes.
-#: admin/class-admin-page.php:1363
+#: admin/class-admin-page.php:1530
 #: assets/js/migrator.js:69
 msgid "%s MB"
 msgstr "%s MB"
 
 #. translators: %s: a formatted number of kilobytes.
-#: admin/class-admin-page.php:1367
+#: admin/class-admin-page.php:1534
 #: assets/js/migrator.js:70
 msgid "%s KB"
 msgstr "%s KB"
 
 #. translators: %s: a formatted number of bytes.
-#: admin/class-admin-page.php:1370
+#: admin/class-admin-page.php:1537
 #: assets/js/migrator.js:71
 msgid "%s B"
 msgstr "%s B"
 
 #: includes/class-packager.php:26
 msgid "This server cannot create archives, so we cannot package your site. Ask your host to enable the PHP zip extension, then contact KapsuleHost support if it still fails."
-msgstr "Kāore tēnei tūmau e taea te hanga kōpaki, nō reira kāore e taea te tākai i tō pae. Tono ki tō kaiwhakarato kia whakahohe i te toronga zip PHP, katahi ka whakapā ki te tautoko KapsuleHost mēnā ka rahua tonu."
+msgstr "Kāore tēnei tūmau e taea te hanga kete tāruatanga, nō reira kāore e taea te whakapūkete i tō pae. Tonoa tō kaihautū kia whakahohehia te taupē PHP zip, ka whakapā atu ki te tautoko o KapsuleHost mēnā ka rahua tonu."
 
 #. translators: %s: the placeholder token found in the export.
 #: includes/class-packager.php:467
 msgid "We built a copy of your database and then found it was not safe to send: it still contains an internal placeholder (%s) where your content has a percent sign. Sending it would have changed your links, styling and settings. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message."
-msgstr "I hangaia e mātou tētahi tārua o tō pātengi raraunga, engari i kitea kāore i te haumaru ki te tuku: kei roto tonu tētahi tohu tautuhi ā-roto (%s) i te wāhi kei reira tētahi tohu pāhekeheke i roto i ō ihirangi. Mēnā ka tukuna, ka panonitia ō hononga, ō momo āhua me ō tautuhinga. Kāore i tukuna atu tētahi mea, kāore hoki i pāngia tō pae. Tēnā, whakapā atu ki te tautoko a KapsuleHost, ā, kōrerotia atu tēnei karere."
+msgstr "I hanga mātou i tētahi tārua o tō pātengi raraunga, ā, ka kitea kāore i haumaru ki te tuku: kei roto tonu tētahi tohu ā-roto (%s) i te wāhi kei tō ihirangi tētahi tohu ōrau. Ki te tukuna, ka hurihia ō hononga, ō hoahoa me ō tautuhinga. Kāore he mea i tukuna ake, kāore hoki tō pae i pāngia. Whakapā atu ki te tautoko o KapsuleHost, kōrero hoki i tēnei karere."
 
 #: includes/class-uploader.php:112
 msgid "We could not read a prepared piece of your site from disk. Free up space on the server and start the migration again."
-msgstr "Kāore i taea e mātou te pānui i tētahi wāhanga kua whakaritea o tō pae mai i te kōpae. Whakakorengahia he wāhi ki te tūmau ka tīmata anō i te hekenga."
+msgstr "Kāore i taea e mātou te pānui i tētahi wāhanga kua rite o tō pae mai i te kōpae. Whakakorehia he wāhi i runga i te tūmau, ka tīmata anō i te nekehanga."
 
 #. translators: %s: an HTTP status code.
 #: includes/class-uploader.php:135
 msgid "the server replied %s"
-msgstr "i whakahoki mai te tūmau %s"
+msgstr "i whakahoki te tūmau i te %s"
 
 #: includes/class-uploader.php:162
 msgid "we could not open the prepared file"
-msgstr "kāore i taea e mātou te huaki i te kōnae kua whakaritea"
+msgstr "kāore i taea e mātou te tuwhera i te kōnae kua rite"
 
 #. translators: %s: the size of the piece that was rejected, e.g. "50".
 #: includes/class-uploader.php:218
 msgid "One piece of your site (%s MB) was larger than the server would accept. This is a limit on our side, not a problem with your site. Contact support and we will raise it."
-msgstr "Kotahi wāhanga o tō pae (%s MB) he nui rawa i tērā ka whakaae mai te tūmau. He here tēnei i tō mātou taha, ehara i te raru o tō pae. Whakapā mai ki te tautoko, ā, ka whakaneke ake mātou i tēnā."
+msgstr "Kotahi wāhanga o tō pae (%s MB) he nui rawa atu i tērā ka whakaae te tūmau. He tepe tēnei i tō mātou taha, ehara i te raruraru o tō pae. Whakapā atu ki te tautoko, ā, ka whakanuia e mātou."
 
 #: includes/class-uploader.php:223
 msgid "Your migration token is no longer valid. Generate a new one in your KapsuleHost panel and paste it in again."
-msgstr "Kua kore te kiko o tō tohu heke. Waihangahia tētahi mea hou i tō papatohu KapsuleHost, ka whakauru anō."
+msgstr "Kua kore te mana o tō tohu nekehanga. Hangaia tētahi mea hōu i roto i tō paetukutuku KapsuleHost, ka whakapiri anō."
 
 #: includes/class-uploader.php:225
 msgid "The migration this token belongs to no longer exists. Start a new migration from your KapsuleHost panel."
-msgstr "Kua kore e tīari ana te heke e pā ana ki tēnei tohu. Tīmatahia tētahi heke hou mai i tō papatohu KapsuleHost."
+msgstr "Kua kore te nekehanga e pā ana ki tēnei tohu. Tīmata tētahi nekehanga hōu mai i tō paetukutuku KapsuleHost."
 
 #: includes/class-uploader.php:227
 msgid "The server could not read one of the prepared pieces of your site. Start the migration again to rebuild it."
-msgstr "Kāore te tūmau i taea te pānui i tētahi o ngā wāhanga kua whakaritea o tō pae. Tīmatahia anō te heke kia hangaia anō."
+msgstr "Kāore te tūmau i taea te pānui i tētahi o ngā wāhanga kua rite o tō pae. Tīmata anō i te nekehanga kia hanga anō."
 
 #. translators: %s: the HTTP status code the server returned.
 #: includes/class-uploader.php:231
 msgid "The server refused a piece of your site (code %s). Your site has not been changed. Contact support and we will look at it."
-msgstr "I whakakāhore te tūmau i tētahi wāhanga o tō pae (waehere %s). Kāore tō pae kia whakarerekētia. Whakapā mai ki te tautoko, ā, ka titiro mātou."
+msgstr "I whakakāhore te tūmau i tētahi wāhanga o tō pae (waehere %s). Kāore tō pae kia whakarerekētia. Whakapā atu ki te tautoko, ā, ka titiro mātou."
 
 #: assets/js/migrator.js:77
 msgid "less than a minute left"
-msgstr "he iti iho i te meneti kei te toe"
+msgstr "iti ake i te meneti e toe ana"
 
 #. translators: %s: whole number of minutes remaining.
 #: assets/js/migrator.js:82
 msgid "about %s minute left"
 msgid_plural "about %s minutes left"
-msgstr[0] "tata ki te %s meneti kei te toe"
-msgstr[1] "tata ki te %s meneti kei te toe"
+msgstr[0] "tata ki te %s meneti e toe ana"
+msgstr[1] "tata ki te %s meneti e toe ana"
 
 #. translators: %s: whole number of hours remaining.
 #: assets/js/migrator.js:87
 msgid "about %s hour left"
 msgid_plural "about %s hours left"
-msgstr[0] "tata ki te %s hāora kei te toe"
-msgstr[1] "tata ki te %s hāora kei te toe"
+msgstr[0] "tata ki te %s hāora e toe ana"
+msgstr[1] "tata ki te %s hāora e toe ana"
 
 #. translators: 1: whole hours remaining, 2: additional minutes remaining.
 #: assets/js/migrator.js:90
 msgid "about %1$s h %2$s min left"
-msgstr "tata ki te %1$s h %2$s men kei te toe"
+msgstr "tata tonu %1$s h %2$s min"
 
 #: assets/js/migrator.js:192
 msgid "Checking your site..."
@@ -619,129 +641,129 @@ msgstr "E tirotiro ana i tō pae..."
 
 #: assets/js/migrator.js:207
 msgid "We could not reach KapsuleHost just now. Check this server can get online, then try again."
-msgstr "Kāore i taea e mātou te toro atu ki a KapsuleHost ināianei. Tirohia mēnā ka taea e tēnei tūmau te uru atu ki te ipurangi, ka ngana anō."
+msgstr "Kāore i taea e mātou te tūhono ki KapsuleHost i tēnei wā. Tirohia ka taea e tēnei tūmau te toro atu ki te ipurangi, katahi ka ngana anō."
 
 #: assets/js/migrator.js:216
 msgid "Packaging..."
-msgstr "E tākai ana..."
+msgstr "E whakapūtē ana..."
 
 #: assets/js/migrator.js:226
 #: assets/js/migrator.js:230
 msgid "We could not start packaging. Please try again."
-msgstr "Kāore i taea e mātou te tīmata i te tākai. Tēnā ngana anō."
+msgstr "Kāore i taea e mātou te tīmata i te whakapūtē. Tēnā ngana anō."
 
 #: assets/js/migrator.js:237
 msgid "Cleaning up..."
-msgstr "E horoi ana..."
+msgstr "E tīkaro ana..."
 
 #. translators: 1: which piece is moving, 2: estimated time remaining. Joined into one line.
-#: assets/js/migrator.js:264
+#: assets/js/migrator.js:294
 msgid "%1$s, %2$s"
 msgstr "%1$s, %2$s"
 
 #. translators: %s: the HTTP status code the server returned, e.g. "502".
-#: assets/js/migrator.js:318
+#: assets/js/migrator.js:361
 msgid "the connection returned %s"
 msgstr "i whakahoki mai te hononga i te %s"
 
-#: assets/js/migrator.js:320
-#: assets/js/migrator.js:397
+#: assets/js/migrator.js:363
+#: assets/js/migrator.js:440
 msgid "the connection dropped"
 msgstr "i taka te hononga"
 
-#: assets/js/migrator.js:328
+#: assets/js/migrator.js:371
 msgid "Keep this tab open."
-msgstr "Waiho tēnei ripa kia tuwhera."
+msgstr "Waiho kia tuwhera tēnei ripa."
 
-#: assets/js/migrator.js:329
+#: assets/js/migrator.js:372
 msgid "The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived."
-msgstr "E oma ana te nekenga mai i konei, nō reira mā te kati i te ripa ka okioki. Kāore he mea ka ngaro mēnā ka kati koe: huakina anō tēnei whārangi, ā, ka haere tonu mai i te wāhanga whakamutunga i tae mai."
+msgstr "Ka rere te nuku mai i konei, nō reira mā te kati i te ripa ka tatari. Karekau he mea ka ngaro mēnā ka pēnā koe: huakina anō tēnei whārangi, ā, ka haere tonu mai i te wāhanga whakamutunga i tae mai."
 
-#: assets/js/migrator.js:350
+#: assets/js/migrator.js:393
 msgid "Retrying"
 msgstr "E ngana anō ana"
 
-#: assets/js/migrator.js:351
+#: assets/js/migrator.js:394
 msgid "The connection dropped"
 msgstr "I taka te hononga"
 
 #. translators: %s: the number of the piece being retried.
-#: assets/js/migrator.js:353
+#: assets/js/migrator.js:396
 msgid "We are retrying piece %s. Everything already sent is kept, so this carries on from where it stopped rather than starting again."
-msgstr "E ngana anō ana mātou ki te wāhanga %s. Kei reira tonu ngā mea katoa kua tukuna kētia, nō reira ka haere tonu mai i te wāhi i mutu ai, kāore e tīmata anō."
+msgstr "E ngana anō ana mātou i te wāhanga %s. Kei te tiakina ngā mea katoa kua tukuna, nō reira ka haere tonu mai i te wāhi i mutu ai, kaua i te tīmata anō."
 
-#: assets/js/migrator.js:356
+#: assets/js/migrator.js:399
 msgid "Attempt"
 msgstr "Ngana"
 
-#: assets/js/migrator.js:357
+#: assets/js/migrator.js:400
 msgid "Nothing has been lost. Your site is untouched and still serving visitors. If this keeps failing we will tell you exactly what to do next."
-msgstr "Kāore he mea kua ngaro. Kei te pai tonu tō pae, ā, e mahi tonu ana ki ngā manuhiri. Mēnā ka rahua tonu tēnei, ka kōrero tika atu mātou ki a koe me pēhea koe ā muri ake nei."
+msgstr "Karekau he mea kua ngaro. Kei te noho tonu tō pae, ā, e mahi tonu ana ki ngā manuhiri. Mēnā ka rahua tonu tēnei ka kī atu mātou ki a koe he aha tonu te mahi hei whai."
 
 #. translators: 1: seconds until the next attempt, 2: the attempt number, 3: total attempts.
-#: assets/js/migrator.js:365
+#: assets/js/migrator.js:408
 msgid "retrying in %1$s second, attempt %2$s of %3$s"
 msgid_plural "retrying in %1$s seconds, attempt %2$s of %3$s"
-msgstr[0] "e ngana anō ana i roto i te %1$s hēkona, te ngana %2$s o te %3$s"
-msgstr[1] "e ngana anō ana i roto i te %1$s hēkona, te ngana %2$s o te %3$s"
+msgstr[0] "ka ngana anō i roto i te %1$s hēkona, ngana %2$s o te %3$s"
+msgstr[1] "ka ngana anō i roto i te %1$s hēkona, ngana %2$s o te %3$s"
 
 #. translators: 1: the attempt number, 2: total attempts.
-#: assets/js/migrator.js:370
+#: assets/js/migrator.js:413
 msgid "retrying now, attempt %1$s of %2$s"
-msgstr "e ngana anō ana ināianei, te ngana %1$s o te %2$s"
+msgstr "e ngana anō ana ināianei, ngana %1$s o te %2$s"
 
-#: assets/js/migrator.js:393
+#: assets/js/migrator.js:436
 msgid "Paused"
-msgstr "Kua okioki"
+msgstr "Kua tatari"
 
-#: assets/js/migrator.js:394
+#: assets/js/migrator.js:437
 msgid "We have paused the move"
-msgstr "Kua okioki mātou i te nekenga"
+msgstr "Kua whakatū mātou i te nuku"
 
 #. translators: 1: how many attempts were made, 2: why the connection failed.
-#: assets/js/migrator.js:396
+#: assets/js/migrator.js:439
 msgid "We could not reach KapsuleHost after %1$s tries (%2$s). Nothing is lost. Everything already copied is still there, and this site has not been changed."
-msgstr "Kāore mātou i taea te toro atu ki a KapsuleHost i muri i te %1$s ngana (%2$s). Kāore he mea kua ngaro. Kei reira tonu ngā mea katoa kua tārua kētia, ā, kāore anō tēnei pae kia whakarereke."
+msgstr "Kāore i taea e mātou te tūhono ki KapsuleHost i muri i ngā ngana %1$s (%2$s). Karekau he mea kua ngaro. Kei reira tonu ngā mea katoa kua tāruatia, ā, kāore anō tēnei pae kia whakarerekeina."
 
 #. translators: %s: describes which piece the transfer stopped on, e.g. "piece 57 of 119".
-#: assets/js/migrator.js:401
+#: assets/js/migrator.js:444
 msgid "paused at %s"
-msgstr "kua okioki ki te %s"
+msgstr "i tatari ki te %s"
 
-#: assets/js/migrator.js:402
+#: assets/js/migrator.js:445
 msgid "Check this server can reach the internet, then pick up where you left off. Nothing needs to be re-sent."
-msgstr "Tirohia mēnā ka taea e tēnei tūmau te toro atu ki te ipurangi, katahi ka haere tonu mai i tō wāhi i mutu ai. Kāore he mea me tuku anō."
+msgstr "Tirohia ka taea e tēnei tūmau te toro atu ki te ipurangi, katahi ka hoki ki te wāhi i waiho ai. Karekau he mea me tuku anō."
 
-#: assets/js/migrator.js:406
+#: assets/js/migrator.js:449
 msgid "Pick up where it stopped"
-msgstr "Haere tonu mai i te wāhi i mutu ai"
+msgstr "Hoki ki te wāhi i mutu ai"
 
-#: assets/js/migrator.js:435
+#: assets/js/migrator.js:478
 msgid "Copying your database"
 msgstr "E tārua ana tō pātengi raraunga"
 
-#: assets/js/migrator.js:436
+#: assets/js/migrator.js:479
 msgid "The files are across. We are copying your database now, which is usually the quickest part."
-msgstr "Kua whiti ngā kōnae. E tārua ana e mātou tō pātengi raraunga ināianei, ko tēnei te wāhanga tere rawa atu i te nuinga o te wā."
+msgstr "Kua whiti ngā kōnae. E tārua ana mātou i tō pātengi raraunga ināianei, ko te wāhanga tere rawa ēnei te nuinga o te wā."
 
-#: assets/js/migrator.js:438
-#: assets/js/migrator.js:585
+#: assets/js/migrator.js:481
+#: assets/js/migrator.js:628
 msgid "database"
 msgstr "pātengi raraunga"
 
-#: assets/js/migrator.js:447
+#: assets/js/migrator.js:490
 msgid "Handing over to KapsuleHost"
-msgstr "E tuku atu ana ki a KapsuleHost"
+msgstr "E tuku ana ki KapsuleHost"
 
-#: assets/js/migrator.js:449
+#: assets/js/migrator.js:492
 msgid "everything sent"
 msgstr "kua tukuna ngā mea katoa"
 
-#: assets/js/migrator.js:478
-#: assets/js/migrator.js:500
+#: assets/js/migrator.js:521
+#: assets/js/migrator.js:543
 msgid "we cannot reach KapsuleHost just now, still trying"
-msgstr "kāore mātou e taea te toro atu ki a KapsuleHost ināianei, e ngana tonu ana"
+msgstr "kāore i taea e mātou te tūhono ki KapsuleHost i tēnei wā, e ngana tonu ana"
 
-#: assets/js/migrator.js:507
+#: assets/js/migrator.js:550
 msgid "Checking..."
 msgstr "E tirotiro ana..."

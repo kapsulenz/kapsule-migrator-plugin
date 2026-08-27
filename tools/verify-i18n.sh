@@ -59,12 +59,73 @@ for loc in "${EXPECTED_LOCALES[@]}"; do
   # locale reported "ok" here, the release check reported "15 .mo files", the zip was built, and the
   # only thing that would have told anyone was a customer reading an English sentence in Japanese.
   #
-  # So the check is now the ORDER of the two files, which is the cheap fact that distinguishes
-  # "compiled" from "present": a .mo older than its .po is stale by definition. This is the existence
-  # versus fidelity distinction, and the fidelity half is the one that reaches a customer.
+  # THE FIRST FIX FOR THAT COMPARED MTIMES, AND MTIME IS NOT THE FACT WE CARE ABOUT.
+  #
+  # `[ "$po" -nt "$mo" ]` compares modification times at NANOSECOND resolution, so it does not
+  # measure staleness, it measures the order two files happened to be written in. Measured on this
+  # repo 2026-08-27: five locales reported STALE-MO with their .po exactly ONE MILLISECOND newer
+  # than their .mo (ja 1787682992.882203429 against .881203426), which is a checkout writing files
+  # in sequence and nothing else. Five false alarms out of fifteen, on a pristine tree, permanently.
+  #
+  # It fails in the alarming direction, which is the cheap one, and that is exactly what makes it
+  # dangerous over time: a gate that cries wolf on a clean checkout is a gate people learn to skip,
+  # and then the real staleness it was written for goes through with it.
+  #
+  # SO IT COUNTS STRINGS INSTEAD, which is the fact the original defect was actually about. A .mo is
+  # a binary catalogue whose header records how many strings it holds, at a fixed offset, and that
+  # number IS what `msgfmt` emitted. Compare it against the number of TRANSLATED entries in the .po
+  # (a msgid with a non-empty msgstr; msgfmt omits untranslated ones, so counting every msgid would
+  # produce a permanent off-by-N in the other direction). A .po that gained a translated string and
+  # was never recompiled comes out short here, which is the 2026-08-24 defect exactly, and it is
+  # immune to file order, to a checkout, to a copy and to a touch.
+  #
+  # `msgfmt` is deliberately not used even where it exists: recompiling to compare would make this
+  # gate depend on a tool that is absent on this box, and BLIND is the answer it would then have to
+  # give on the one question it exists to answer.
   po="$LANG_DIR/$DOMAIN-$loc.po"
-  if [ -f "$mo" ] && [ -f "$po" ] && [ "$po" -nt "$mo" ]; then
-    problems="$problems STALE-MO(po is newer, run: wp i18n make-mo languages/ languages/)"
+  if [ -f "$mo" ] && [ -f "$po" ]; then
+    counts=$(python3 - "$po" "$mo" <<'PYEOF' 2>/dev/null
+import re, struct, sys
+
+po_path, mo_path = sys.argv[1], sys.argv[2]
+
+# Count msgid/msgstr pairs whose msgstr is non-empty. The catalogue header is the entry whose
+# msgid is the empty string, and msgfmt DOES emit it, so it is counted here too.
+text = open(po_path, encoding='utf-8', errors='replace').read()
+entries, cur, key = 0, {}, None
+for line in text.splitlines():
+    line = line.strip()
+    if line.startswith('msgid '):
+        if key and cur.get('msgstr'):
+            entries += 1
+        cur, key = {}, 'msgid'
+        cur[key] = line[6:].strip()
+    elif line.startswith('msgid_plural '):
+        key = 'msgid'
+    elif line.startswith('msgstr'):
+        key = 'msgstr'
+        cur[key] = cur.get('msgstr', '') + line.split(' ', 1)[-1].strip().strip('"')
+    elif line.startswith('"') and key:
+        cur[key] = cur.get(key, '') + line.strip('"')
+if key and cur.get('msgstr'):
+    entries += 1
+
+# .mo header: magic, revision, then the string count at byte offset 8.
+raw = open(mo_path, 'rb').read()
+magic = raw[:4]
+endian = '<' if magic == b'\xde\x12\x04\x95' else '>' if magic == b'\x95\x04\x12\xde' else None
+if endian is None:
+    print('BADMAGIC'); sys.exit(0)
+print('%d %d' % (struct.unpack(endian + 'I', raw[8:12])[0], entries))
+PYEOF
+    )
+    mo_n=${counts%% *}
+    po_n=${counts##* }
+    if [ "$counts" = "BADMAGIC" ]; then
+      problems="$problems MO-NOT-A-CATALOGUE"
+    elif [ -n "$mo_n" ] && [ -n "$po_n" ] && [ "$mo_n" -lt "$po_n" ] 2>/dev/null; then
+      problems="$problems STALE-MO(mo holds $mo_n strings, po has $po_n translated, run: wp i18n make-mo languages/ languages/)"
+    fi
   fi
 
   if [ -f "$js" ]; then

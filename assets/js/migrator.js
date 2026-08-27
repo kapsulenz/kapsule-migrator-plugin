@@ -246,17 +246,47 @@
 
     // ── The transfer ─────────────────────────────────────────────────────────
 
-    function reportProgress(bytesDone, totalBytes, chunkIndex, chunkCount) {
+    /**
+     * `server` is what KapsuleHost answered on the last progress call, or undefined when we have
+     * not heard from them yet (the very first paint, or an older server).
+     */
+    function reportProgress(bytesDone, totalBytes, chunkIndex, chunkCount, server) {
         if (baselineBytes === null) baselineBytes = bytesDone;
 
-        var pct = totalBytes > 0 ? (bytesDone / totalBytes) * 100 : 0;
+        /*
+         * ONE PERCENTAGE, AND IT IS KAPSULEHOST'S.
+         *
+         * This screen used to compute `bytesDone / totalBytes * 100`, which is a perfectly correct
+         * answer to "how far through the upload am I" and a different number from the one the
+         * KapsuleHost panel shows, which covers the whole move including unpacking, importing and
+         * rewriting after the upload ends. Two honest numbers for one migration is still a
+         * contradiction to whoever is reading both, so this renders theirs.
+         *
+         * The local calculation stays as the fallback and is used ONLY when they have not told us
+         * one. A blank meter on a working transfer would be worse than a number that is about the
+         * upload alone, and an older server that does not send `progress` must still show movement.
+         */
+        var localPct = totalBytes > 0 ? (bytesDone / totalBytes) * 100 : 0;
+        var pct = (server && typeof server.progress === 'number') ? server.progress : localPct;
 
         // Rate is measured from THIS page load only. Extrapolating across a resumed run would divide
         // hours of previous transfer by seconds of current uptime and promise a finish time that is
         // not real. An honest blank beats a confident wrong number.
         var elapsed = (Date.now() - startedAt) / 1000;
         var moved   = bytesDone - baselineBytes;
-        var note    = pieceOf(chunkIndex, chunkCount);
+
+        /*
+         * ONE PIECE COUNT, AND IT IS WHAT LANDED RATHER THAN WHAT WAS SENT.
+         *
+         * `chunkIndex` is what this browser has finished sending. `server.chunksReceived` is what
+         * KapsuleHost has on disk, counted from the directory. They differ by whatever is in flight,
+         * which is at least one piece for the whole of every upload, and that difference is what put
+         * two different counts on the two screens. Theirs is both the truthful one and the one the
+         * panel shows, so it wins where we have it.
+         */
+        var shownIndex = (server && typeof server.chunksReceived === 'number') ? server.chunksReceived : chunkIndex;
+        var shownTotal = (server && typeof server.chunkCount === 'number' && server.chunkCount > 0) ? server.chunkCount : chunkCount;
+        var note    = pieceOf(shownIndex, shownTotal);
 
         if (elapsed > 15 && moved > 0 && totalBytes > bytesDone) {
             var eta = fmtEta((totalBytes - bytesDone) / (moved / elapsed));
@@ -265,7 +295,8 @@
         }
 
         setMeter(pct, note);
-            $('#km-f-pieces').text(pair(fmtCount(chunkIndex), fmtCount(chunkCount)));
+        // The same count as the note above and as the panel, rather than this browser's send count.
+        $('#km-f-pieces').text(pair(fmtCount(shownIndex), fmtCount(shownTotal)));
         $('#km-f-moved').text(fmtBytes(bytesDone));
     }
 
@@ -290,10 +321,22 @@
                 var bytesDone  = resp.data.bytesDone  || 0;
                 var knownTotal = totalBytes || resp.data.totalBytes || 0;
 
+                // STOPPED FROM THE KAPSULEHOST PANEL. Learned on the very next piece, because the
+                // progress call now answers with it. Before this the plugin could not find out at
+                // all: it kept sending pieces at a job that had ended, and kept showing a live
+                // transfer to a customer who had stopped it from the other screen. Reload rather
+                // than draw the stopped state out here, so there is one implementation of that card
+                // (PHP's) and the two cannot disagree.
+                if (resp.data.stopped) {
+                    cancelled = true;
+                    window.location.reload();
+                    return;
+                }
+
                 // A piece landed, so the connection is healthy again whatever happened before it.
                 if (attempt > 1) restoreTransferringState();
 
-                reportProgress(bytesDone, knownTotal, index + 1, chunkCount);
+                reportProgress(bytesDone, knownTotal, index + 1, chunkCount, resp.data);
                 runChunkLoop(chunkCount, knownTotal, index + 1, 1);
                 return;
             }

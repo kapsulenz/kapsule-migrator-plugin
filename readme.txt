@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.4.1
+Stable tag: 1.5.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,13 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.5.0 =
+* Fixed: the percentage on this screen and the percentage on your KapsuleHost panel were different numbers. Both were honest and they were answering different questions: this screen showed how far through the upload you were, and the panel showed how far through the whole move, which carries on after the upload with unpacking, importing and rewriting the addresses inside your site. There is now one number and both screens show it.
+* Fixed: the piece count differed between the two screens for the same reason. This screen counted what it had sent and KapsuleHost counted what had arrived, which are never the same while a piece is in flight. Both now show what has actually arrived.
+* Fixed: stopping a move from your KapsuleHost panel did not reach this screen, so it carried on showing a live transfer for a move that had ended. It now finds out on the very next piece and shows you that it was stopped, and which screen stopped it.
+* Fixed: a long value in the fourth box, such as your new web address, ran outside its box instead of wrapping.
+* The white underlines under the buttons on this screen are gone. They were fixed in the previous release and could not reach you: that release went out under a version number that had already been used, so WordPress never offered it to sites that already had that version, and browsers kept serving the stylesheet they had already cached. This release has a new version number, which is what makes the fix arrive.
 
 = 1.4.1 =
 * Fixed, and it is the whole reason for this release: starting a migration could make your existing site slow to a crawl or stop loading altogether, including the Kapsule screen you started it from. The plugin kept the list of every file it was going to move in a place WordPress reads back into memory on every single visit to your site. On a site with 127,977 files that list was 34 MB, and reading it needed 150 MB of memory, more than most hosting plans allow. The list now sits in a file next to the copy being prepared, and each piece reads only its own part of it.
