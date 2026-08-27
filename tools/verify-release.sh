@@ -132,9 +132,22 @@ if [ -f "$ZIP" ]; then
   # PUBLISHED hash rather than against a rebuild is deliberate: rebuilding the same tree does not
   # produce a byte-identical zip (timestamps and compression vary), so a rebuild check would fire on
   # every honest run and be turned off within a week.
+  # IT ONLY ASKS THE QUESTION WHEN THE QUESTION MAKES SENSE, and the first version of this check did
+  # not. It compared the ledger's hash for the PLUGIN'S version against whatever zip sat at $PORTAL,
+  # including a zip holding a DIFFERENT version. Pointed at the deploy tree before a release has
+  # landed, which is the completely normal state, it announced "1.5.0 was ALREADY PUBLISHED with
+  # different contents" about a 1.4.1 zip. Nothing of the sort had happened, and the remedy it printed
+  # (BUMP THE VERSION) was exactly the wrong thing to do.
+  #
+  # A false alarm on a normal state is not a small cost on a gate whose value is being believed: it is
+  # how a gate gets ignored, and this one is now wired into build-zip.sh where it runs every time. The
+  # mismatch is ALREADY reported by the "published zip" check above, so this stands down and says why
+  # rather than adding a second, contradictory failure about the same fact.
   LEDGER="published-versions.txt"
   ZIP_SHA=$(sha256sum "$ZIP" 2>/dev/null | cut -d' ' -f1)
-  if [ -n "$ZIP_SHA" ]; then
+  if [ "$ZIP_V" != "$HEADER_V" ]; then
+    say "version/content ledger" "not asked: the zip at \$PORTAL holds ${ZIP_V:-nothing readable}, not $HEADER_V (see above)"
+  elif [ -n "$ZIP_SHA" ]; then
     PREV_SHA=$(grep -E "^${HEADER_V//./\\.} " "$LEDGER" 2>/dev/null | tail -1 | awk '{print $2}')
     if [ -z "$PREV_SHA" ]; then
       say "version/content ledger" "$HEADER_V not published before, nothing to contradict"
