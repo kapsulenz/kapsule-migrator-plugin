@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,11 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.5.2 =
+* Fixed: this screen and your KapsuleHost panel showed different amounts moved, 473.6 MB here against 495 MB there. They were two different counts, not two ways of writing one: this screen showed what your browser believed it had sent, and the panel showed what had actually arrived. Both now show what has arrived, which is the one that matters.
+* Fixed: the time remaining differed between the two screens, and the panel's wording could read "about 1 minutes left". There is one estimate now, worked out in one place, and both screens show it.
+* Fixed: if KapsuleHost did not answer the moment this page loaded, you were told we could not be reached. A single lost answer is now retried once before that, so a brief hiccup no longer looks like an outage. When we genuinely cannot be reached the screen still says so plainly, and still refuses to guess.
 
 = 1.5.1 =
 * Fixed, and it is the reason for this release: this plugin has never been able to update itself. WordPress asks a plugin with its own update address for a version, and requires that answer to contain a field called "version". This plugin sent the same number under a different name, so WordPress discarded the answer without an error and every site stayed on whatever version it was first installed with, no matter how many releases came out. That is why fixes reported as done kept coming back: they were correct, they were published, and they could not reach you. Update to this release once by hand and every release after it arrives on its own.

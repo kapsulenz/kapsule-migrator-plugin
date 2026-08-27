@@ -238,7 +238,32 @@ class Kapsule_Admin_Page {
         // healthy round trip from a shared host and short enough that the honest "we cannot reach
         // KapsuleHost" card arrives while they are still looking. The AJAX poll keeps the longer
         // budget, because nobody is blocked on it.
-        $fresh = $this->fetch_job_state( 8 );
+        $fresh = $this->fetch_job_state( 6 );
+        if ( is_array( $fresh ) ) return $fresh;
+
+        /*
+         * ONE RETRY, AND THE TWO BUDGETS TOGETHER ARE SHORTER THAN THE OLD SINGLE ONE.
+         *
+         * Reported from a real migration: `cURL error 28: Operation timed out after 8002 milliseconds
+         * with 0 bytes received`, on this call. ZERO BYTES is the tell. It is not a slow answer, it is
+         * no answer: the connection was accepted and nothing came back.
+         *
+         * MEASURED before changing anything: the endpoint answers in 50ms median, 0 of 15 calls over
+         * 8 seconds, on two indexed queries. And no departure's swap window overlapped that migration
+         * (it ran 16:22:38 to 16:28:35; the surrounding departures reloaded before 16:18 and began
+         * again at 16:33). SO I COULD NOT PIN THE CAUSE, and I am not going to invent one.
+         *
+         * What I can do is make it not matter. A single 8-second synchronous call inside a page render
+         * is fragile whatever the cause, because ONE lost answer becomes a card that says we are
+         * unreachable. Two 6-second attempts cost the customer 12 seconds in the worst case against
+         * the old 8, and they survive any transient shorter than six seconds, which is what a dropped
+         * connection, a reload window or a moment of load actually looks like.
+         *
+         * The card this falls through to is RIGHT and is not being changed: it says plainly that we
+         * cannot be reached, refuses to guess, and states the site is untouched. Jesse called that the
+         * one good thing in the run. This only makes it rarer, it does not replace it.
+         */
+        $fresh = $this->fetch_job_state( 6 );
         if ( is_array( $fresh ) ) return $fresh;
         return null;
     }
@@ -515,7 +540,7 @@ class Kapsule_Admin_Page {
              * is a measurement, and rendering the first as the second is how a screen claims nothing
              * has moved when it simply did not hear back. The JS treats null as "keep what you have".
              */
-            $srv = array( 'progress' => null, 'chunksReceived' => null, 'chunkCount' => null, 'stopped' => null, 'stoppedBy' => null );
+            $srv = array( 'progress' => null, 'chunksReceived' => null, 'chunkCount' => null, 'bytesReceived' => null, 'etaSeconds' => null, 'stopped' => null, 'stoppedBy' => null );
             if ( ! is_wp_error( $api ) ) {
                 $decoded = json_decode( (string) wp_remote_retrieve_body( $api ), true );
                 if ( is_array( $decoded ) ) {
@@ -556,6 +581,10 @@ class Kapsule_Admin_Page {
                 'progress'       => $srv['progress'],
                 'chunksReceived' => $srv['chunksReceived'],
                 'chunkCount'     => $srv['chunkCount'],
+                // What KapsuleHost HOLDS, and their single time estimate, so "Moved" and
+                // "about a minute left" are one figure across both screens rather than two.
+                'bytesReceived'  => $srv['bytesReceived'],
+                'etaSeconds'     => $srv['etaSeconds'],
                 'stopped'        => $srv['stopped'],
                 'stoppedBy'      => $srv['stoppedBy'],
             ) );

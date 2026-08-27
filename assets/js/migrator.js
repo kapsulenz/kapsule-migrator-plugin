@@ -269,6 +269,16 @@
         var localPct = totalBytes > 0 ? (bytesDone / totalBytes) * 100 : 0;
         var pct = (server && typeof server.progress === 'number') ? server.progress : localPct;
 
+        /*
+         * MOVED IS WHAT THEY HOLD, NOT WHAT WE BELIEVE WE SENT.
+         *
+         * Reported side by side: this screen said 473.6 MB while the panel said 495 MB. Not a units
+         * mismatch, both format in 1024s. Two genuinely different counts, and theirs is the one that
+         * matters because it is what has actually arrived. The local figure stays as the fallback for
+         * an older server, because a blank where a number was is worse than a number about the upload.
+         */
+        var shownBytes = (server && typeof server.bytesReceived === 'number') ? server.bytesReceived : bytesDone;
+
         // Rate is measured from THIS page load only. Extrapolating across a resumed run would divide
         // hours of previous transfer by seconds of current uptime and promise a finish time that is
         // not real. An honest blank beats a confident wrong number.
@@ -288,7 +298,17 @@
         var shownTotal = (server && typeof server.chunkCount === 'number' && server.chunkCount > 0) ? server.chunkCount : chunkCount;
         var note    = pieceOf(shownIndex, shownTotal);
 
-        if (elapsed > 15 && moved > 0 && totalBytes > bytesDone) {
+        /*
+         * AND ONE TIME ESTIMATE, THEIRS. Two surfaces each deriving one from their own rate over their
+         * own window cannot agree except by accident, which is why this screen said "about 1 minute
+         * left" while the panel said "about 1 minutes left". KapsuleHost computes it once now.
+         */
+        var srvEta = (server && typeof server.etaSeconds === 'number') ? server.etaSeconds : null;
+        if (srvEta !== null) {
+            var eta = fmtEta(srvEta);
+            /* translators: 1: which piece is moving, 2: estimated time remaining. Joined into one line. */
+            if (eta) note = sprintf(__('%1$s, %2$s', 'kapsule-migrator'), note, eta);
+        } else if (elapsed > 15 && moved > 0 && totalBytes > bytesDone) {
             var eta = fmtEta((totalBytes - bytesDone) / (moved / elapsed));
             /* translators: 1: which piece is moving, 2: estimated time remaining. Joined into one line. */
             if (eta) note = sprintf(__('%1$s, %2$s', 'kapsule-migrator'), note, eta);
@@ -297,7 +317,7 @@
         setMeter(pct, note);
         // The same count as the note above and as the panel, rather than this browser's send count.
         $('#km-f-pieces').text(pair(fmtCount(shownIndex), fmtCount(shownTotal)));
-        $('#km-f-moved').text(fmtBytes(bytesDone));
+        $('#km-f-moved').text(fmtBytes(shownBytes));
     }
 
     function runChunkLoop(chunkCount, totalBytes, index, attempt) {
