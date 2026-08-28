@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,11 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.5.3 =
+* Fixed: this screen said "piece 3 of 10" while your KapsuleHost panel said "piece 2 of 10" at the same
+  moment, and this screen's own PIECES SENT box said 2 as well. One count, three renderings, two of
+  them a step ahead. The count of pieces that have arrived is now rendered the same way everywhere.
 
 = 1.5.2 =
 * Fixed: this screen and your KapsuleHost panel showed different amounts moved, 473.6 MB here against 495 MB there. They were two different counts, not two ways of writing one: this screen showed what your browser believed it had sent, and the panel showed what had actually arrived. Both now show what has arrived, which is the one that matters.

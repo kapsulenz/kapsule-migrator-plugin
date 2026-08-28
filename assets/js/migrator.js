@@ -151,9 +151,22 @@
         return '\u2066' + a + ' / ' + b + '\u2069';
     }
 
-    /** Pieces are 1-indexed for a human and 0-indexed internally. One place so they cannot disagree. */
-    function pieceOf(index, total) {
-        return sprintf(__('piece %1$s of %2$s', 'kapsule-migrator'), fmtCount(Math.min(index + 1, total)), fmtCount(total));
+    /**
+     * "piece N of M", where N is a COUNT OF PIECES DONE, never a zero-based index.
+     *
+     * This took an index and added one, which was right while the only caller passed `chunkIndex`
+     * (0-based, what this browser has finished sending). It stopped being right the moment the count
+     * was unified onto the server's `chunksReceived`, which is already a COUNT: two pieces landed
+     * rendered here as "piece 3 of 10" while the panel, reading the very same field, said 2 of 10.
+     *
+     * IT ALSO DISAGREED WITH THIS SCREEN'S OWN FACT ROW, which printed the count raw and so said
+     * "2 / 10" beside a meter note saying "piece 3 of 10". One value, three renderings, two wrong.
+     *
+     * The argument is a COUNT now. Every caller converts its own value once, and the +1 lives at the
+     * call sites that genuinely hold an index.
+     */
+    function pieceOf(done, total) {
+        return sprintf(__('piece %1$s of %2$s', 'kapsule-migrator'), fmtCount(Math.min(done, total)), fmtCount(total));
     }
 
     // ── Idle screen ──────────────────────────────────────────────────────────
@@ -294,9 +307,11 @@
          * two different counts on the two screens. Theirs is both the truthful one and the one the
          * panel shows, so it wins where we have it.
          */
-        var shownIndex = (server && typeof server.chunksReceived === 'number') ? server.chunksReceived : chunkIndex;
+        // `chunksReceived` is already a COUNT of what landed. `chunkIndex` is 0-based, so it becomes a
+        // count by adding one. Normalising HERE is what stops the two screens differing by exactly one.
+        var shownDone = (server && typeof server.chunksReceived === 'number') ? server.chunksReceived : (chunkIndex + 1);
         var shownTotal = (server && typeof server.chunkCount === 'number' && server.chunkCount > 0) ? server.chunkCount : chunkCount;
-        var note    = pieceOf(shownIndex, shownTotal);
+        var note    = pieceOf(shownDone, shownTotal);
 
         /*
          * AND ONE TIME ESTIMATE, THEIRS. Two surfaces each deriving one from their own rate over their
@@ -316,7 +331,7 @@
 
         setMeter(pct, note);
         // The same count as the note above and as the panel, rather than this browser's send count.
-        $('#km-f-pieces').text(pair(fmtCount(shownIndex), fmtCount(shownTotal)));
+        $('#km-f-pieces').text(pair(fmtCount(shownDone), fmtCount(shownTotal)));
         $('#km-f-moved').text(fmtBytes(shownBytes));
     }
 
@@ -459,9 +474,9 @@
                 sprintf(__('We could not reach KapsuleHost after %1$s tries (%2$s). Nothing is lost. Everything already copied is still there, and this site has not been changed.', 'kapsule-migrator'),
                         fmtCount(MAX_ATTEMPTS), why || __('the connection dropped', 'kapsule-migrator')));
         setLive(false);
-        setFact4(__('Stopped at', 'kapsule-migrator'), pieceOf(index, chunkCount));
+        setFact4(__('Stopped at', 'kapsule-migrator'), pieceOf(index + 1, chunkCount));
         /* translators: %s: describes which piece the transfer stopped on, e.g. "piece 57 of 119". */
-        $('#km-meter-note').text(sprintf(__('paused at %s', 'kapsule-migrator'), pieceOf(index, chunkCount)));
+        $('#km-meter-note').text(sprintf(__('paused at %s', 'kapsule-migrator'), pieceOf(index + 1, chunkCount)));
         setNote('error', escapeHtml(__('Check this server can reach the internet, then pick up where you left off. Nothing needs to be re-sent.', 'kapsule-migrator')));
 
         if (!$('#km-resume-btn').length) {
