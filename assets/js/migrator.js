@@ -107,6 +107,21 @@
         if (note !== undefined) $('#km-meter-note').text(note);
     }
 
+    /*
+     * THE WORDS WITHOUT THE NUMBER.
+     *
+     * Every caller below used to pass a percentage of its own alongside its message: 95 when the
+     * database started, 97 when the upload finished, and a local bytes/total calculation while polling.
+     * Those are what Jesse watched jump from 95 to 97 and then back to 48 when KapsuleHost's real
+     * figure arrived. The messages were right and the numbers were a second opinion.
+     *
+     * The percentage now comes from KapsuleHost and from nowhere else. These callers say what is
+     * happening and touch the meter's number never.
+     */
+    function setMeterNote(text) {
+        $('#km-meter-note').text(text);
+    }
+
     function setNote(tone, html) {
         $('#km-note').attr('data-tone', tone);
         $('#km-note-text').html(html);
@@ -126,6 +141,85 @@
             $(this).attr('data-on',   i === target ? '1' : '0');
             $(this).attr('data-done', i <  target ? '1' : '0');
         });
+    }
+
+    /*
+     * THE STEP LIST IS KAPSULEHOST'S, NOT THIS SCREEN'S.
+     *
+     * This screen had four hand-written rows while the KPanel screen had twelve, so one moment was
+     * called "Checking what arrived" here and "Importing database" there. Jesse's specification,
+     * 2026-08-29: pick one set of step names, serve it, render the same names on both screens.
+     *
+     * The rows are now REBUILT from `display.steps` on every poll that carries one. The four static
+     * rows in the PHP remain as the first paint, before any reply has arrived, so the card is never
+     * empty; the moment KapsuleHost speaks they are replaced by its list.
+     */
+    /*
+     * THE PLUGIN KEEPS ITS OWN FOUR STEPS, DRIVEN BY KAPSULEHOST'S PHASE.
+     *
+     * An earlier version replaced these rows with KPanel's full list. Jesse's clarification,
+     * 2026-08-29: KPanel having more steps is fine, and what this screen must make unmistakable is
+     * that the FILES ARE COMPLETE and the rest is happening on KapsuleHost.
+     *
+     * So the four rows stay, and which one is lit comes from the served phase rather than from this
+     * screen guessing. Everything after the upload maps to the last row, "KapsuleHost puts it
+     * together", which is the honest single name for the nine things KPanel itemises.
+     *
+     * THE PERCENTAGE IS UNAFFECTED BY ANY OF THIS. It is KapsuleHost's number on both screens at all
+     * times, whatever either list of steps says.
+     */
+    var PHASE_TO_STEP = {
+        queued:         'kstep-scan',
+        preflight:      'kstep-scan',
+        connecting:     'kstep-scan',
+        scanning:       'kstep-scan',
+        uploading:      'kstep-files',
+        receiving:      'kstep-files',
+        // Everything below is ours, not theirs. One row, so this screen never implies the customer
+        // still has something to do.
+        provisioning:   'kstep-done',
+        unpacking:      'kstep-done',
+        placing_files:  'kstep-done',
+        pulling_files:  'kstep-done',
+        importing_db:   'kstep-done',
+        search_replace: 'kstep-done',
+        verifying:      'kstep-done',
+        done:           'kstep-done'
+    };
+
+    function renderServedSteps(display) {
+        if (!display || !display.stepKey) return;
+        var row = PHASE_TO_STEP[display.stepKey];
+        if (!row) return;
+        setStep(row);
+        // Once the sending is finished, say so on the row itself rather than leaving a customer to
+        // wonder whether their browser still has work to do.
+        if (row === 'kstep-done') {
+            $('#kstep-files').attr('data-done', '1').attr('data-on', '0');
+            $('#kstep-db').attr('data-done', '1').attr('data-on', '0');
+        }
+    }
+
+    /*
+     * ONE PERCENT, ONE LABEL, ONE ESTIMATE, ALL OF THEM THEIRS.
+     *
+     * Everything this screen used to work out for itself is gone: the percentage, the step wording and
+     * the time remaining. A screen that calculates is a screen that can disagree, and it disagrees
+     * invisibly to whoever wrote either half. `display` is null on a reply that knows nothing, and a
+     * null must leave what is on screen exactly as it is rather than blanking it.
+     */
+    function renderDisplay(display) {
+        if (!display) return;
+        if (typeof display.percent === 'number') { lastServerPct = display.percent; }
+        renderServedSteps(display);
+        var note = display.pieces
+            ? pieceOf(display.pieces.done, display.pieces.total)
+            : (display.stepLabel || '');
+        if (typeof display.etaSeconds === 'number' && display.etaSeconds >= 30) {
+            note = note ? (note + ', ' + fmtEta(display.etaSeconds)) : fmtEta(display.etaSeconds);
+        }
+        if (lastServerPct !== null) setMeter(lastServerPct, note || undefined);
+        else if (note) $('#km-meter-note').text(note);
     }
 
     /** The rail's sheen is a claim that bytes are moving. Stop making it while they are not. */
@@ -361,7 +455,12 @@
             if (eta) note = sprintf(__('%1$s, %2$s', 'kapsule-migrator'), note, eta);
         }
 
-        setMeter(pct, note);
+        /*
+         * THEIRS WINS. If this reply carried a display block, it decides the percentage, the wording
+         * and the estimate, and the lines above become the fallback for a server too old to send one.
+         */
+        if (server && server.display) { renderDisplay(server.display); }
+        else { setMeter(pct, note); }
         // The same count as the note above and as the panel, rather than this browser's send count.
         $('#km-f-pieces').text(pair(fmtCount(shownDone), fmtCount(shownTotal)));
         $('#km-f-moved').text(fmtBytes(shownBytes));
@@ -545,7 +644,7 @@
         setHead(__('Copying your database', 'kapsule-migrator'),
                 __('The files are across. We are copying your database now, which is usually the quickest part.', 'kapsule-migrator'));
         setLive(true);
-        setMeter(95, __('database', 'kapsule-migrator'));
+        setMeterNote(__('database', 'kapsule-migrator'));
 
         $.post(cfg.ajaxUrl, {
             action: 'kapsule_upload_db_and_complete',
@@ -556,7 +655,8 @@
             // page reloads into the awaiting-import screen, which reports what the JOB says.
             setChip('transferring', __('Handing over to KapsuleHost', 'kapsule-migrator'));
             setLive(false);
-            setMeter(97, __('everything sent', 'kapsule-migrator'));
+            // The moment the customer needs named plainly: their side is finished and ours is running.
+            setMeterNote(__('All files sent. KapsuleHost is finishing the move.', 'kapsule-migrator'));
             window.location.reload();
         }).fail(function () {
             if (!cancelled) window.location.reload();
@@ -650,7 +750,8 @@
                 if (label) setChip(null, label);
 
                 if (data.progress && data.progress.totalBytes > 0) {
-                    setMeter(Math.min(95, (data.progress.bytesTransferred / data.progress.totalBytes) * 100));
+                    // The percentage is KapsuleHost's. A local bytes/total figure here is a second
+                    // opinion about a different quantity, and it is what made the bar run backwards.
                 }
 
                 if (data.status === 'awaiting_import' || data.status === 'error' || data.status === 'standalone_ready') {
@@ -692,7 +793,7 @@
 
     } else if (cfg.status === 'uploading_db') {
         setStep('kstep-db');
-        setMeter(95, __('database', 'kapsule-migrator'));
+        setMeterNote(__('database', 'kapsule-migrator'));
         pollStatus(3000);
 
     } else if (cfg.status === 'awaiting_import') {

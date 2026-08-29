@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,17 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.5.5 =
+* Fixed: this screen showed 95%, then 97%, then dropped back to 48% when it heard from KapsuleHost. The
+  jumps were this screen's own numbers, hardcoded at the moments the database started and the upload
+  finished. Every percentage now comes from KapsuleHost, so the figure here and the figure in your
+  KapsuleHost panel are the same number at all times.
+* The steps here now follow the real state of your move rather than this screen's guess, and once your
+  files are across it says so plainly: everything after that is happening on KapsuleHost, not in your
+  browser.
+* The time remaining is KapsuleHost's single estimate, so the two screens can no longer say "less than
+  a minute" and "about a minute" at the same moment.
 
 = 1.5.4 =
 * Fixed: the percentage on this screen could go BACKWARDS, reading 95, then 97, then 48. When a reply
