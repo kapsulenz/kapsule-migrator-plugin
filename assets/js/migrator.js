@@ -165,6 +165,13 @@
      * The argument is a COUNT now. Every caller converts its own value once, and the +1 lives at the
      * call sites that genuinely hold an index.
      */
+    /*
+     * WHAT THE SERVER LAST TOLD US, held at module scope on purpose: these outlive one poll, which is
+     * the entire point. A reply that carries no numbers must not be able to change what is on screen.
+     */
+    var lastServerPct = null;
+    var lastServerBytes = null;
+
     function pieceOf(done, total) {
         return sprintf(__('piece %1$s of %2$s', 'kapsule-migrator'), fmtCount(Math.min(done, total)), fmtCount(total));
     }
@@ -279,8 +286,30 @@
          * one. A blank meter on a working transfer would be worse than a number that is about the
          * upload alone, and an older server that does not send `progress` must still show movement.
          */
+        /*
+         * ONCE THEY HAVE TOLD US A NUMBER, NEVER RENDER A DIFFERENT QUANTITY AGAIN.
+         *
+         * This fell back to the local upload percentage whenever `server.progress` was missing from a
+         * reply, and the server has a path that answers a progress poll with no fields at all. So
+         * consecutive polls alternated between two DIFFERENT MEASUREMENTS of two different things, and
+         * the meter read 95, then 97, then back to 48 in front of Jesse. Both numbers were honest.
+         * Neither was wrong. Showing them in the same place is what made the bar run backwards.
+         *
+         * A missing value is not a reason to substitute a different quantity. It is a reason to keep
+         * showing the last one we were given:
+         *
+         *   never had a server number     the local upload figure, so a working transfer is not blank
+         *                                 and an older server still shows movement
+         *   have one, this reply lacks    the LAST server number, unchanged, because a stale true
+         *                                 number beats a fresh number about something else
+         *   this reply has one            use it
+         *
+         * The bar can therefore stall for a poll. It cannot go backwards, and it cannot quietly change
+         * what it is measuring, which is the part a customer cannot see happening.
+         */
         var localPct = totalBytes > 0 ? (bytesDone / totalBytes) * 100 : 0;
-        var pct = (server && typeof server.progress === 'number') ? server.progress : localPct;
+        if (server && typeof server.progress === 'number') { lastServerPct = server.progress; }
+        var pct = (lastServerPct !== null) ? lastServerPct : localPct;
 
         /*
          * MOVED IS WHAT THEY HOLD, NOT WHAT WE BELIEVE WE SENT.
@@ -290,7 +319,10 @@
          * matters because it is what has actually arrived. The local figure stays as the fallback for
          * an older server, because a blank where a number was is worse than a number about the upload.
          */
-        var shownBytes = (server && typeof server.bytesReceived === 'number') ? server.bytesReceived : bytesDone;
+        // Same rule as the percentage, for the same reason: what THEY hold, remembered, never swapped
+        // back to what this browser believes it sent just because one reply came back thin.
+        if (server && typeof server.bytesReceived === 'number') { lastServerBytes = server.bytesReceived; }
+        var shownBytes = (lastServerBytes !== null) ? lastServerBytes : bytesDone;
 
         // Rate is measured from THIS page load only. Extrapolating across a resumed run would divide
         // hours of previous transfer by seconds of current uptime and promise a finish time that is

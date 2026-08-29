@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,14 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.5.4 =
+* Fixed: the percentage on this screen could go BACKWARDS, reading 95, then 97, then 48. When a reply
+  from KapsuleHost came back without a progress figure, this screen quietly substituted its own upload
+  percentage, which measures a different thing: how far the upload has got, rather than how far the
+  whole move has got. Two honest numbers alternating in one place. It now keeps showing the last figure
+  KapsuleHost gave, so the bar can pause for a moment but can never run backwards or change what it is
+  counting.
 
 = 1.5.3 =
 * Fixed: this screen said "piece 3 of 10" while your KapsuleHost panel said "piece 2 of 10" at the same
