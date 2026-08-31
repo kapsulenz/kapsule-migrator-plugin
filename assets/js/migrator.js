@@ -71,23 +71,50 @@
         return sprintf(__('%s B', 'kapsule-migrator'), localeNum(n, 0));
     }
 
-    /** Plain-language duration. "about 6 minutes" reads better than "00:06:13" and is honest about precision. */
-    function fmtEta(seconds) {
-        if (!isFinite(seconds) || seconds <= 0) return '';
-        if (seconds < 60) return __('less than a minute left', 'kapsule-migrator');
-
-        var mins = Math.round(seconds / 60);
-        if (mins < 60) {
+    /**
+     * Render KapsuleHost's ETA BUCKET. This screen no longer decides which bucket a duration is in.
+     *
+     * Sharing `etaSeconds` with the panel closed the two-rates defect and left a subtler one: both
+     * screens read one number and each turned it into words with its own rounding. On identical
+     * input, 45 seconds read "less than a minute left" here and "about 1 minute left" in the panel,
+     * and 5400 seconds read "about 1 h 30 min left" here and "about 2 hours left" there.
+     *
+     * The bucket is now decided once, server side, in `buildMigrationDisplay`, and sent as DATA so
+     * each screen still renders it in the customer's own language. This function only picks a string.
+     */
+    function fmtEtaBucket(eta) {
+        if (!eta || !eta.kind || eta.kind === 'none') return '';
+        if (eta.kind === 'under_minute') return __('less than a minute left', 'kapsule-migrator');
+        if (eta.kind === 'minutes') {
             /* translators: %s: whole number of minutes remaining. */
-            return sprintf(_n('about %s minute left', 'about %s minutes left', mins, 'kapsule-migrator'), fmtCount(mins));
+            return sprintf(_n('about %s minute left', 'about %s minutes left', eta.minutes, 'kapsule-migrator'), fmtCount(eta.minutes));
         }
-        var hrs = Math.floor(mins / 60), rem = mins % 60;
-        if (!rem) {
+        if (eta.kind === 'hours') {
             /* translators: %s: whole number of hours remaining. */
-            return sprintf(_n('about %s hour left', 'about %s hours left', hrs, 'kapsule-migrator'), fmtCount(hrs));
+            return sprintf(_n('about %s hour left', 'about %s hours left', eta.hours, 'kapsule-migrator'), fmtCount(eta.hours));
         }
         /* translators: 1: whole hours remaining, 2: additional minutes remaining. */
-        return sprintf(__('about %1$s h %2$s min left', 'kapsule-migrator'), fmtCount(hrs), fmtCount(rem));
+        return sprintf(__('about %1$s h %2$s min left', 'kapsule-migrator'), fmtCount(eta.hours), fmtCount(eta.minutes));
+    }
+
+    /**
+     * The bucket rule, for the FALLBACK PATH ONLY: a reply from a server too old to send one.
+     *
+     * Identical thresholds to `bucketEta` in the portal on purpose. Even the fallback must not round
+     * differently from the panel, or this change reintroduces the defect it exists to remove.
+     */
+    function bucketEtaLocal(seconds) {
+        if (typeof seconds !== 'number' || !isFinite(seconds) || seconds <= 0) return { kind: 'none' };
+        if (seconds < 60) return { kind: 'under_minute' };
+        var mins = Math.round(seconds / 60);
+        if (mins < 60) return { kind: 'minutes', minutes: Math.max(1, mins) };
+        var hours = Math.floor(mins / 60), minutes = mins % 60;
+        return minutes === 0 ? { kind: 'hours', hours: hours } : { kind: 'hours_minutes', hours: hours, minutes: minutes };
+    }
+
+    /** Convenience for the call sites that still hold only seconds. */
+    function fmtEta(seconds) {
+        return fmtEtaBucket(bucketEtaLocal(seconds));
     }
 
     function setChip(state, label) {
@@ -187,6 +214,35 @@
         done:           'kstep-done'
     };
 
+    /**
+     * The phase wording, WORD FOR WORD the same as KPanel's, and translated here.
+     *
+     * Every string is copied from `src/lib/migration/display.ts` in the portal, which is the one
+     * function that decides what a phase is called. It is duplicated here rather than read from the
+     * server response because the server sends English: a German customer should read German on both
+     * screens, not matching English on both. So the SOURCE STRING is shared and the TRANSLATION is
+     * local, which is the only arrangement that satisfies both requirements at once.
+     *
+     * `admin/class-admin-page.php::phase_label` holds the identical set for the server-rendered pass.
+     * Change one, change all three, in the same commit.
+     */
+    var PHASE_LABEL = {
+        queued:         __('Waiting to start', 'kapsule-migrator'),
+        uploading:      __('Sending your site to KapsuleHost', 'kapsule-migrator'),
+        preflight:      __('Checking the connection', 'kapsule-migrator'),
+        connecting:     __('Connecting to your old host', 'kapsule-migrator'),
+        scanning:       __('Counting your files', 'kapsule-migrator'),
+        provisioning:   __('Preparing space on KapsuleHost', 'kapsule-migrator'),
+        receiving:      __('Receiving your site', 'kapsule-migrator'),
+        unpacking:      __('Unpacking your files', 'kapsule-migrator'),
+        placing_files:  __('Putting your files in place', 'kapsule-migrator'),
+        pulling_files:  __('Copying your files across', 'kapsule-migrator'),
+        importing_db:   __('Importing your database', 'kapsule-migrator'),
+        search_replace: __('Updating the addresses inside your site', 'kapsule-migrator'),
+        verifying:      __('Checking the copy that arrived', 'kapsule-migrator'),
+        done:           __('Done', 'kapsule-migrator')
+    };
+
     function renderServedSteps(display) {
         if (!display || !display.stepKey) return;
         var row = PHASE_TO_STEP[display.stepKey];
@@ -212,12 +268,14 @@
         if (!display) return;
         if (typeof display.percent === 'number') { lastServerPct = display.percent; }
         renderServedSteps(display);
+        // The label is translated locally from the shared source string (see PHASE_LABEL), so this
+        // screen and the panel say the same thing in the customer's own language rather than the
+        // same thing in English. `stepLabel` is the fallback for a key this build has not heard of.
         var note = display.pieces
             ? pieceOf(display.pieces.done, display.pieces.total)
-            : (display.stepLabel || '');
-        if (typeof display.etaSeconds === 'number' && display.etaSeconds >= 30) {
-            note = note ? (note + ', ' + fmtEta(display.etaSeconds)) : fmtEta(display.etaSeconds);
-        }
+            : ((display.stepKey && PHASE_LABEL[display.stepKey]) || display.stepLabel || '');
+        var etaText = fmtEtaBucket(display.eta || bucketEtaLocal(display.etaSeconds));
+        if (etaText) note = note ? (note + ', ' + etaText) : etaText;
         if (lastServerPct !== null) setMeter(lastServerPct, note || undefined);
         else if (note) $('#km-meter-note').text(note);
     }
@@ -683,9 +741,28 @@
                 if (cancelled) return;
 
                 if (!resp.success) {
-                    // Unreachable. Say so on the meter note rather than freezing a number that reads
-                    // like progress, and keep trying.
-                    $('#km-job-note').text(__('we cannot reach KapsuleHost just now, still trying', 'kapsule-migrator'));
+                    /*
+                      NAME THE RIGHT PARTY. This branch used to say "we cannot reach KapsuleHost" for
+                      every failure, and only ONE of the three that reach it is about KapsuleHost:
+
+                        - `reachable: false`  the PHP asked KapsuleHost and could not get an answer.
+                          That is ours, and the PHP already recorded WHY, so show its reason.
+                        - a permission failure  the PHP sent a perfectly good sentence explaining it,
+                          which was thrown away and replaced with a claim about a server that was fine.
+                        - anything else  a failure inside this site's own admin, not ours.
+
+                      Jesse watched this say we were unreachable while his panel climbed through 66%,
+                      which is the panel PROVING KapsuleHost was reachable the whole time. Blaming the
+                      wrong party sends somebody to check the wrong thing.
+                    */
+                    var d = resp.data || {};
+                    $('#km-job-note').text(
+                        d.reachable === false
+                            ? (d.reason || __('we cannot reach KapsuleHost just now, still trying', 'kapsule-migrator'))
+                            : (typeof resp.data === 'string' && resp.data)
+                                ? resp.data
+                                : __('we could not read the status from this site just now, still trying', 'kapsule-migrator')
+                    );
                     pollJob(15000);
                     return;
                 }
@@ -699,10 +776,46 @@
                     return;
                 }
 
-                var pct = Math.max(0, Math.min(99, parseInt(job.progress, 10) || 0));
+                /*
+                  ONE NUMBER AND ONE LABEL, BOTH THE SERVER'S.
+
+                  This screen is where a customer spends most of the migration and it was the one
+                  place still rendering `job.progress` and `job.phaseMessage` directly, while the
+                  panel rendered `display`. Same job, same instant, two different sentences and two
+                  numbers that could drift. `display` is the function that decides both, so it decides
+                  both here too, and `phaseMessage` survives only as a fallback for a server build
+                  that does not send one.
+                */
+                var jd = job.display || null;
+                var pct = jd && typeof jd.percent === 'number'
+                    ? jd.percent
+                    : (parseInt(job.progress, 10) || 0);
+                pct = Math.max(0, Math.min(99, pct));
                 $('#km-job-pct').text(fmtCount(pct));
                 $('#km-job-fill').css('width', pct + '%');
-                if (job.phaseMessage) $('#km-job-note').text(job.phaseMessage);
+
+                // The step wording, translated HERE from the same source string the panel uses, so a
+                // German customer reads German on both screens rather than English on both.
+                /*
+                  THE CHIP GOES STALE IF NOTHING UPDATES IT, and nothing did.
+
+                  Photographed on a real migration at 91%: the chip read "Preparing space on
+                  KapsuleHost" while the note directly beneath it read "Updating the addresses inside
+                  your site". Both were correct words for a phase; only one of them was THIS phase.
+                  PHP paints the chip once at page load and this poll updated the number and the note
+                  and never the chip, so a customer who leaves the tab open reads a step name from
+                  whenever the page happened to load.
+
+                  Same source as the note, so the two cannot describe different moments.
+                */
+                var note = (jd && jd.stepKey && PHASE_LABEL[jd.stepKey]) || job.phaseMessage || '';
+                if (jd && jd.stepKey && PHASE_LABEL[jd.stepKey]) {
+                    $('#km-chip-label').text(PHASE_LABEL[jd.stepKey]);
+                }
+                var jdEta = jd ? fmtEtaBucket(jd.eta || bucketEtaLocal(jd.etaSeconds)) : '';
+                if (jdEta) note = note ? (note + ', ' + jdEta) : jdEta;
+                if (note) $('#km-job-note').text(note);
+                renderServedSteps(jd);
 
                 pollJob(8000);
             }).fail(function () {

@@ -186,8 +186,19 @@ class Kapsule_Admin_Page {
      * that has since failed, which is this whole defect wearing a slightly newer timestamp.
      */
     private function fetch_job_state( int $timeout = 15 ): ?array {
+        /*
+         * EVERY FAILURE PATH RECORDS WHY, INCLUDING THIS ONE.
+         *
+         * This returned null with NO reason recorded, so the screen showed the generic "we cannot
+         * reach KapsuleHost" with nothing behind it and no way to tell an empty token from a real
+         * outage. Chased exactly that on 2026-08-30 and could not distinguish the two from the
+         * outside, which is the whole cost of a silent return.
+         */
         $token = get_option( 'kapsule_migration_token', '' );
-        if ( empty( $token ) ) return null;
+        if ( empty( $token ) ) {
+            update_option( 'kapsule_migration_job_state_error', __( 'This site has no migration token stored, so there is nothing to ask about.', 'kapsule-migrator' ) );
+            return null;
+        }
 
         $response = wp_remote_get(
             KAPSULE_MIGRATOR_API_BASE . '/job-status?token=' . rawurlencode( $token ),
@@ -1490,21 +1501,36 @@ class Kapsule_Admin_Page {
      * every locale. Mirrors src/lib/migration/phases.ts in the portal; that file is the source of the
      * list and this is where those ids become sentences on the customer's own WordPress.
      */
+    /**
+     * The phase wording, WORD FOR WORD the same as KPanel's.
+     *
+     * These strings are not a style choice: every one is copied from `src/lib/migration/display.ts`
+     * in the portal, which is the single function that decides what a phase is called. Nine of the
+     * thirteen used to differ here (this screen said "Looking at your site" while the panel said
+     * "Counting your files", and so on down the list), and a customer watching both screens read two
+     * different accounts of one moment. Jesse raised it five times.
+     *
+     * They are kept as gettext calls rather than taken from the server response on purpose: the
+     * server sends English, and a German customer should read German on both screens rather than
+     * matching English on both. So the SOURCE STRING is shared and the TRANSLATION stays local.
+     * If you change wording here, change `display.ts` in the same commit, or the divergence is back.
+     */
     private function phase_label( string $phase ): string {
         switch ( $phase ) {
             case 'queued':         return __( 'Waiting to start', 'kapsule-migrator' );
-            case 'preflight':      return __( 'Checking what arrived', 'kapsule-migrator' );
-            case 'connecting':     return __( 'Connecting', 'kapsule-migrator' );
-            case 'scanning':       return __( 'Looking at your site', 'kapsule-migrator' );
-            case 'provisioning':   return __( 'Building your new environment', 'kapsule-migrator' );
-            case 'receiving':      return __( 'Moving your files to the server', 'kapsule-migrator' );
+            case 'uploading':      return __( 'Sending your site to KapsuleHost', 'kapsule-migrator' );
+            case 'preflight':      return __( 'Checking the connection', 'kapsule-migrator' );
+            case 'connecting':     return __( 'Connecting to your old host', 'kapsule-migrator' );
+            case 'scanning':       return __( 'Counting your files', 'kapsule-migrator' );
+            case 'provisioning':   return __( 'Preparing space on KapsuleHost', 'kapsule-migrator' );
+            case 'receiving':      return __( 'Receiving your site', 'kapsule-migrator' );
             case 'unpacking':      return __( 'Unpacking your files', 'kapsule-migrator' );
-            case 'placing_files':  return __( 'Putting the files in place', 'kapsule-migrator' );
-            case 'pulling_files':  return __( 'Copying files', 'kapsule-migrator' );
+            case 'placing_files':  return __( 'Putting your files in place', 'kapsule-migrator' );
+            case 'pulling_files':  return __( 'Copying your files across', 'kapsule-migrator' );
             case 'importing_db':   return __( 'Importing your database', 'kapsule-migrator' );
-            case 'search_replace': return __( 'Rewriting the addresses in your site', 'kapsule-migrator' );
-            case 'verifying':      return __( 'Checking the result serves', 'kapsule-migrator' );
-            case 'done':           return __( 'Finished', 'kapsule-migrator' );
+            case 'search_replace': return __( 'Updating the addresses inside your site', 'kapsule-migrator' );
+            case 'verifying':      return __( 'Checking the copy that arrived', 'kapsule-migrator' );
+            case 'done':           return __( 'Done', 'kapsule-migrator' );
             default:               return '';
         }
     }

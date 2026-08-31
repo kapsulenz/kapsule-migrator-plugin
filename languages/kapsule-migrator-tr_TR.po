@@ -35,551 +35,573 @@ msgstr "https://kapsulehost.com"
 
 #: admin/class-admin-page.php:66
 msgid "The migration ended in a state we do not recognise, so we stopped rather than guess. Your site here is untouched."
-msgstr "Taşıma işlemi tanımadığımız bir durumda sonlandı, bu yüzden tahmin yürütmek yerine durdurduk. Buradaki siteniz değiştirilmedi."
+msgstr "Taşıma işlemi tanımadığımız bir durumda sonlandı, bu nedenle tahmin yürütmek yerine durdurduk. Buradaki siteniz değiştirilmedi."
+
+#: admin/class-admin-page.php:199
+msgid "This site has no migration token stored, so there is nothing to ask about."
+msgstr "Bu sitede kayıtlı bir taşıma kodu yok, dolayısıyla sorulacak bir şey yok."
 
 #. translators: %s: an HTTP status code, e.g. "503".
-#: admin/class-admin-page.php:203
-msgid "KapsuleHost answered %s when we asked about your move."
-msgstr "Taşıma işleminiz hakkında sorduğumuzda KapsuleHost %s yanıtını verdi."
-
 #: admin/class-admin-page.php:214
+msgid "KapsuleHost answered %s when we asked about your move."
+msgstr "Taşımanızı sorduğumuzda KapsuleHost %s yanıtını verdi."
+
+#: admin/class-admin-page.php:225
 msgid "KapsuleHost sent an answer we could not read."
 msgstr "KapsuleHost okuyamadığımız bir yanıt gönderdi."
 
-#: admin/class-admin-page.php:260
-#: admin/class-admin-page.php:305
-#: admin/class-admin-page.php:409
-#: admin/class-admin-page.php:588
-#: admin/class-admin-page.php:688
-#: admin/class-admin-page.php:719
+#: admin/class-admin-page.php:296
+#: admin/class-admin-page.php:341
+#: admin/class-admin-page.php:445
+#: admin/class-admin-page.php:628
+#: admin/class-admin-page.php:728
+#: admin/class-admin-page.php:759
 msgid "You do not have permission to do that. Ask an administrator of this site to run the migration."
-msgstr "Bunu yapmak için yetkiniz yok. Taşıma işlemini bu sitenin bir yöneticisinden çalıştırmasını isteyin."
+msgstr "Bunu yapmak için yetkiniz yok. Taşıma işlemini bu sitenin bir yöneticisinin çalıştırmasını isteyin."
 
-#: admin/class-admin-page.php:311
-#: assets/js/migrator.js:187
+#: admin/class-admin-page.php:347
+#: assets/js/migrator.js:359
 msgid "Paste your migration token first. You will find it in your KapsuleHost panel under Sites, then Migrate."
-msgstr "Önce taşıma jetonunuzu yapıştırın. Bunu KapsuleHost panelinizde Siteler altında, ardından Taşı bölümünde bulacaksınız."
+msgstr "Önce taşıma kodunuzu yapıştırın. Bunu KapsuleHost panelinizde Siteler altında, ardından Taşı bölümünde bulacaksınız."
 
-#: admin/class-admin-page.php:335
-#: assets/js/migrator.js:203
+#: admin/class-admin-page.php:371
+#: assets/js/migrator.js:375
 msgid "We could not connect to KapsuleHost with that token. Check it and try again."
-msgstr "Bu jetonla KapsuleHost'a bağlanamadık. Kontrol edin ve tekrar deneyin."
+msgstr "Bu kodla KapsuleHost'a bağlanamadık. Kontrol edip tekrar deneyin."
 
-#: admin/class-admin-page.php:435
-#: admin/class-admin-page.php:596
+#: admin/class-admin-page.php:471
+#: admin/class-admin-page.php:636
 msgid "This migration is no longer in a state we can continue from. Stop and start over to begin a clean run."
-msgstr "Bu taşıma işlemi artık devam edebileceğimiz bir durumda değil. Durdurun ve temiz bir çalıştırma başlatmak için baştan başlayın."
+msgstr "Bu taşıma artık devam edebileceğimiz bir durumda değil. Durdurup temiz bir çalıştırma başlatmak için baştan başlayın."
 
-#: admin/class-admin-page.php:803
+#: admin/class-admin-page.php:843
 msgid "You do not have permission to download this file."
 msgstr "Bu dosyayı indirmek için yetkiniz yok."
 
-#: admin/class-admin-page.php:810
+#: admin/class-admin-page.php:850
 msgid "That download link has expired. Reload this page and try again."
-msgstr "İndirme bağlantısının süresi dolmuş. Bu sayfayı yenileyin ve tekrar deneyin."
+msgstr "Bu indirme bağlantısının süresi doldu. Sayfayı yeniden yükleyin ve tekrar deneyin."
 
-#: admin/class-admin-page.php:815
+#: admin/class-admin-page.php:855
 msgid "We could not find that file. The package may have been cleaned up, so package this site again."
-msgstr "Bu dosyayı bulamadık. Paket temizlenmiş olabilir, bu yüzden siteyi yeniden paketleyin."
+msgstr "Bu dosyayı bulamadık. Paket temizlenmiş olabilir, bu nedenle siteyi yeniden paketleyin."
 
-#: admin/class-admin-page.php:822
+#: admin/class-admin-page.php:862
 msgid "That file is no longer on this server. Package this site again to rebuild it."
 msgstr "Bu dosya artık bu sunucuda değil. Yeniden oluşturmak için siteyi tekrar paketleyin."
 
-#: admin/class-admin-page.php:919
+#: admin/class-admin-page.php:959
 msgid "Move to KapsuleHost"
 msgstr "KapsuleHost'a taşı"
 
-#: admin/class-admin-page.php:920
+#: admin/class-admin-page.php:960
 msgid "Download a copy"
-msgstr "Bir kopya indir"
+msgstr "Bir kopyasını indir"
 
-#: admin/class-admin-page.php:925
+#: admin/class-admin-page.php:965
 msgid "Step 1 of 1"
 msgstr "1/1. Adım"
 
-#: admin/class-admin-page.php:926
+#: admin/class-admin-page.php:966
 msgid "Move this site to KapsuleHost"
-msgstr "Bu siteyi KapsuleHost'a taşı"
+msgstr "Bu siteyi KapsuleHost'a taşıyın"
 
-#: admin/class-admin-page.php:928
+#: admin/class-admin-page.php:968
 msgid "Paste the migration token from your KapsuleHost panel. We copy your files and your database across and leave this site exactly as it is, serving visitors the whole time."
-msgstr "KapsuleHost panelinizden taşıma jetonunu yapıştırın. Dosyalarınızı ve veritabanınızı aktarıyoruz ve bu siteyi olduğu gibi bırakıyoruz, tüm süre boyunca ziyaretçilere hizmet vermeye devam ediyor."
+msgstr "KapsuleHost panelinizden taşıma kodunu yapıştırın. Dosyalarınızı ve veritabanınızı aktarıyoruz ve bu siteyi olduğu gibi bırakıyoruz, tüm süre boyunca ziyaretçilere hizmet vermeye devam ediyor."
 
-#: admin/class-admin-page.php:932
+#: admin/class-admin-page.php:972
 msgid "Migration token"
-msgstr "Taşıma jetonu"
+msgstr "Taşıma kodu"
 
-#: admin/class-admin-page.php:934
+#: admin/class-admin-page.php:974
 msgid "Paste your token"
-msgstr "Jetonunuzu yapıştırın"
+msgstr "Kodunuzu yapıştırın"
 
-#: admin/class-admin-page.php:936
+#: admin/class-admin-page.php:976
 msgid "Find it in your panel under Sites, then Migrate. The token works once and is deleted when the move finishes."
-msgstr "Panelinizde Siteler altında, ardından Taşı bölümünde bulun. Jeton bir kez çalışır ve taşıma tamamlandığında silinir."
+msgstr "Bunu panelinizde Siteler altında, ardından Taşı bölümünde bulacaksınız. Kod bir kez çalışır ve taşıma tamamlandığında silinir."
 
-#: admin/class-admin-page.php:946
+#: admin/class-admin-page.php:986
 msgid "How long this takes depends on how fast this server can upload. Small sites finish in a few minutes and large ones take longer; you will see a live estimate once the transfer starts. If it is interrupted, reopen this page and it carries on from the last piece that arrived."
-msgstr "Ne kadar süreceği bu sunucunun ne kadar hızlı yükleyebileceğine bağlıdır. Küçük siteler birkaç dakikada biter ve büyük olanlar daha uzun sürer; aktarım başladığında canlı bir tahmin göreceksiniz. Kesintiye uğrarsa, bu sayfayı yeniden açın ve gelen son parçadan devam eder."
+msgstr "Bu işlemin ne kadar süreceği, bu sunucunun ne kadar hızlı yükleme yapabildiğine bağlıdır. Küçük siteler birkaç dakikada tamamlanır ve büyük olanlar daha uzun sürer; aktarım başladığında canlı bir tahmin göreceksiniz. Kesintiye uğrarsa, bu sayfayı yeniden açın ve ulaşan son parçadan devam eder."
 
-#: admin/class-admin-page.php:951
-#: assets/js/migrator.js:204
-#: assets/js/migrator.js:208
+#: admin/class-admin-page.php:991
+#: assets/js/migrator.js:376
+#: assets/js/migrator.js:380
 msgid "Start the move"
 msgstr "Taşımayı başlat"
 
-#: admin/class-admin-page.php:961
+#: admin/class-admin-page.php:1001
 msgid "Encrypted end to end"
 msgstr "Uçtan uca şifreli"
 
-#: admin/class-admin-page.php:962
+#: admin/class-admin-page.php:1002
 msgid "This site is only ever read, never changed"
 msgstr "Bu site yalnızca okunur, asla değiştirilmez"
 
-#: admin/class-admin-page.php:963
+#: admin/class-admin-page.php:1003
 msgid "Token deleted after use"
-msgstr "Jeton kullanımdan sonra silindi"
+msgstr "Kod kullanımdan sonra silinir"
 
-#: admin/class-admin-page.php:969
+#: admin/class-admin-page.php:1009
 msgid "No account needed"
-msgstr "Hesap gerekmez"
+msgstr "Hesap gerekmiyor"
 
-#: admin/class-admin-page.php:970
+#: admin/class-admin-page.php:1010
 msgid "Download a copy of this site"
-msgstr "Bu sitenin bir kopyasını indir"
+msgstr "Bu sitenin bir kopyasını indirin"
 
-#: admin/class-admin-page.php:972
+#: admin/class-admin-page.php:1012
 msgid "Package the files and database into archives you can download and take anywhere. Useful if you are moving by hand or want a copy before you change anything."
-msgstr "Dosyaları ve veritabanını indirebileceğiniz ve istediğiniz yere götürebileceğiniz arşivlere paketleyin. Elle taşıma yapıyorsanız veya bir şey değiştirmeden önce bir kopya istiyorsanız kullanışlıdır."
+msgstr "Dosyaları ve veritabanını indirebileceğiniz ve istediğiniz yere götürebileceğiniz arşivler halinde paketleyin. Elle taşıma yapıyorsanız veya bir şeyi değiştirmeden önce yedek almak istiyorsanız kullanışlıdır."
 
-#: admin/class-admin-page.php:976
-#: assets/js/migrator.js:227
-#: assets/js/migrator.js:231
+#: admin/class-admin-page.php:1016
+#: assets/js/migrator.js:399
+#: assets/js/migrator.js:403
 msgid "Package this site"
 msgstr "Bu siteyi paketle"
 
-#: admin/class-admin-page.php:986
+#: admin/class-admin-page.php:1026
 msgid "Files stay on your server until you download them"
 msgstr "Dosyalar siz indirene kadar sunucunuzda kalır"
 
-#: admin/class-admin-page.php:987
+#: admin/class-admin-page.php:1027
 msgid "wp-config.php is left out on purpose"
-msgstr "wp-config.php kasıtlı olarak bırakıldı"
+msgstr "wp-config.php dosyası kasıtlı olarak hariç bırakılmıştır"
 
-#: admin/class-admin-page.php:1012
+#: admin/class-admin-page.php:1052
 msgid "Packaging your site"
 msgstr "Siteniz paketleniyor"
 
-#: admin/class-admin-page.php:1013
+#: admin/class-admin-page.php:1053
 msgid "We are building downloadable archives of your files and database. Keep this tab open."
-msgstr "Dosyalarınızın ve veritabanınızın indirilebilir arşivlerini oluşturuyoruz. Bu sekmeyi açık tutun."
+msgstr "Dosyalarınızın ve veritabanınızın indirilebilir arşivleri oluşturuluyor. Bu sekmeyi açık tutun."
 
-#: admin/class-admin-page.php:1015
-#: admin/class-admin-page.php:1469
+#: admin/class-admin-page.php:1055
 msgid "Looking at your site"
 msgstr "Siteniz inceleniyor"
 
-#: admin/class-admin-page.php:1016
+#: admin/class-admin-page.php:1056
 msgid "We are counting your files and checking the connection to KapsuleHost. Nothing has moved yet."
-msgstr "Dosyalarınızı sayıyor ve KapsuleHost bağlantısını kontrol ediyoruz. Henüz hiçbir şey taşınmadı."
+msgstr "Dosyalarınız sayılıyor ve KapsuleHost bağlantısı kontrol ediliyor. Henüz hiçbir şey taşınmadı."
 
-#: admin/class-admin-page.php:1018
-#: assets/js/migrator.js:377
+#: admin/class-admin-page.php:1058
+#: assets/js/migrator.js:601
 msgid "Moving your site"
 msgstr "Siteniz taşınıyor"
 
-#: admin/class-admin-page.php:1019
-#: assets/js/migrator.js:378
+#: admin/class-admin-page.php:1059
+#: assets/js/migrator.js:602
 msgid "Your site is being copied across in pieces. It stays live and unchanged the whole time."
-msgstr "Siteniz parçalar halinde kopyalanıyor. Tüm süreç boyunca canlı ve değişmeden kalıyor."
+msgstr "Siteniz parçalar halinde kopyalanıyor. Tüm süreç boyunca siteniz yayında ve değişmeden kalıyor."
 
 #. translators: 1: current piece number, 2: total number of pieces.
-#: admin/class-admin-page.php:1038
-#: assets/js/migrator.js:156
+#: admin/class-admin-page.php:1078
+#: assets/js/migrator.js:328
 msgid "piece %1$s of %2$s"
-msgstr "%2$s parçadan %1$s"
+msgstr "parça %1$s / %2$s"
 
-#: admin/class-admin-page.php:1052
+#: admin/class-admin-page.php:1092
 msgid "Pieces sent"
 msgstr "Gönderilen parçalar"
 
-#: admin/class-admin-page.php:1056
+#: admin/class-admin-page.php:1096
 msgid "Moved"
-msgstr "Taşındı"
+msgstr "Taşınan"
 
-#: admin/class-admin-page.php:1060
+#: admin/class-admin-page.php:1100
 msgid "Total"
 msgstr "Toplam"
 
-#: admin/class-admin-page.php:1064
-#: assets/js/migrator.js:380
+#: admin/class-admin-page.php:1104
+#: assets/js/migrator.js:604
 msgid "Files"
 msgstr "Dosyalar"
 
-#: admin/class-admin-page.php:1072
+#: admin/class-admin-page.php:1112
 msgid "Count the files and check the connection"
 msgstr "Dosyaları say ve bağlantıyı kontrol et"
 
-#: admin/class-admin-page.php:1076
+#: admin/class-admin-page.php:1116
 msgid "Copy the files across"
 msgstr "Dosyaları kopyala"
 
-#: admin/class-admin-page.php:1080
+#: admin/class-admin-page.php:1120
 msgid "Copy the database across"
 msgstr "Veritabanını kopyala"
 
-#: admin/class-admin-page.php:1084
+#: admin/class-admin-page.php:1124
 msgid "KapsuleHost puts it together"
 msgstr "KapsuleHost bir araya getiriyor"
 
-#: admin/class-admin-page.php:1093
+#: admin/class-admin-page.php:1133
 msgid "Keep this tab open. We will show your download links the moment packaging finishes."
-msgstr "Bu sekmeyi açık tutun. Paketleme tamamlanır tamamlanmaz indirme bağlantılarınızı göstereceğiz."
+msgstr "Bu sekmeyi açık tutun. Paketleme tamamlandığı anda indirme bağlantılarınızı göstereceğiz."
 
-#: admin/class-admin-page.php:1095
+#: admin/class-admin-page.php:1135
 msgid "<strong>Keep this tab open.</strong> The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived."
-msgstr "<strong>Bu sekmeyi açık tutun.</strong> Taşıma buradan çalışıyor, bu yüzden sekmeyi kapatmak duraklatır. Kapatsanız bile hiçbir şey kaybolmaz: bu sayfayı yeniden açın ve ulaşan son parçadan devam eder."
+msgstr "<strong>Bu sekmeyi açık tutun.</strong> Taşıma buradan yürütülüyor, bu nedenle sekmeyi kapatmak işlemi duraklatır. Kapatırsanız hiçbir şey kaybolmaz: bu sayfayı yeniden açın ve ulaşan son parçadan devam eder."
 
-#: admin/class-admin-page.php:1101
+#: admin/class-admin-page.php:1141
 msgid "Stop and start over"
 msgstr "Durdur ve baştan başla"
 
-#: admin/class-admin-page.php:1110
+#: admin/class-admin-page.php:1150
 msgid "Package ready"
 msgstr "Paket hazır"
 
-#: admin/class-admin-page.php:1111
+#: admin/class-admin-page.php:1151
 msgid "Your site is packaged"
 msgstr "Siteniz paketlendi"
 
-#: admin/class-admin-page.php:1113
+#: admin/class-admin-page.php:1153
 msgid "Download the archives below and import them on your new host. This site has not been changed."
-msgstr "Aşağıdaki arşivleri indirin ve yeni sunucunuzda içe aktarın. Bu site değiştirilmedi."
+msgstr "Aşağıdaki arşivleri indirin ve yeni sunucunuzda içe aktarın. Bu sitede hiçbir değişiklik yapılmadı."
 
-#: admin/class-admin-page.php:1123
+#: admin/class-admin-page.php:1163
 msgid "Download"
 msgstr "İndir"
 
-#: admin/class-admin-page.php:1130
+#: admin/class-admin-page.php:1170
 msgid "Moving to KapsuleHost instead? Use the token path and we do all of this for you, with nothing to download."
-msgstr "Bunun yerine KapsuleHost'a mı taşınıyorsunuz? Token yolunu kullanın, tüm bunları sizin için yapalım, indirmenize gerek kalmadan."
+msgstr "Bunun yerine KapsuleHost'a mı taşınıyorsunuz? Token yolunu kullanın; tüm bunları sizin için yapalım, indirmenize gerek kalmadan."
 
-#: admin/class-admin-page.php:1134
+#: admin/class-admin-page.php:1174
 msgid "Delete the package and start over"
 msgstr "Paketi sil ve baştan başla"
 
-#: admin/class-admin-page.php:1152
-#: admin/class-admin-page.php:1219
-#: admin/class-admin-page.php:1282
+#: admin/class-admin-page.php:1192
+#: admin/class-admin-page.php:1259
+#: admin/class-admin-page.php:1322
 msgid "Move stopped"
 msgstr "Taşıma durduruldu"
 
-#: admin/class-admin-page.php:1153
+#: admin/class-admin-page.php:1193
 msgid "We stopped before anything changed"
-msgstr "Hiçbir şey değişmeden durdurduk"
+msgstr "Herhangi bir değişiklik yapılmadan durdurduk"
 
-#: admin/class-admin-page.php:1155
+#: admin/class-admin-page.php:1195
 msgid "The move did not finish, so we stopped rather than leave you with half a site. Your site here is untouched and still serving visitors."
-msgstr "Taşıma tamamlanmadı, bu yüzden size yarım bir site bırakmamak için durdurduk. Buradaki siteniz dokunulmamış durumda ve hâlâ ziyaretçilere hizmet veriyor."
+msgstr "Taşıma tamamlanmadı, bu nedenle yarım bir siteyle kalmamanız için durdurduk. Buradaki siteniz dokunulmamış durumda ve ziyaretçilerinize hizmet vermeye devam ediyor."
 
-#: admin/class-admin-page.php:1166
+#: admin/class-admin-page.php:1206
 msgid "Try again"
 msgstr "Tekrar dene"
 
-#: admin/class-admin-page.php:1167
-#: admin/class-admin-page.php:1312
-#: admin/class-admin-page.php:1330
+#: admin/class-admin-page.php:1207
+#: admin/class-admin-page.php:1352
+#: admin/class-admin-page.php:1370
 msgid "Contact support"
-msgstr "Desteğe başvur"
+msgstr "Destek ile iletişime geç"
 
-#: admin/class-admin-page.php:1220
+#: admin/class-admin-page.php:1260
 msgid "This move was stopped"
 msgstr "Bu taşıma durduruldu"
 
-#: admin/class-admin-page.php:1224
+#: admin/class-admin-page.php:1264
 msgid "You stopped this move from this screen. Nothing further is being sent and nothing on this site was changed."
-msgstr "Bu taşımayı bu ekrandan durdurdunuz. Başka bir şey gönderilmiyor ve bu sitede hiçbir şey değiştirilmedi."
+msgstr "Bu taşımayı bu ekrandan durdurdunuz. Başka hiçbir şey gönderilmiyor ve bu sitede hiçbir değişiklik yapılmadı."
 
-#: admin/class-admin-page.php:1225
+#: admin/class-admin-page.php:1265
 msgid "This move was stopped from your KapsuleHost panel. Nothing further is being sent and nothing on this site was changed."
-msgstr "Bu taşıma KapsuleHost panelinizden durduruldu. Başka bir şey gönderilmiyor ve bu sitede hiçbir şey değiştirilmedi."
+msgstr "Bu taşıma KapsuleHost panelinizden durduruldu. Başka hiçbir şey gönderilmiyor ve bu sitede hiçbir değişiklik yapılmadı."
 
-#: admin/class-admin-page.php:1231
+#: admin/class-admin-page.php:1271
 msgid "Your site here is untouched and still serving visitors exactly as it was. The pieces that had already reached KapsuleHost are discarded, so starting again starts from the beginning rather than from a half delivered copy."
-msgstr "Buradaki siteniz dokunulmamış durumda ve tam olarak eskisi gibi ziyaretçilere hizmet vermeye devam ediyor. KapsuleHost'a ulaşmış olan parçalar silindi, bu yüzden yeniden başlamak yarım kalmış bir kopyadan değil baştan başlar."
+msgstr "Buradaki siteniz dokunulmamış durumda ve ziyaretçilerinize aynen hizmet vermeye devam ediyor. KapsuleHost'a ulaşmış olan parçalar silindi, bu nedenle yeniden başlamak yarım kalmış bir kopyadan değil, baştan başlamak anlamına gelir."
 
-#: admin/class-admin-page.php:1235
+#: admin/class-admin-page.php:1275
 msgid "Start over"
 msgstr "Baştan başla"
 
-#: admin/class-admin-page.php:1236
-#: admin/class-admin-page.php:1268
+#: admin/class-admin-page.php:1276
+#: admin/class-admin-page.php:1308
 msgid "Open my panel"
 msgstr "Panelimi aç"
 
-#: admin/class-admin-page.php:1253
+#: admin/class-admin-page.php:1293
 msgid "Checking"
 msgstr "Kontrol ediliyor"
 
-#: admin/class-admin-page.php:1254
+#: admin/class-admin-page.php:1294
 msgid "Your files are with KapsuleHost"
 msgstr "Dosyalarınız KapsuleHost'ta"
 
-#: admin/class-admin-page.php:1255
+#: admin/class-admin-page.php:1295
 msgid "Everything uploaded from this site. We cannot reach KapsuleHost right now to tell you what has happened since, so we will not guess: open your panel to see where the move has got to."
-msgstr "Bu siteden her şey yüklendi. Şu anda KapsuleHost'a ulaşamıyoruz, bu yüzden o andan beri ne olduğunu size söyleyemiyoruz ve tahmin de yürütmeyeceğiz: taşımanın hangi aşamada olduğunu görmek için panelinizi açın."
+msgstr "Bu siteden her şey yüklendi. Şu anda KapsuleHost'a ulaşamıyoruz ve sonrasında ne olduğunu size söyleyemiyoruz, bu yüzden tahmin yürütmeyeceğiz: taşımanın nereye geldiğini görmek için panelinizi açın."
 
-#: admin/class-admin-page.php:1264
+#: admin/class-admin-page.php:1304
 msgid "This site has not been changed and is still serving visitors, whatever the move is doing."
-msgstr "Bu site değiştirilmedi ve taşıma işlemi ne yaparsa yapsın ziyaretçilere hizmet vermeye devam ediyor."
+msgstr "Bu site değiştirilmedi ve taşıma işlemi ne yaparsa yapsın, ziyaretçilere hizmet vermeye devam ediyor."
 
-#: admin/class-admin-page.php:1267
+#: admin/class-admin-page.php:1307
 msgid "Check again"
 msgstr "Tekrar kontrol et"
 
-#: admin/class-admin-page.php:1283
+#: admin/class-admin-page.php:1323
 msgid "The move did not finish"
 msgstr "Taşıma tamamlanmadı"
 
-#: admin/class-admin-page.php:1284
+#: admin/class-admin-page.php:1324
 msgid "Your files reached KapsuleHost, but putting the site together did not finish. Nothing here has changed: this site is untouched and still serving visitors, and nothing has moved for anyone visiting it."
-msgstr "Dosyalarınız KapsuleHost'a ulaştı, ancak sitenin bir araya getirilmesi tamamlanmadı. Burada hiçbir şey değişmedi: bu site dokunulmamış durumda ve ziyaretçilere hizmet vermeye devam ediyor, siteyi ziyaret edenler için hiçbir şey taşınmadı."
+msgstr "Dosyalarınız KapsuleHost'a ulaştı, ancak sitenin bir araya getirilmesi tamamlanmadı. Burada hiçbir şey değişmedi: bu site dokunulmamış durumda ve ziyaretçilere hizmet vermeye devam ediyor, ziyaret eden hiç kimse için bir şey taşınmadı."
 
-#: admin/class-admin-page.php:1289
-#: assets/js/migrator.js:442
+#: admin/class-admin-page.php:1329
+#: assets/js/migrator.js:666
 msgid "Stopped at"
 msgstr "Durduğu yer"
 
-#: admin/class-admin-page.php:1293
+#: admin/class-admin-page.php:1333
 msgid "Files placed"
 msgstr "Dosyalar yerleştirildi"
 
-#: admin/class-admin-page.php:1294
+#: admin/class-admin-page.php:1334
 msgid "Yes"
 msgstr "Evet"
 
-#: admin/class-admin-page.php:1294
+#: admin/class-admin-page.php:1334
 msgid "No"
 msgstr "Hayır"
 
-#: admin/class-admin-page.php:1297
-#: admin/class-admin-page.php:1427
+#: admin/class-admin-page.php:1337
+#: admin/class-admin-page.php:1467
 msgid "Database"
 msgstr "Veritabanı"
 
-#: admin/class-admin-page.php:1298
-#: admin/class-admin-page.php:1428
+#: admin/class-admin-page.php:1338
+#: admin/class-admin-page.php:1468
 msgid "Imported"
 msgstr "İçe aktarıldı"
 
-#: admin/class-admin-page.php:1298
-#: admin/class-admin-page.php:1428
+#: admin/class-admin-page.php:1338
+#: admin/class-admin-page.php:1468
 msgid "Not imported"
 msgstr "İçe aktarılmadı"
 
-#: admin/class-admin-page.php:1311
+#: admin/class-admin-page.php:1351
 msgid "See the details in my panel"
-msgstr "Ayrıntıları panelimde gör"
+msgstr "Panelimde ayrıntıları gör"
 
-#: admin/class-admin-page.php:1313
+#: admin/class-admin-page.php:1353
 msgid "Start over from here"
-msgstr "Buradan baştan başla"
+msgstr "Buradan yeniden başla"
 
-#: admin/class-admin-page.php:1325
+#: admin/class-admin-page.php:1365
 msgid "Needs a look"
-msgstr "İnceleme gerekiyor"
+msgstr "İncelenmeli"
 
-#: admin/class-admin-page.php:1326
+#: admin/class-admin-page.php:1366
 msgid "Part of your site moved"
 msgstr "Sitenizin bir kısmı taşındı"
 
-#: admin/class-admin-page.php:1327
+#: admin/class-admin-page.php:1367
 msgid "Some of the move finished and some of it did not, so we are not calling it done. Your panel lists exactly what came across and what is still here. This site is untouched and still serving visitors."
-msgstr "Taşıma işleminin bir kısmı tamamlandı, bir kısmı tamamlanmadı, bu yüzden bunu tamamlanmış olarak değerlendirmiyoruz. Paneliniz tam olarak neyin aktarıldığını ve neyin hâlâ burada olduğunu listeliyor. Bu site dokunulmamış durumda ve ziyaretçilere hizmet vermeye devam ediyor."
+msgstr "Taşımanın bir kısmı tamamlandı ve bir kısmı tamamlanmadı, bu nedenle bunu bitti olarak işaretlemiyoruz. Panelinizde neyin aktarıldığı ve neyin hâlâ burada olduğu tam olarak listeleniyor. Bu site dokunulmamış durumda ve ziyaretçilere hizmet vermeye devam ediyor."
 
-#: admin/class-admin-page.php:1329
+#: admin/class-admin-page.php:1369
 msgid "See what moved"
-msgstr "Nelerin taşındığını gör"
+msgstr "Neyin taşındığını gör"
 
-#: admin/class-admin-page.php:1345
-#: admin/class-admin-page.php:1512
+#: admin/class-admin-page.php:1385
+#: admin/class-admin-page.php:1567
 msgid "Working"
-msgstr "İşleniyor"
+msgstr "Çalışıyor"
 
-#: admin/class-admin-page.php:1346
+#: admin/class-admin-page.php:1386
 msgid "KapsuleHost is putting your site together"
 msgstr "KapsuleHost sitenizi bir araya getiriyor"
 
-#: admin/class-admin-page.php:1347
+#: admin/class-admin-page.php:1387
 msgid "Everything uploaded from this site. KapsuleHost is unpacking it, importing your database and checking the result. We will show you the outcome here, and it is safe to close this tab."
 msgstr "Bu siteden her şey yüklendi. KapsuleHost dosyaları açıyor, veritabanınızı içe aktarıyor ve sonucu kontrol ediyor. Sonucu size burada göstereceğiz ve bu sekmeyi kapatmanız güvenlidir."
 
-#: admin/class-admin-page.php:1365
+#: admin/class-admin-page.php:1405
 msgid "<strong>This site has not been changed.</strong> It is still live and serving visitors, and nothing moves for them until you point your domain at the new copy."
-msgstr "<strong>Bu site değiştirilmedi.</strong> Hâlâ yayında ve ziyaretçilere hizmet veriyor; alan adınızı yeni kopyaya yönlendirene kadar ziyaretçiler için hiçbir şey değişmiyor."
+msgstr "<strong>Bu site değiştirilmedi.</strong> Hâlâ yayında ve ziyaretçilere hizmet veriyor, siz alan adınızı yeni kopyaya yönlendirene kadar onlar için hiçbir şey değişmeyecek."
 
-#: admin/class-admin-page.php:1369
+#: admin/class-admin-page.php:1409
 msgid "Follow it in my panel"
-msgstr "Panelimde takip et"
+msgstr "Panelimden takip et"
 
-#: admin/class-admin-page.php:1408
+#: admin/class-admin-page.php:1448
 msgid "Move complete"
 msgstr "Taşıma tamamlandı"
 
-#: admin/class-admin-page.php:1409
+#: admin/class-admin-page.php:1449
 msgid "Your site is on KapsuleHost"
 msgstr "Siteniz KapsuleHost'ta"
 
 #. translators: %s: number of files this site sent, already formatted for the locale.
-#: admin/class-admin-page.php:1412
+#: admin/class-admin-page.php:1452
 msgid "KapsuleHost has finished putting your site together from the %s files this site sent. Open the copy and look around before you point your domain at it."
 msgstr "KapsuleHost, bu sitenin gönderdiği %s dosyadan sitenizi bir araya getirmeyi tamamladı. Alan adınızı yönlendirmeden önce kopyayı açın ve inceleyin."
 
-#: admin/class-admin-page.php:1419
+#: admin/class-admin-page.php:1459
 msgid "Files sent"
 msgstr "Gönderilen dosyalar"
 
-#: admin/class-admin-page.php:1423
+#: admin/class-admin-page.php:1463
 msgid "Transferred"
 msgstr "Aktarıldı"
 
-#: admin/class-admin-page.php:1431
+#: admin/class-admin-page.php:1471
 msgid "Your copy"
 msgstr "Kopyanız"
 
-#: admin/class-admin-page.php:1432
+#: admin/class-admin-page.php:1472
 msgid "in your panel"
 msgstr "panelinizde"
 
-#: admin/class-admin-page.php:1438
+#: admin/class-admin-page.php:1478
 msgid "<strong>This site has not been changed.</strong> It is still live and serving visitors. Nothing moves for your visitors until you point your domain at the new copy."
-msgstr "<strong>Bu site değiştirilmedi.</strong> Hâlâ yayında ve ziyaretçilere hizmet veriyor. Alan adınızı yeni kopyaya yönlendirene kadar ziyaretçileriniz için hiçbir şey değişmiyor."
+msgstr "<strong>Bu site değiştirilmedi.</strong> Hâlâ yayında ve ziyaretçilere hizmet veriyor. Siz alan adınızı yeni kopyaya yönlendirene kadar ziyaretçileriniz için hiçbir şey değişmeyecek."
 
-#: admin/class-admin-page.php:1443
+#: admin/class-admin-page.php:1483
 msgid "Open the migrated site"
 msgstr "Taşınan siteyi aç"
 
-#: admin/class-admin-page.php:1446
+#: admin/class-admin-page.php:1486
 msgid "See the move in my panel"
-msgstr "Taşımayı panelimde gör"
+msgstr "Taşıma işlemini panelimde görüntüle"
 
-#: admin/class-admin-page.php:1448
+#: admin/class-admin-page.php:1488
 msgid "Back to my panel"
 msgstr "Panelime geri dön"
 
-#: admin/class-admin-page.php:1466
+#: admin/class-admin-page.php:1520
+#: assets/js/migrator.js:230
 msgid "Waiting to start"
-msgstr "Başlamak için bekleniyor"
+msgstr "Başlatılması bekleniyor"
 
-#: admin/class-admin-page.php:1467
-msgid "Checking what arrived"
-msgstr "Gelen veriler kontrol ediliyor"
+#: admin/class-admin-page.php:1521
+#: assets/js/migrator.js:231
+msgid "Sending your site to KapsuleHost"
+msgstr "Siteniz KapsuleHost'a gönderiliyor"
 
-#: admin/class-admin-page.php:1468
-msgid "Connecting"
-msgstr "Bağlanılıyor"
-
-#: admin/class-admin-page.php:1470
-msgid "Building your new environment"
-msgstr "Yeni ortamınız oluşturuluyor"
-
-#: admin/class-admin-page.php:1471
-msgid "Moving your files to the server"
-msgstr "Dosyalarınız sunucuya taşınıyor"
-
-#: admin/class-admin-page.php:1472
-msgid "Unpacking your files"
-msgstr "Dosyalarınız açılıyor"
-
-#: admin/class-admin-page.php:1473
-msgid "Putting the files in place"
-msgstr "Dosyalar yerleştirililiyor"
-
-#: admin/class-admin-page.php:1474
-#: admin/class-admin-page.php:1508
-#: assets/js/migrator.js:376
-#: assets/js/migrator.js:565
-msgid "Copying files"
-msgstr "Dosyalar kopyalanıyor"
-
-#: admin/class-admin-page.php:1475
-msgid "Importing your database"
-msgstr "Veritabanınız içe aktarılıyor"
-
-#: admin/class-admin-page.php:1476
-msgid "Rewriting the addresses in your site"
-msgstr "Sitenizdeki adresler yeniden yazılıyor"
-
-#: admin/class-admin-page.php:1477
-msgid "Checking the result serves"
-msgstr "Sonuç kontrol ediliyor"
-
-#: admin/class-admin-page.php:1478
-msgid "Finished"
-msgstr "Tamamlandı"
-
-#: admin/class-admin-page.php:1506
-#: assets/js/migrator.js:563
+#: admin/class-admin-page.php:1522
+#: admin/class-admin-page.php:1561
+#: assets/js/migrator.js:232
+#: assets/js/migrator.js:843
 msgid "Checking the connection"
 msgstr "Bağlantı kontrol ediliyor"
 
-#: admin/class-admin-page.php:1507
-#: assets/js/migrator.js:564
+#: admin/class-admin-page.php:1523
+#: assets/js/migrator.js:233
+msgid "Connecting to your old host"
+msgstr "Eski barındırma hizmetinize bağlanılıyor"
+
+#: admin/class-admin-page.php:1524
+#: admin/class-admin-page.php:1562
+#: assets/js/migrator.js:234
+#: assets/js/migrator.js:844
 msgid "Counting your files"
 msgstr "Dosyalarınız sayılıyor"
 
-#: admin/class-admin-page.php:1509
-#: assets/js/migrator.js:477
-#: assets/js/migrator.js:566
+#: admin/class-admin-page.php:1525
+#: assets/js/migrator.js:235
+msgid "Preparing space on KapsuleHost"
+msgstr "KapsuleHost'ta alan hazırlanıyor"
+
+#: admin/class-admin-page.php:1526
+#: assets/js/migrator.js:236
+msgid "Receiving your site"
+msgstr "Siteniz alınıyor"
+
+#: admin/class-admin-page.php:1527
+#: assets/js/migrator.js:237
+msgid "Unpacking your files"
+msgstr "Dosyalarınız açılıyor"
+
+#: admin/class-admin-page.php:1528
+#: assets/js/migrator.js:238
+msgid "Putting your files in place"
+msgstr "Dosyalarınız yerleştiriliyor"
+
+#: admin/class-admin-page.php:1529
+#: assets/js/migrator.js:239
+msgid "Copying your files across"
+msgstr "Dosyalarınız kopyalanıyor"
+
+#: admin/class-admin-page.php:1530
+#: assets/js/migrator.js:240
+msgid "Importing your database"
+msgstr "Veritabanınız içe aktarılıyor"
+
+#: admin/class-admin-page.php:1531
+#: assets/js/migrator.js:241
+msgid "Updating the addresses inside your site"
+msgstr "Sitenizdeki adresler güncelleniyor"
+
+#: admin/class-admin-page.php:1532
+#: assets/js/migrator.js:242
+msgid "Checking the copy that arrived"
+msgstr "Gelen kopya kontrol ediliyor"
+
+#: admin/class-admin-page.php:1533
+#: assets/js/migrator.js:243
+msgid "Done"
+msgstr "Tamamlandı"
+
+#: admin/class-admin-page.php:1563
+#: assets/js/migrator.js:600
+#: assets/js/migrator.js:845
+msgid "Copying files"
+msgstr "Dosyalar kopyalanıyor"
+
+#: admin/class-admin-page.php:1564
+#: assets/js/migrator.js:701
+#: assets/js/migrator.js:846
 msgid "Copying database"
 msgstr "Veritabanı kopyalanıyor"
 
-#: admin/class-admin-page.php:1510
-#: assets/js/migrator.js:567
+#: admin/class-admin-page.php:1565
+#: assets/js/migrator.js:847
 msgid "KapsuleHost is working on it"
 msgstr "KapsuleHost üzerinde çalışıyor"
 
-#: admin/class-admin-page.php:1511
-#: assets/js/migrator.js:568
+#: admin/class-admin-page.php:1566
+#: assets/js/migrator.js:848
 msgid "Packaging"
 msgstr "Paketleniyor"
 
 #. translators: %s: a formatted number of gigabytes, e.g. "5.9".
-#: admin/class-admin-page.php:1526
+#: admin/class-admin-page.php:1581
 #: assets/js/migrator.js:68
 msgid "%s GB"
 msgstr "%s GB"
 
 #. translators: %s: a formatted number of megabytes.
-#: admin/class-admin-page.php:1530
+#: admin/class-admin-page.php:1585
 #: assets/js/migrator.js:69
 msgid "%s MB"
 msgstr "%s MB"
 
 #. translators: %s: a formatted number of kilobytes.
-#: admin/class-admin-page.php:1534
+#: admin/class-admin-page.php:1589
 #: assets/js/migrator.js:70
 msgid "%s KB"
 msgstr "%s KB"
 
 #. translators: %s: a formatted number of bytes.
-#: admin/class-admin-page.php:1537
+#: admin/class-admin-page.php:1592
 #: assets/js/migrator.js:71
 msgid "%s B"
 msgstr "%s B"
 
 #: includes/class-packager.php:26
 msgid "This server cannot create archives, so we cannot package your site. Ask your host to enable the PHP zip extension, then contact KapsuleHost support if it still fails."
-msgstr "Bu sunucu arşiv oluşturamadığı için sitenizi paketleyemiyoruz. Barındırma sağlayıcınızdan PHP zip eklentisini etkinleştirmesini isteyin, ardından sorun devam ederse KapsuleHost destek ekibiyle iletişime geçin."
+msgstr "Bu sunucu arşiv oluşturamıyor, bu nedenle sitenizi paketleyemiyoruz. Barındırma sağlayıcınızdan PHP zip eklentisini etkinleştirmesini isteyin, ardından sorun devam ederse KapsuleHost destek ekibiyle iletişime geçin."
 
 #. translators: %s: the placeholder token found in the export.
 #: includes/class-packager.php:467
 msgid "We built a copy of your database and then found it was not safe to send: it still contains an internal placeholder (%s) where your content has a percent sign. Sending it would have changed your links, styling and settings. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message."
-msgstr "Veritabanınızın bir kopyasını oluşturduk ancak gönderilmesinin güvenli olmadığını tespit ettik: içeriğinizde yüzde işareti bulunduğu yerde hâlâ dahili bir yer tutucu (%s) içeriyor. Gönderilmesi bağlantılarınızı, stil ayarlarınızı ve yapılandırmalarınızı değiştirebilirdi. Hiçbir şey yüklenmedi ve sitenize dokunulmadı. Lütfen KapsuleHost destek ekibiyle iletişime geçin ve bu mesajı iletin."
+msgstr "Veritabanınızın bir kopyasını oluşturduk ancak gönderilmesinin güvenli olmadığını tespit ettik: içeriğinizde yüzde işareti olan yerde hâlâ dahili bir yer tutucu (%s) bulunuyor. Gönderilmesi halinde bağlantılarınız, stil ayarlarınız ve yapılandırmalarınız değişebilirdi. Hiçbir şey yüklenmedi ve siteniz değiştirilmedi. Lütfen KapsuleHost destek ekibiyle iletişime geçin ve bu mesajı belirtin."
 
 #: includes/class-uploader.php:112
 msgid "We could not read a prepared piece of your site from disk. Free up space on the server and start the migration again."
-msgstr "Sitenizdeki hazırlanmış bir parça diskten okunamadı. Sunucuda yer açın ve taşıma işlemini yeniden başlatın."
+msgstr "Sitenizin hazırlanmış bir parçası diskten okunamadı. Sunucuda yer açın ve taşıma işlemini yeniden başlatın."
 
 #. translators: %s: an HTTP status code.
 #: includes/class-uploader.php:135
@@ -593,7 +615,7 @@ msgstr "hazırlanan dosya açılamadı"
 #. translators: %s: the size of the piece that was rejected, e.g. "50".
 #: includes/class-uploader.php:218
 msgid "One piece of your site (%s MB) was larger than the server would accept. This is a limit on our side, not a problem with your site. Contact support and we will raise it."
-msgstr "Sitenizin bir parçası (%s MB) sunucunun kabul edeceğinden daha büyüktü. Bu bizim tarafımızdaki bir sınırlama, sitenizle ilgili bir sorun değil. Destek ekibiyle iletişime geçin, limiti artıracağız."
+msgstr "Sitenizin bir parçası (%s MB) sunucunun kabul edeceğinden daha büyüktü. Bu bizim tarafımızda bir sınırlama olup sitenizle ilgili bir sorun değildir. Destek ekibiyle iletişime geçin, sınırı yükselteceğiz."
 
 #: includes/class-uploader.php:223
 msgid "Your migration token is no longer valid. Generate a new one in your KapsuleHost panel and paste it in again."
@@ -610,160 +632,165 @@ msgstr "Sunucu, sitenizin hazırlanmış parçalarından birini okuyamadı. Yeni
 #. translators: %s: the HTTP status code the server returned.
 #: includes/class-uploader.php:231
 msgid "The server refused a piece of your site (code %s). Your site has not been changed. Contact support and we will look at it."
-msgstr "Sunucu sitenizin bir parçasını reddetti (kod %s). Sitenizde değişiklik yapılmadı. Destek ekibiyle iletişime geçin, inceleyeceğiz."
+msgstr "Sunucu sitenizin bir parçasını reddetti (kod %s). Sitenizde herhangi bir değişiklik yapılmadı. Destek ekibiyle iletişime geçin, inceleyeceğiz."
 
-#: assets/js/migrator.js:77
+#: assets/js/migrator.js:87
 msgid "less than a minute left"
 msgstr "bir dakikadan az kaldı"
 
 #. translators: %s: whole number of minutes remaining.
-#: assets/js/migrator.js:82
+#: assets/js/migrator.js:90
 msgid "about %s minute left"
 msgid_plural "about %s minutes left"
 msgstr[0] "yaklaşık %s dakika kaldı"
 msgstr[1] "yaklaşık %s dakika kaldı"
 
 #. translators: %s: whole number of hours remaining.
-#: assets/js/migrator.js:87
+#: assets/js/migrator.js:94
 msgid "about %s hour left"
 msgid_plural "about %s hours left"
 msgstr[0] "yaklaşık %s saat kaldı"
 msgstr[1] "yaklaşık %s saat kaldı"
 
 #. translators: 1: whole hours remaining, 2: additional minutes remaining.
-#: assets/js/migrator.js:90
+#: assets/js/migrator.js:97
 msgid "about %1$s h %2$s min left"
-msgstr "yaklaşık %1$s saat %2$s dakika kaldı"
+msgstr "yaklaşık %1$s sa %2$s dk kaldı"
 
-#: assets/js/migrator.js:192
+#: assets/js/migrator.js:364
 msgid "Checking your site..."
 msgstr "Siteniz kontrol ediliyor..."
 
-#: assets/js/migrator.js:207
+#: assets/js/migrator.js:379
 msgid "We could not reach KapsuleHost just now. Check this server can get online, then try again."
-msgstr "KapsuleHost'a şu anda ulaşılamadı. Bu sunucunun internete çıkabildiğini kontrol edin ve tekrar deneyin."
+msgstr "Şu anda KapsuleHost'a ulaşılamadı. Bu sunucunun internete bağlı olduğunu kontrol edin, ardından tekrar deneyin."
 
-#: assets/js/migrator.js:216
+#: assets/js/migrator.js:388
 msgid "Packaging..."
 msgstr "Paketleniyor..."
 
-#: assets/js/migrator.js:226
-#: assets/js/migrator.js:230
+#: assets/js/migrator.js:398
+#: assets/js/migrator.js:402
 msgid "We could not start packaging. Please try again."
 msgstr "Paketleme başlatılamadı. Lütfen tekrar deneyin."
 
-#: assets/js/migrator.js:237
+#: assets/js/migrator.js:409
 msgid "Cleaning up..."
 msgstr "Temizleniyor..."
 
 #. translators: 1: which piece is moving, 2: estimated time remaining. Joined into one line.
-#: assets/js/migrator.js:294
+#: assets/js/migrator.js:509
+#: assets/js/migrator.js:513
 msgid "%1$s, %2$s"
 msgstr "%1$s, %2$s"
 
 #. translators: %s: the HTTP status code the server returned, e.g. "502".
-#: assets/js/migrator.js:361
+#: assets/js/migrator.js:585
 msgid "the connection returned %s"
-msgstr "bağlantı %s kodunu döndürdü"
+msgstr "bağlantı %s döndürdü"
 
-#: assets/js/migrator.js:363
-#: assets/js/migrator.js:440
+#: assets/js/migrator.js:587
+#: assets/js/migrator.js:664
 msgid "the connection dropped"
 msgstr "bağlantı koptu"
 
-#: assets/js/migrator.js:371
+#: assets/js/migrator.js:595
 msgid "Keep this tab open."
 msgstr "Bu sekmeyi açık tutun."
 
-#: assets/js/migrator.js:372
+#: assets/js/migrator.js:596
 msgid "The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived."
-msgstr "Taşıma buradan yönetiliyor, bu nedenle sekmeyi kapatırsanız işlem duraklar. Kapatsanız bile bir şey kaybedilmez: bu sayfayı yeniden açın, işlem gelen son parçadan devam eder."
+msgstr "Taşıma işlemi buradan yürütülüyor, bu nedenle sekmeyi kapatmak işlemi duraklatır. Kapatırsanız hiçbir şey kaybolmaz: bu sayfayı yeniden açın ve ulaşan son parçadan devam eder."
 
-#: assets/js/migrator.js:393
+#: assets/js/migrator.js:617
 msgid "Retrying"
 msgstr "Yeniden deneniyor"
 
-#: assets/js/migrator.js:394
+#: assets/js/migrator.js:618
 msgid "The connection dropped"
 msgstr "Bağlantı koptu"
 
 #. translators: %s: the number of the piece being retried.
-#: assets/js/migrator.js:396
+#: assets/js/migrator.js:620
 msgid "We are retrying piece %s. Everything already sent is kept, so this carries on from where it stopped rather than starting again."
-msgstr "%s numaralı parça yeniden gönderiliyor. Daha önce gönderilen her şey korundu, işlem baştan başlamak yerine kaldığı yerden devam ediyor."
+msgstr "%s numaralı parça yeniden deneniyor. Zaten gönderilen her şey korundu, bu nedenle baştan başlamak yerine kaldığı yerden devam ediyor."
 
-#: assets/js/migrator.js:399
+#: assets/js/migrator.js:623
 msgid "Attempt"
 msgstr "Deneme"
 
-#: assets/js/migrator.js:400
+#: assets/js/migrator.js:624
 msgid "Nothing has been lost. Your site is untouched and still serving visitors. If this keeps failing we will tell you exactly what to do next."
-msgstr "Hiçbir şey kaybedilmedi. Siteniz değişmedi ve ziyaretçilere hizmet vermeye devam ediyor. Bu hata devam ederse size tam olarak ne yapmanız gerektiğini bildireceğiz."
+msgstr "Hiçbir şey kaybolmadı. Siteniz değişmedi ve ziyaretçilere hizmet vermeye devam ediyor. Bu başarısız olmaya devam ederse, sırada ne yapmanız gerektiğini tam olarak size bildireceğiz."
 
 #. translators: 1: seconds until the next attempt, 2: the attempt number, 3: total attempts.
-#: assets/js/migrator.js:408
+#: assets/js/migrator.js:632
 msgid "retrying in %1$s second, attempt %2$s of %3$s"
 msgid_plural "retrying in %1$s seconds, attempt %2$s of %3$s"
 msgstr[0] "%1$s saniye içinde yeniden denenecek, %2$s/%3$s deneme"
 msgstr[1] "%1$s saniye içinde yeniden denenecek, %2$s/%3$s deneme"
 
 #. translators: 1: the attempt number, 2: total attempts.
-#: assets/js/migrator.js:413
+#: assets/js/migrator.js:637
 msgid "retrying now, attempt %1$s of %2$s"
 msgstr "şimdi yeniden deneniyor, %1$s/%2$s deneme"
 
-#: assets/js/migrator.js:436
+#: assets/js/migrator.js:660
 msgid "Paused"
 msgstr "Duraklatıldı"
 
-#: assets/js/migrator.js:437
+#: assets/js/migrator.js:661
 msgid "We have paused the move"
-msgstr "Taşımayı duraklattık"
+msgstr "Taşıma işlemini duraklattık"
 
 #. translators: 1: how many attempts were made, 2: why the connection failed.
-#: assets/js/migrator.js:439
+#: assets/js/migrator.js:663
 msgid "We could not reach KapsuleHost after %1$s tries (%2$s). Nothing is lost. Everything already copied is still there, and this site has not been changed."
-msgstr "%1$s denemeden sonra KapsuleHost'a ulaşılamadı (%2$s). Hiçbir şey kaybedilmedi. Kopyalanan her şey yerinde ve bu site değiştirilmedi."
+msgstr "%1$s denemeden sonra KapsuleHost'a ulaşılamadı (%2$s). Hiçbir şey kaybolmadı. Zaten kopyalanan her şey hâlâ orada ve bu site değiştirilmedi."
 
 #. translators: %s: describes which piece the transfer stopped on, e.g. "piece 57 of 119".
-#: assets/js/migrator.js:444
+#: assets/js/migrator.js:668
 msgid "paused at %s"
 msgstr "%s konumunda duraklatıldı"
 
-#: assets/js/migrator.js:445
+#: assets/js/migrator.js:669
 msgid "Check this server can reach the internet, then pick up where you left off. Nothing needs to be re-sent."
-msgstr "Bu sunucunun internete erişebildiğini kontrol edin, ardından kaldığınız yerden devam edin. Hiçbir şeyin yeniden gönderilmesine gerek yok."
+msgstr "Bu sunucunun internete ulaşabildiğini kontrol edin, ardından kaldığınız yerden devam edin. Hiçbir şeyin yeniden gönderilmesine gerek yok."
 
-#: assets/js/migrator.js:449
+#: assets/js/migrator.js:673
 msgid "Pick up where it stopped"
 msgstr "Kaldığı yerden devam et"
 
-#: assets/js/migrator.js:478
+#: assets/js/migrator.js:702
 msgid "Copying your database"
 msgstr "Veritabanınız kopyalanıyor"
 
-#: assets/js/migrator.js:479
+#: assets/js/migrator.js:703
 msgid "The files are across. We are copying your database now, which is usually the quickest part."
-msgstr "Dosyalar aktarıldı. Şimdi veritabanınız kopyalanıyor, bu genellikle en hızlı kısımdır."
+msgstr "Dosyalar aktarıldı. Şimdi veritabanınızı kopyalıyoruz, bu genellikle en hızlı kısımdır."
 
-#: assets/js/migrator.js:481
-#: assets/js/migrator.js:628
+#: assets/js/migrator.js:705
+#: assets/js/migrator.js:909
 msgid "database"
 msgstr "veritabanı"
 
-#: assets/js/migrator.js:490
+#: assets/js/migrator.js:714
 msgid "Handing over to KapsuleHost"
 msgstr "KapsuleHost'a devrediliyor"
 
-#: assets/js/migrator.js:492
-msgid "everything sent"
-msgstr "her şey gönderildi"
+#: assets/js/migrator.js:717
+msgid "All files sent. KapsuleHost is finishing the move."
+msgstr "Tüm dosyalar gönderildi. KapsuleHost taşıma işlemini tamamlıyor."
 
-#: assets/js/migrator.js:521
-#: assets/js/migrator.js:543
+#: assets/js/migrator.js:761
+#: assets/js/migrator.js:823
 msgid "we cannot reach KapsuleHost just now, still trying"
-msgstr "KapsuleHost'a şu anda ulaşılamıyor, denemeye devam ediliyor"
+msgstr "şu anda KapsuleHost'a ulaşılamıyor, denemeye devam ediliyor"
 
-#: assets/js/migrator.js:550
+#: assets/js/migrator.js:764
+msgid "we could not read the status from this site just now, still trying"
+msgstr "bu siteden durumu şu anda okuyamadık, denemeye devam ediliyor"
+
+#: assets/js/migrator.js:830
 msgid "Checking..."
 msgstr "Kontrol ediliyor..."
