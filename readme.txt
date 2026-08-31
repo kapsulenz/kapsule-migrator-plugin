@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.5
+Stable tag: 1.5.7
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,15 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.5.7 =
+* Fixed: the status label at the top of this screen did not change as your move progressed. It showed whatever step was running when the page loaded, so it could read one step while the line under the percentage read another.
+* When we cannot read your migration's status, this screen now always records why, so a failure can be explained rather than guessed at.
+
+= 1.5.6 =
+* The wait screen now shows KapsuleHost's own percentage and step wording, so this screen and your panel say the same thing at the same moment.
+* Phase names match your panel word for word. Nine of them used to differ.
+* A status check that fails now names the right party. It used to say KapsuleHost was unreachable when the failure was inside this site.
 
 = 1.5.5 =
 * Fixed: this screen showed 95%, then 97%, then dropped back to 48% when it heard from KapsuleHost. The
