@@ -200,8 +200,25 @@ class Kapsule_Admin_Page {
             return null;
         }
 
+        /*
+         * TELL KAPSULEHOST WHICH LANGUAGE THIS SCREEN IS IN, so it can answer in that language.
+         *
+         * WHY, measured 2026-08-31 across every language this plugin ships. The English words on the
+         * two screens were unified in 1.5.6 and that work was correct: all fourteen phases matched. But
+         * the two catalogues were then TRANSLATED SEPARATELY, this plugin's `.po` files here and the
+         * panel's `migrate.json` over there, so the agreement survived only in English. Measured on the
+         * shipped 1.5.7 artefact against the live panel catalogue: 125 of 210 phase strings differ, in
+         * 14 of the 15 languages. A German customer read "Ihre Dateien werden an den richtigen Ort
+         * gebracht" here and "Dateien werden platziert" there, at the same instant, about the same
+         * moment of the same move. Both are good German. There were two of them.
+         *
+         * `determine_locale()` is the WordPress admin's own answer for the current user, so this asks
+         * in the language the customer is actually reading this page in, not the site default: on a
+         * multilingual site those differ, and the one that matters is the one in front of them.
+         */
         $response = wp_remote_get(
-            KAPSULE_MIGRATOR_API_BASE . '/job-status?token=' . rawurlencode( $token ),
+            KAPSULE_MIGRATOR_API_BASE . '/job-status?token=' . rawurlencode( $token )
+                . '&locale=' . rawurlencode( determine_locale() ),
             array( 'timeout' => $timeout )
         );
         if ( is_wp_error( $response ) ) {
@@ -1315,7 +1332,7 @@ class Kapsule_Admin_Page {
 
         if ( $status === 'FAILED' || $status === 'CANCELLED' ) {
             $why = (string) ( $job['errorMessage'] ?? '' );
-            $at  = $this->phase_label( (string) ( $job['phase'] ?? '' ) );
+            $at  = $this->phase_label( (string) ( $job['phase'] ?? '' ), $job );
             ?>
             <div class="km-card">
                 <div class="km-card-body">
@@ -1377,7 +1394,7 @@ class Kapsule_Admin_Page {
 
         // PENDING, RUNNING, PAUSED, NO_JOB and anything this build has never heard of.
         $pct   = max( 0, min( 99, (int) ( $job['progress'] ?? 0 ) ) );
-        $label = $this->phase_label( (string) ( $job['phase'] ?? '' ) );
+        $label = $this->phase_label( (string) ( $job['phase'] ?? '' ), $job );
         $msg   = (string) ( $job['phaseMessage'] ?? '' );
         ?>
         <div class="km-card">
@@ -1502,20 +1519,55 @@ class Kapsule_Admin_Page {
      * list and this is where those ids become sentences on the customer's own WordPress.
      */
     /**
-     * The phase wording, WORD FOR WORD the same as KPanel's.
+     * The phase wording. KapsuleHost sends it, in this customer's own language, and this renders it.
      *
-     * These strings are not a style choice: every one is copied from `src/lib/migration/display.ts`
-     * in the portal, which is the single function that decides what a phase is called. Nine of the
-     * thirteen used to differ here (this screen said "Looking at your site" while the panel said
-     * "Counting your files", and so on down the list), and a customer watching both screens read two
-     * different accounts of one moment. Jesse raised it five times.
+     * THE PREVIOUS DESIGN WAS RIGHT WHEN IT WAS WRITTEN AND IS NOT ANY MORE, so the reasoning is
+     * corrected here rather than worked around. It said: "the server sends English, and a German
+     * customer should read German on both screens rather than matching English on both. So the SOURCE
+     * STRING is shared and the TRANSLATION stays local." Given a server that could only speak English,
+     * that was the only correct choice available, and it is why this switch exists.
      *
-     * They are kept as gettext calls rather than taken from the server response on purpose: the
-     * server sends English, and a German customer should read German on both screens rather than
-     * matching English on both. So the SOURCE STRING is shared and the TRANSLATION stays local.
-     * If you change wording here, change `display.ts` in the same commit, or the divergence is back.
+     * WHAT IT COST ANYWAY, measured 2026-08-31 on the shipped 1.5.7 artefact against the live panel
+     * catalogue. Sharing the source string makes the two screens agree in ENGLISH ONLY. The
+     * translations were then produced twice, independently: this plugin's `.po` files and the panel's
+     * `messages/<locale>/migrate.json`. Result: **125 of 210 phase strings differ, in 14 of the 15
+     * languages we sell in.** English is the single language that agrees, because English is the one
+     * that was unified. A German customer read "Ihre Dateien werden an den richtigen Ort gebracht"
+     * here and "Dateien werden platziert" there; a Japanese customer disagreed on 13 of 14. Nobody
+     * did anything wrong, and no amount of care could have held two catalogues in step across
+     * fifteen languages forever.
+     *
+     * SO THE SERVER NOW SPEAKS THE CUSTOMER'S LANGUAGE. `fetch_job_state()` sends this admin's
+     * `determine_locale()`, and `job-status` answers with the PANEL'S OWN `job.phase.*` strings in
+     * that language. One catalogue, one set of words, and the two screens cannot drift because there
+     * is no second thing to drift from.
+     *
+     * THE SWITCH BELOW STAYS, AND IT IS NOT DEAD CODE. It is what renders when this plugin is talking
+     * to a portal that does not send the words yet, and when the language we asked in is not the
+     * language we were answered in. In that second case falling back is the whole point: showing a
+     * German customer the English the server sent would be worse than showing them the German we
+     * already have.
      */
-    private function phase_label( string $phase ): string {
+    private function phase_label( string $phase, ?array $job = null ): string {
+        /*
+         * ONLY IF IT IS ACTUALLY IN OUR LANGUAGE. A portal that could not map this admin's locale
+         * answers in its own default, which is English, and rendering that would replace a correct
+         * German sentence with an English one: a regression dressed as a fix. So the language subtag
+         * of what we were answered in must match the language we asked in, and anything else falls
+         * back to the local catalogue below.
+         */
+        if ( is_array( $job ) ) {
+            $sent   = $job['display']['stepLabel'] ?? null;
+            $answer = $job['locale'] ?? null;
+            if ( is_string( $sent ) && '' !== $sent && is_string( $answer ) && '' !== $answer ) {
+                $asked_lang  = strtolower( strtok( str_replace( '_', '-', determine_locale() ), '-' ) );
+                $answer_lang = strtolower( strtok( str_replace( '_', '-', $answer ), '-' ) );
+                if ( $asked_lang === $answer_lang ) {
+                    return $sent;
+                }
+            }
+        }
+
         switch ( $phase ) {
             case 'queued':         return __( 'Waiting to start', 'kapsule-migrator' );
             case 'uploading':      return __( 'Sending your site to KapsuleHost', 'kapsule-migrator' );
