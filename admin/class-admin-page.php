@@ -166,6 +166,20 @@ class Kapsule_Admin_Page {
             // The browser owns the retry loop, so it owns the budget too. See admin.js and
             // Kapsule_Uploader: one ATTEMPT per request, never a sleep inside one.
             'maxAttempts' => Kapsule_Uploader::MAX_ATTEMPTS,
+            /*
+             * THE PHASE TABLE, SHIPPED TO THE BROWSER ALREADY TRANSLATED, so the plugin holds exactly
+             * ONE of them.
+             *
+             * The JS used to carry its own 14-row `PHASE_LABEL` object of `__()` calls beside this
+             * file's own list, which is two tables for one question in one plugin, plus KPanel's as a
+             * third. Two of the three have now collapsed into `job_copy()`: PHP paints the first card
+             * from it and hands the same rows to the poll, so a badge the customer reads at page load
+             * and the badge they read eight seconds later come from the same row of the same table.
+             *
+             * Keyed by the portal's canonical phase id (`display.stepKey`), which is a machine value
+             * with no language in it, and translated HERE where the site's locale is known.
+             */
+            'jobCopy'     => self::job_copy_map(),
         ) );
     }
 
@@ -205,7 +219,29 @@ class Kapsule_Admin_Page {
             array( 'timeout' => $timeout )
         );
         if ( is_wp_error( $response ) ) {
-            update_option( 'kapsule_migration_job_state_error', $response->get_error_message() );
+            /*
+             * THE LINE THAT PUT libcurl ON A CUSTOMER'S SCREEN. It used to be:
+             *
+             *     update_option( 'kapsule_migration_job_state_error', $response->get_error_message() );
+             *
+             * WordPress fills a WP_Error from the curl transport with the transport's own text, so on
+             * 2026-08-31 the option held "cURL error 28: Operation timed out after 15002 milliseconds
+             * with 0 bytes received" and BOTH readers of this option print it: the unreachable card
+             * below, and `ajax_job_status`, which hands it to the browser as `reason`, where the poll
+             * writes it under the percentage. The 15002 is this function's own default timeout, which
+             * is how the string is identifiable as coming from exactly here.
+             *
+             * The raw text is not lost. It goes to the log and to a developer-only option that no
+             * template reads, and the customer gets a sentence about what happened to their move.
+             */
+            $raw = $response->get_error_message();
+            Kapsule_Transport_Message::log( 'job-status read failed', $raw );
+            update_option( 'kapsule_migration_job_state_error_raw', array(
+                'code'    => (string) $response->get_error_code(),
+                'message' => $raw,
+                'at'      => time(),
+            ), false );
+            update_option( 'kapsule_migration_job_state_error', Kapsule_Transport_Message::customer( $raw ) );
             return null;
         }
         if ( (int) wp_remote_retrieve_response_code( $response ) !== 200 ) {
@@ -229,6 +265,9 @@ class Kapsule_Admin_Page {
         $body['fetchedAt'] = time();
         update_option( 'kapsule_migration_job_state', $body );
         delete_option( 'kapsule_migration_job_state_error' );
+        // The developer copy goes with it. A stale raw error left beside a healthy read is a support
+        // reader being handed the wrong incident.
+        delete_option( 'kapsule_migration_job_state_error_raw' );
 
         if ( ! empty( $body['jobId'] ) && is_string( $body['jobId'] ) ) {
             update_option( 'kapsule_migration_job_id', $body['jobId'] );
@@ -362,7 +401,17 @@ class Kapsule_Admin_Page {
         ) );
 
         if ( is_wp_error( $response ) ) {
-            wp_send_json_error( $response->get_error_message() );
+            // THE SAME DEFECT ON THE FIRST SCREEN A CUSTOMER SEES. This sent the transport's own text
+            // straight into the red box under the token field, so a slow network read as a broken
+            // token. The handshake is not on a retry loop, so it gets the stopped() wording, which
+            // promises nothing, wrapped in the one instruction that is actually useful here.
+            $raw = $response->get_error_message();
+            Kapsule_Transport_Message::log( 'handshake failed', $raw );
+            wp_send_json_error( sprintf(
+                /* translators: %s: a short plain description of what went wrong, e.g. "this server could not open a connection to KapsuleHost". */
+                __( 'We could not start the move because %s. Your token is probably fine. Check this server can reach the internet, then try again.', 'kapsule-migrator' ),
+                Kapsule_Transport_Message::stopped( $raw )
+            ) );
             return;
         }
 
@@ -387,7 +436,7 @@ class Kapsule_Admin_Page {
             'data_format' => 'body',
         ) );
 
-        // Scan all files and split into chunks — browser will drive each chunk as a separate AJAX call
+        // Scan all files and split into chunks. The browser drives each chunk as a separate AJAX call.
         $packager = new Kapsule_Packager();
         $files    = $packager->scan_files();
         $chunks   = Kapsule_Packager::build_chunks( $files );
@@ -803,6 +852,7 @@ class Kapsule_Admin_Page {
         // fresher date on it.
         delete_option( 'kapsule_migration_job_state' );
         delete_option( 'kapsule_migration_job_state_error' );
+        delete_option( 'kapsule_migration_job_state_error_raw' );
         // Same reason as the start path: leaving this behind makes the NEXT run skip every piece it
         // thinks it already sent. "Start over" that quietly sends nothing is worse than not resetting.
         Kapsule_Uploader::reset_progress();
@@ -1315,7 +1365,9 @@ class Kapsule_Admin_Page {
 
         if ( $status === 'FAILED' || $status === 'CANCELLED' ) {
             $why = (string) ( $job['errorMessage'] ?? '' );
-            $at  = $this->phase_label( (string) ( $job['phase'] ?? '' ) );
+            // Same one value the live card uses, so "Stopped at" cannot name a different step from the
+            // one the badge was showing a second before the job failed.
+            $at  = $this->phase_label( self::job_phase( $job ) );
             ?>
             <div class="km-card">
                 <div class="km-card-body">
@@ -1375,16 +1427,41 @@ class Kapsule_Admin_Page {
             return;
         }
 
-        // PENDING, RUNNING, PAUSED, NO_JOB and anything this build has never heard of.
-        $pct   = max( 0, min( 99, (int) ( $job['progress'] ?? 0 ) ) );
-        $label = $this->phase_label( (string) ( $job['phase'] ?? '' ) );
-        $msg   = (string) ( $job['phaseMessage'] ?? '' );
+        /*
+         * PENDING, RUNNING, PAUSED, NO_JOB and anything this build has never heard of.
+         *
+         * ONE READ. `$phase` is fetched once, `$copy` is derived from it once, and the badge, the
+         * heading and the body are three fields of that one row. There is no second decision anywhere
+         * on this card for any of them, which is the whole point: see `job_copy()` for the screen a
+         * customer read on 2026-08-31 when there were three.
+         *
+         * The percentage stays the SERVER'S, taken from the same `display` block the panel renders, so
+         * the two surfaces cannot be showing two numbers for one moment.
+         */
+        $phase = self::job_phase( $job );
+        $copy  = self::job_copy( $phase );
+        $disp  = is_array( $job['display'] ?? null ) ? $job['display'] : array();
+        $pct   = max( 0, min( 99, (int) ( $disp['percent'] ?? $job['progress'] ?? 0 ) ) );
+        // The note under the number is the SAME phase wording, never `phaseMessage`. The worker writes
+        // phaseMessage as a free sentence of its own, so printing it here put a fourth author on a card
+        // that is meant to have one, and it is the field an internal error message travels in.
+        $msg   = $copy['badge'];
         ?>
         <div class="km-card">
             <div class="km-card-body">
-                <span class="km-chip" data-state="transferring"><?php echo esc_html( $label ? $label : __( 'Working', 'kapsule-migrator' ) ); ?></span>
-                <h1 class="km-title"><?php echo esc_html__( 'KapsuleHost is putting your site together', 'kapsule-migrator' ); ?></h1>
-                <p class="km-lede"><?php echo esc_html__( 'Everything uploaded from this site. KapsuleHost is unpacking it, importing your database and checking the result. We will show you the outcome here, and it is safe to close this tab.', 'kapsule-migrator' ); ?></p>
+                <?php
+                // THE IDS ARE LOAD-BEARING. `setChip()` and `setHead()` in migrator.js drive exactly
+                // these three, and this card carried none of them, so the poll could refresh the number
+                // and never the words. 1.5.7 added a line to keep the chip fresh which selected
+                // `#km-chip-label`: correct code, pointed at an element that did not exist on this card,
+                // so it matched nothing and the badge stayed frozen at whatever phase was current when
+                // the page loaded. Removing an id here re-freezes the badge silently.
+                ?>
+                <span class="km-chip" id="km-chip" data-state="transferring">
+                    <span id="km-chip-label"><?php echo esc_html( $copy['badge'] ); ?></span>
+                </span>
+                <h1 class="km-title" id="km-head"><?php echo esc_html( $copy['head'] ); ?></h1>
+                <p class="km-lede" id="kapsule-status-text"><?php echo esc_html( $copy['body'] ); ?></p>
 
                 <div class="km-meter">
                     <div class="km-meter-head">
@@ -1400,9 +1477,29 @@ class Kapsule_Admin_Page {
                     </div>
                 </div>
 
+                <?php
+                /*
+                 * THE STALL LINE, AND IT IS EMPTY WHILE THINGS ARE FINE.
+                 *
+                 * When the poll cannot read the job, the old code overwrote the note under the
+                 * percentage with the failure text. That erased the step wording, so the customer lost
+                 * the one true thing on the card AND was handed a libcurl sentence in its place. The
+                 * failure now has its own line and nothing else on the card moves: the badge, the
+                 * heading, the body and the number all hold their last known values, which is what
+                 * makes a stalled step look stalled rather than like a step that is progressing.
+                 *
+                 * Rendered empty and hidden here because the first paint of this card only happens
+                 * when the read SUCCEEDED. It exists so the poll has somewhere to write.
+                 */
+                ?>
+                <div class="km-note" id="km-job-retry" data-tone="warn" style="display:none;">
+                    <?php echo $bang; ?>
+                    <span id="km-job-retry-text"></span>
+                </div>
+
                 <div class="km-note" data-tone="info">
                     <?php echo $info; ?>
-                    <span><?php echo wp_kses( __( '<strong>This site has not been changed.</strong> It is still live and serving visitors, and nothing moves for them until you point your domain at the new copy.', 'kapsule-migrator' ), $bold ); ?></span>
+                    <span><?php echo wp_kses( __( '<strong>This site has not been changed.</strong> It is still live and serving visitors, and nothing moves for them until you point your domain at the new copy. It is safe to close this tab: we will show you the outcome here.', 'kapsule-migrator' ), $bold ); ?></span>
                 </div>
 
                 <div class="km-actions">
@@ -1513,26 +1610,178 @@ class Kapsule_Admin_Page {
      * They are kept as gettext calls rather than taken from the server response on purpose: the
      * server sends English, and a German customer should read German on both screens rather than
      * matching English on both. So the SOURCE STRING is shared and the TRANSLATION stays local.
-     * If you change wording here, change `display.ts` in the same commit, or the divergence is back.
+     *
+     * THE SENTENCE THAT USED TO END THIS BLOCK SAID: "If you change wording here, change display.ts
+     * in the same commit, or the divergence is back." That is a request, not a control, and the
+     * labels drifted anyway. The wording now lives in `job_copy()` below and
+     * `tools/verify-one-phase-source.sh` reads BOTH files and fails on a row that drifts.
      */
     private function phase_label( string $phase ): string {
-        switch ( $phase ) {
-            case 'queued':         return __( 'Waiting to start', 'kapsule-migrator' );
-            case 'uploading':      return __( 'Sending your site to KapsuleHost', 'kapsule-migrator' );
-            case 'preflight':      return __( 'Checking the connection', 'kapsule-migrator' );
-            case 'connecting':     return __( 'Connecting to your old host', 'kapsule-migrator' );
-            case 'scanning':       return __( 'Counting your files', 'kapsule-migrator' );
-            case 'provisioning':   return __( 'Preparing space on KapsuleHost', 'kapsule-migrator' );
-            case 'receiving':      return __( 'Receiving your site', 'kapsule-migrator' );
-            case 'unpacking':      return __( 'Unpacking your files', 'kapsule-migrator' );
-            case 'placing_files':  return __( 'Putting your files in place', 'kapsule-migrator' );
-            case 'pulling_files':  return __( 'Copying your files across', 'kapsule-migrator' );
-            case 'importing_db':   return __( 'Importing your database', 'kapsule-migrator' );
-            case 'search_replace': return __( 'Updating the addresses inside your site', 'kapsule-migrator' );
-            case 'verifying':      return __( 'Checking the copy that arrived', 'kapsule-migrator' );
-            case 'done':           return __( 'Done', 'kapsule-migrator' );
-            default:               return '';
+        // An unrecognised phase has NO label. `job_copy()` answers with generic copy so a CARD can
+        // always be drawn, but a FACT cell ("Stopped at") must stay empty rather than print "Working",
+        // which would read as a step name the worker never recorded.
+        if ( ! in_array( $phase, self::PHASE_IDS, true ) ) return '';
+        $copy = self::job_copy( $phase );
+        return $copy['badge'];
+    }
+
+    /**
+     * ONE PHASE VALUE DECIDES THE BADGE, THE HEADING AND THE BODY. Nothing else may decide any of them.
+     *
+     * WHAT A REAL CUSTOMER READ ON 2026-08-31, all four of these at the same instant, on one card:
+     *
+     *     badge     Checking the connection
+     *     heading   KapsuleHost is putting your site together
+     *     body      Everything uploaded from this site. KapsuleHost is unpacking it, importing your
+     *               database and checking the result.
+     *     note      cURL error 28: Operation timed out after 15002 milliseconds with 0 bytes received
+     *     meter     52%
+     *
+     * THE MECHANISM, and it was three independent sources rather than one confused one:
+     *
+     *   THE BADGE was `phase_label( $job['phase'] )`, evaluated ONCE by PHP at page load. The job was
+     *     at `preflight` when the tab was opened, and `preflight` is called "Checking the connection".
+     *     Correct at 09:00 and still on screen at 09:20. The poll that updates the number every eight
+     *     seconds could not update the badge, because the badge on THIS card carried no id: the JS
+     *     selector `#km-chip-label` exists only on the UPLOAD card, so the line added in 1.5.7 to keep
+     *     the chip fresh matched nothing and was inert.
+     *   THE HEADING was a hardcoded literal. It named no phase, so it could not be wrong, and it could
+     *     not be right either.
+     *   THE BODY was a hardcoded literal that lists THREE phases at once ("unpacking it, importing
+     *     your database and checking the result"), which is a sentence built to be unfalsifiable. It
+     *     is what let the body claim a database import while the badge claimed a connection check.
+     *
+     * So the screen had one true value (the phase), one frozen copy of it, and two constants. Editing
+     * the three strings to agree about today's case would leave the same three sources in place.
+     *
+     * THE SHAPE NOW: this is the only table, it is keyed by the portal's canonical phase id, and the
+     * card reads it ONCE into `$copy`. The three fields cannot disagree because there is nothing left
+     * for them to disagree about. The JS half does not keep a second copy either: `enqueue_scripts`
+     * localises this table, already translated for the site's locale, so the poll re-renders all three
+     * from the same rows PHP painted.
+     *
+     * THE BADGE WORDING IS SHARED WITH KPANEL BY VALUE, not by intention: every `badge` below is the
+     * same source string as `LABELS` in the portal's `src/lib/migration/display.ts`, which is the one
+     * function that decides what a phase is called, and `tools/verify-one-phase-source.sh` reads both
+     * files and fails when a row drifts. It is a gate rather than a comment because the comment that
+     * used to ask for this by hand is still in the history and the labels drifted anyway.
+     *
+     * DELIBERATELY A SWITCH OF LITERAL `__()` CALLS AND NOT A CONST ARRAY OF STRINGS. `wp i18n
+     * make-pot` extracts from the SOURCE, and `__( $row['badge'] )` gives it a variable to read: the
+     * strings would never enter the catalogue, every locale would fall back to English, and all 15
+     * .mo files would be present and look correct. That is a defect this repo has already paid for
+     * once (see the `admin.js` naming note in `enqueue_scripts`), so the extractable form wins even
+     * though the table is longer.
+     */
+    const PHASE_IDS = array(
+        'queued', 'uploading', 'preflight', 'connecting', 'scanning', 'provisioning', 'receiving',
+        'unpacking', 'placing_files', 'pulling_files', 'importing_db', 'search_replace', 'verifying',
+        'done',
+    );
+
+    /**
+     * The whole table, plus the fallback row under the key `''`, for handing to the browser.
+     *
+     * Built by CALLING `job_copy()` for every declared id rather than by writing the rows out a second
+     * time. A second literal listing is a second table however carefully it is copied.
+     */
+    public static function job_copy_map(): array {
+        $map = array( '' => self::job_copy( '' ) );
+        foreach ( self::PHASE_IDS as $id ) {
+            $map[ $id ] = self::job_copy( $id );
         }
+        return $map;
+    }
+
+    public static function job_copy( string $phase ): array {
+        switch ( $phase ) {
+            case 'queued': return array(
+                'badge' => __( 'Waiting to start', 'kapsule-migrator' ),
+                'head'  => __( 'Your move is queued', 'kapsule-migrator' ),
+                'body'  => __( 'Everything uploaded from this site. KapsuleHost has your copy and will start work on it shortly.', 'kapsule-migrator' ) );
+            case 'uploading': return array(
+                'badge' => __( 'Sending your site to KapsuleHost', 'kapsule-migrator' ),
+                'head'  => __( 'Sending your site to KapsuleHost', 'kapsule-migrator' ),
+                'body'  => __( 'Your site is being copied across in pieces. It stays live and unchanged the whole time.', 'kapsule-migrator' ) );
+            case 'preflight': return array(
+                'badge' => __( 'Checking the connection', 'kapsule-migrator' ),
+                'head'  => __( 'KapsuleHost is checking what arrived', 'kapsule-migrator' ),
+                'body'  => __( 'Everything uploaded from this site. KapsuleHost is checking the copy is complete before it starts building your site.', 'kapsule-migrator' ) );
+            case 'connecting': return array(
+                'badge' => __( 'Connecting to your old host', 'kapsule-migrator' ),
+                'head'  => __( 'KapsuleHost is connecting to your old host', 'kapsule-migrator' ),
+                'body'  => __( 'KapsuleHost is opening a connection to the server your site is on today.', 'kapsule-migrator' ) );
+            case 'scanning': return array(
+                'badge' => __( 'Counting your files', 'kapsule-migrator' ),
+                'head'  => __( 'KapsuleHost is counting your files', 'kapsule-migrator' ),
+                'body'  => __( 'KapsuleHost is working out how much there is to move before it starts moving it.', 'kapsule-migrator' ) );
+            case 'provisioning': return array(
+                'badge' => __( 'Preparing space on KapsuleHost', 'kapsule-migrator' ),
+                'head'  => __( 'KapsuleHost is preparing space for your site', 'kapsule-migrator' ),
+                'body'  => __( 'Everything uploaded from this site. KapsuleHost is setting up the server your site will run on.', 'kapsule-migrator' ) );
+            case 'receiving': return array(
+                'badge' => __( 'Receiving your site', 'kapsule-migrator' ),
+                'head'  => __( 'KapsuleHost is receiving your site', 'kapsule-migrator' ),
+                'body'  => __( 'Everything uploaded from this site. KapsuleHost is moving your copy onto the server that will run it.', 'kapsule-migrator' ) );
+            case 'unpacking': return array(
+                'badge' => __( 'Unpacking your files', 'kapsule-migrator' ),
+                'head'  => __( 'KapsuleHost is unpacking your files', 'kapsule-migrator' ),
+                'body'  => __( 'Everything uploaded from this site. KapsuleHost is opening the pieces this site sent and reading your files out of them.', 'kapsule-migrator' ) );
+            case 'placing_files': return array(
+                'badge' => __( 'Putting your files in place', 'kapsule-migrator' ),
+                'head'  => __( 'KapsuleHost is putting your files in place', 'kapsule-migrator' ),
+                'body'  => __( 'Everything uploaded from this site. KapsuleHost is writing your files onto the new server.', 'kapsule-migrator' ) );
+            case 'pulling_files': return array(
+                'badge' => __( 'Copying your files across', 'kapsule-migrator' ),
+                'head'  => __( 'KapsuleHost is copying your files across', 'kapsule-migrator' ),
+                'body'  => __( 'KapsuleHost is copying your files onto the new server.', 'kapsule-migrator' ) );
+            case 'importing_db': return array(
+                'badge' => __( 'Importing your database', 'kapsule-migrator' ),
+                'head'  => __( 'KapsuleHost is importing your database', 'kapsule-migrator' ),
+                'body'  => __( 'Your files are in place. KapsuleHost is loading your posts, pages, settings and comments into the new database.', 'kapsule-migrator' ) );
+            case 'search_replace': return array(
+                'badge' => __( 'Updating the addresses inside your site', 'kapsule-migrator' ),
+                'head'  => __( 'KapsuleHost is updating the addresses inside your site', 'kapsule-migrator' ),
+                'body'  => __( 'Your database is in. KapsuleHost is rewriting the links and image addresses stored in your content so they point at the new copy.', 'kapsule-migrator' ) );
+            case 'verifying': return array(
+                'badge' => __( 'Checking the copy that arrived', 'kapsule-migrator' ),
+                'head'  => __( 'KapsuleHost is checking the copy that arrived', 'kapsule-migrator' ),
+                'body'  => __( 'Your site is assembled. KapsuleHost is loading it to confirm it serves before telling you it is ready.', 'kapsule-migrator' ) );
+            case 'done': return array(
+                'badge' => __( 'Done', 'kapsule-migrator' ),
+                'head'  => __( 'KapsuleHost has finished putting your site together', 'kapsule-migrator' ),
+                'body'  => __( 'Every step has finished. We are writing up the result for you now.', 'kapsule-migrator' ) );
+        }
+
+        /*
+         * THE FALLBACK IS NOT THE OLD HARDCODED CARD WEARING A DEFAULT LABEL. A customer's plugin is
+         * as old as the day they installed it, so a portal that ships a new phase WILL meet a plugin
+         * with no row for it, and the only safe answer names no step at all. It says the move is being
+         * worked on, which is true of every non-terminal phase, and sends them to the panel for the
+         * rest. Crucially it is still ONE row, so the three fields still cannot contradict each other.
+         */
+        return array(
+            'badge' => __( 'Working', 'kapsule-migrator' ),
+            'head'  => __( 'KapsuleHost is putting your site together', 'kapsule-migrator' ),
+            'body'  => __( 'Everything uploaded from this site. KapsuleHost is working on your site now. Your panel shows which step it is on.', 'kapsule-migrator' ),
+        );
+    }
+
+    /**
+     * THE ONE PHASE VALUE, read from the one field both surfaces read.
+     *
+     * `display.stepKey` is what `buildMigrationDisplay` decided, and it is what KPanel renders its own
+     * step name from. Reading it here rather than the sibling `phase` field is what makes "the same
+     * moment" mean the same thing on both screens: they are the same property of the same payload.
+     * `phase` remains as the fallback for a portal build that predates the display block.
+     */
+    private static function job_phase( ?array $job ): string {
+        if ( ! is_array( $job ) ) return '';
+        $display = $job['display'] ?? null;
+        if ( is_array( $display ) && isset( $display['stepKey'] ) && is_string( $display['stepKey'] ) ) {
+            return $display['stepKey'];
+        }
+        return isset( $job['phase'] ) && is_string( $job['phase'] ) ? $job['phase'] : '';
     }
 
     /**

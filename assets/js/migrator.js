@@ -127,6 +127,29 @@
         if (lede)  $('#kapsule-status-text').text(lede);
     }
 
+    /**
+     * A FAILED STATUS READ GETS ITS OWN LINE AND MOVES NOTHING ELSE.
+     *
+     * The chip's state (its colour, not its words) goes to `retrying` so the top of the card carries
+     * the signal too, while the WORDS stay on whatever phase was last confirmed. Saying "Retrying"
+     * where the step name goes would be replacing a fact we have with a fact about our own plumbing.
+     *
+     * `.text()` and never `.html()`: this string can originate from a server response.
+     */
+    function showJobRetry(message) {
+        if (!message) return;
+        $('#km-job-retry-text').text(message);
+        $('#km-job-retry').show();
+        $('#km-chip').attr('data-state', 'retrying');
+        $('#km-rail').attr('data-live', '0');
+    }
+
+    /** The next answer that arrives takes the line away again. */
+    function clearJobRetry() {
+        $('#km-job-retry').hide();
+        $('#km-job-retry-text').text('');
+    }
+
     function setMeter(pct, note) {
         pct = Math.min(100, Math.max(0, Math.round(pct)));
         $('#kapsule-progress-fill').css('width', pct + '%');
@@ -215,33 +238,49 @@
     };
 
     /**
-     * The phase wording, WORD FOR WORD the same as KPanel's, and translated here.
+     * THE PHASE TABLE IS NOT HERE ANY MORE, AND THAT IS THE FIX.
      *
-     * Every string is copied from `src/lib/migration/display.ts` in the portal, which is the one
-     * function that decides what a phase is called. It is duplicated here rather than read from the
-     * server response because the server sends English: a German customer should read German on both
-     * screens, not matching English on both. So the SOURCE STRING is shared and the TRANSLATION is
-     * local, which is the only arrangement that satisfies both requirements at once.
+     * WHAT USED TO BE AT THIS LINE: a 14-row `PHASE_LABEL` object of `__()` calls, beside an identical
+     * 14-row list in `admin/class-admin-page.php`, beside a third in the portal's
+     * `src/lib/migration/display.ts`. Three tables answering one question, with a comment on each
+     * asking the next person to change all three in the same commit. Nine of the rows had already
+     * drifted once and a customer read two accounts of one moment.
      *
-     * `admin/class-admin-page.php::phase_label` holds the identical set for the server-rendered pass.
-     * Change one, change all three, in the same commit.
+     * `job_copy()` in the PHP is now the plugin's only table. It is localised into `cfg.jobCopy`
+     * ALREADY TRANSLATED for the site's locale, so this file holds no strings for it to get wrong and
+     * a badge painted by PHP at page load is the same row as the badge this poll writes eight seconds
+     * later. Keyed by `display.stepKey`, the portal's canonical phase id.
+     *
+     * An absent `cfg.jobCopy` (an old enqueue, a cached script) yields undefined, and every caller
+     * below falls through to the server's own `stepLabel`. English is a worse answer than German and a
+     * far better one than a blank card.
      */
-    var PHASE_LABEL = {
-        queued:         __('Waiting to start', 'kapsule-migrator'),
-        uploading:      __('Sending your site to KapsuleHost', 'kapsule-migrator'),
-        preflight:      __('Checking the connection', 'kapsule-migrator'),
-        connecting:     __('Connecting to your old host', 'kapsule-migrator'),
-        scanning:       __('Counting your files', 'kapsule-migrator'),
-        provisioning:   __('Preparing space on KapsuleHost', 'kapsule-migrator'),
-        receiving:      __('Receiving your site', 'kapsule-migrator'),
-        unpacking:      __('Unpacking your files', 'kapsule-migrator'),
-        placing_files:  __('Putting your files in place', 'kapsule-migrator'),
-        pulling_files:  __('Copying your files across', 'kapsule-migrator'),
-        importing_db:   __('Importing your database', 'kapsule-migrator'),
-        search_replace: __('Updating the addresses inside your site', 'kapsule-migrator'),
-        verifying:      __('Checking the copy that arrived', 'kapsule-migrator'),
-        done:           __('Done', 'kapsule-migrator')
-    };
+    var JOB_COPY = cfg.jobCopy || {};
+
+    /** The one row for a phase, with the fallback row for an id this build has no copy for. */
+    function phaseCopy(key) {
+        return (key && JOB_COPY[key]) || JOB_COPY[''] || null;
+    }
+
+    function phaseLabel(key) {
+        var row = key && JOB_COPY[key];
+        return row ? row.badge : '';
+    }
+
+    /**
+     * ONE VALUE, THREE FIELDS, ONE FUNCTION. The badge, the heading and the body of the job card are
+     * written together from a single phase id or not at all.
+     *
+     * They are set in one call precisely so no future edit can update one of them on its own, which is
+     * what produced a badge reading "Checking the connection" over a heading reading "KapsuleHost is
+     * putting your site together" over a body about a database import, on one card, at one instant.
+     */
+    function applyJobPhase(key) {
+        var row = phaseCopy(key);
+        if (!row) return;
+        setChip('transferring', row.badge);
+        setHead(row.head, row.body);
+    }
 
     function renderServedSteps(display) {
         if (!display || !display.stepKey) return;
@@ -268,12 +307,12 @@
         if (!display) return;
         if (typeof display.percent === 'number') { lastServerPct = display.percent; }
         renderServedSteps(display);
-        // The label is translated locally from the shared source string (see PHASE_LABEL), so this
+        // The label comes from cfg.jobCopy, already translated by PHP for the site's locale, so this
         // screen and the panel say the same thing in the customer's own language rather than the
         // same thing in English. `stepLabel` is the fallback for a key this build has not heard of.
         var note = display.pieces
             ? pieceOf(display.pieces.done, display.pieces.total)
-            : ((display.stepKey && PHASE_LABEL[display.stepKey]) || display.stepLabel || '');
+            : (phaseLabel(display.stepKey) || display.stepLabel || '');
         var etaText = fmtEtaBucket(display.eta || bucketEtaLocal(display.etaSeconds));
         if (etaText) note = note ? (note + ', ' + etaText) : etaText;
         if (lastServerPct !== null) setMeter(lastServerPct, note || undefined);
@@ -755,13 +794,28 @@
                       which is the panel PROVING KapsuleHost was reachable the whole time. Blaming the
                       wrong party sends somebody to check the wrong thing.
                     */
+                    /*
+                      AND IT GOES ON ITS OWN LINE, LEAVING EVERY OTHER FIELD FROZEN.
+
+                      This used to write the failure INTO `#km-job-note`, the note under the
+                      percentage, which is where the step wording lives. So a failed read deleted the
+                      one true thing on the card and replaced it with the reason, and on 2026-08-31
+                      that reason was `cURL error 28: Operation timed out after 15002 milliseconds
+                      with 0 bytes received`. The PHP no longer produces that sentence (see
+                      Kapsule_Transport_Message), and this no longer writes into that element.
+
+                      Nothing else is touched: the badge, the heading, the body and the number all
+                      hold their last known values and the bar does not move. A step that has stalled
+                      must look stalled, and a card that quietly kept animating while we could not
+                      read anything is a customer believing work is happening that may not be.
+                    */
                     var d = resp.data || {};
-                    $('#km-job-note').text(
+                    showJobRetry(
                         d.reachable === false
-                            ? (d.reason || __('we cannot reach KapsuleHost just now, still trying', 'kapsule-migrator'))
+                            ? (d.reason || __('We could not read how your move is going just now. We are checking again in a moment.', 'kapsule-migrator'))
                             : (typeof resp.data === 'string' && resp.data)
                                 ? resp.data
-                                : __('we could not read the status from this site just now, still trying', 'kapsule-migrator')
+                                : __('This site could not read the status of your move just now. Your files are already with KapsuleHost and this site has not been changed. We are checking again in a moment.', 'kapsule-migrator')
                     );
                     pollJob(15000);
                     return;
@@ -794,24 +848,26 @@
                 $('#km-job-pct').text(fmtCount(pct));
                 $('#km-job-fill').css('width', pct + '%');
 
-                // The step wording, translated HERE from the same source string the panel uses, so a
-                // German customer reads German on both screens rather than English on both.
                 /*
-                  THE CHIP GOES STALE IF NOTHING UPDATES IT, and nothing did.
+                  THE BADGE, THE HEADING AND THE BODY, TOGETHER, FROM ONE VALUE.
 
-                  Photographed on a real migration at 91%: the chip read "Preparing space on
-                  KapsuleHost" while the note directly beneath it read "Updating the addresses inside
-                  your site". Both were correct words for a phase; only one of them was THIS phase.
-                  PHP paints the chip once at page load and this poll updated the number and the note
-                  and never the chip, so a customer who leaves the tab open reads a step name from
-                  whenever the page happened to load.
+                  THE CHIP USED TO GO STALE because nothing updated it. Photographed on a real
+                  migration at 91%: the chip read "Preparing space on KapsuleHost" while the note
+                  beneath it read "Updating the addresses inside your site". 1.5.7 added a line here
+                  to fix that, and it was INERT: it selected `#km-chip-label`, an id that existed only
+                  on the UPLOAD card, so it matched nothing on this one and the badge stayed frozen at
+                  whatever phase was current when the page loaded. That is what produced "Checking the
+                  connection" over a heading about assembling a site, twenty minutes in.
 
-                  Same source as the note, so the two cannot describe different moments.
+                  Two things fix it and both are required. The card now CARRIES those ids, so the
+                  selector has something to write to. And the heading and body are no longer constants
+                  a poll cannot reach: `applyJobPhase` writes all three from one row, so the failure
+                  where one of them updates and the others do not has nowhere left to live.
                 */
-                var note = (jd && jd.stepKey && PHASE_LABEL[jd.stepKey]) || job.phaseMessage || '';
-                if (jd && jd.stepKey && PHASE_LABEL[jd.stepKey]) {
-                    $('#km-chip-label').text(PHASE_LABEL[jd.stepKey]);
-                }
+                clearJobRetry();
+                if (jd && jd.stepKey) applyJobPhase(jd.stepKey);
+
+                var note = phaseLabel(jd && jd.stepKey) || (jd && jd.stepLabel) || '';
                 var jdEta = jd ? fmtEtaBucket(jd.eta || bucketEtaLocal(jd.etaSeconds)) : '';
                 if (jdEta) note = note ? (note + ', ' + jdEta) : jdEta;
                 if (note) $('#km-job-note').text(note);
@@ -820,7 +876,9 @@
                 pollJob(8000);
             }).fail(function () {
                 if (cancelled) return;
-                $('#km-job-note').text(__('we cannot reach KapsuleHost just now, still trying', 'kapsule-migrator'));
+                // The request never completed, so this site's own admin did not answer. Same rule: one
+                // line, nothing else moves.
+                showJobRetry(__('This site could not read the status of your move just now. Your files are already with KapsuleHost and this site has not been changed. We are checking again in a moment.', 'kapsule-migrator'));
                 pollJob(15000);
             });
         }, delay);

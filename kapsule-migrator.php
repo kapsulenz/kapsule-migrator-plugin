@@ -41,6 +41,9 @@ define( 'KAPSULE_MIGRATOR_SITE', apply_filters( 'kapsule_migrator_site', 'https:
 define( 'KAPSULE_MIGRATOR_API_BASE',    KAPSULE_MIGRATOR_HOST . '/api/migration/plugin' );
 define( 'KAPSULE_MIGRATOR_VERSION_API', KAPSULE_MIGRATOR_HOST . '/api/migration/plugin-version' );
 
+// FIRST, because three other files call it and none of them may print a transport library's own
+// English at a customer. See includes/class-transport-message.php for what reached one on 2026-08-31.
+require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'includes/class-transport-message.php';
 require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'includes/class-kapsule-migrator.php';
 require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'includes/class-preflight.php';
 require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'includes/class-dump-preamble.php';

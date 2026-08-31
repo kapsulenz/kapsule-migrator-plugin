@@ -71,6 +71,26 @@ if ! bash tools/verify-no-local-completion.sh >/dev/null 2>&1; then
 fi
 say "completion-truth gate" "passed"
 
+# A RELEASE THAT CAN CONTRADICT ITSELF ON ONE CARD, OR PRINT libcurl AT A CUSTOMER, IS NOT RELEASABLE
+# EITHER, and for the same reason: it is a build that tells a frightened person something untrue about
+# their site. Wired HERE rather than recommended in a document, because a gate whose only mention is
+# its own file is a report. Both arms are required: each check must also prove it can go RED against
+# the pinned pre-fix source, so a green here is a green from a control that can still see.
+for gate in \
+  "php tools/verify-one-phase-source.php|one phase drives the card" \
+  "php tools/verify-one-phase-source.php --self-test|its red arm still fires" \
+  "node tools/verify-job-card-js.mjs|the poll can reach all three fields" \
+  "node tools/verify-job-card-js.mjs --self-test|its red arm still fires"
+do
+  cmd=${gate%%|*}; label=${gate##*|}
+  if ! ( eval "$cmd" ) >/dev/null 2>&1; then
+    echo "RELEASE BLOCKED: $label"
+    echo "Run: $cmd"
+    exit 1
+  fi
+  say "$label" "passed"
+done
+
 # ── CAN THIS BUILD ACTUALLY BE DELIVERED? ─────────────────────────────────────────────────────────
 #
 # Every other check in this file asks whether the version NUMBERS agree. This asks whether WordPress

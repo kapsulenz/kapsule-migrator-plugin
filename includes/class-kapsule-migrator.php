@@ -218,7 +218,16 @@ class Kapsule_Migrator {
         ) );
 
         if ( is_wp_error( $response ) ) {
-            throw new Exception( $response->get_error_message() );
+            // THE THIRD ROUTE FOR A TRANSPORT LIBRARY'S OWN TEXT. This message becomes
+            // `kapsule_migration_error`, which the stopped card prints verbatim. The raw text goes to
+            // the log; the customer gets the sentence. `stopped()` because nothing retries after this.
+            $raw = $response->get_error_message();
+            Kapsule_Transport_Message::log( 'cron api call failed', $raw );
+            throw new Exception( sprintf(
+                /* translators: %s: a short plain description of what went wrong, e.g. "this server could not open a connection to KapsuleHost". */
+                __( 'The move could not continue because %s. Nothing on this site has been changed.', 'kapsule-migrator' ),
+                Kapsule_Transport_Message::stopped( $raw )
+            ) );
         }
 
         $body = json_decode( wp_remote_retrieve_body( $response ), true );
