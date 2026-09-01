@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.8
+Stable tag: 1.5.9
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,9 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.5.9 =
+* Fixed: the first screen of a move was headed "Step 1 of 1", and then you watched thirteen steps go past. It was trying to say that pasting the token is the only thing YOU have to do, and it read as though the whole move were one step. It now says that plainly: "The one thing you need to do". Translated in all fifteen languages rather than left in English.
 
 = 1.5.8 =
 * Fixed: this screen and your KapsuleHost panel described the same step of your move in different words, in every language except English. The two screens were given matching English wording in an earlier release, and that was done properly, but each screen was then translated separately, so the agreement only ever survived in English. Measured across the fifteen languages KapsuleHost sells in, 125 of 210 step descriptions differed: in German this screen said your files were being brought to the right place while your panel said they were being placed, and in Japanese thirteen of the fourteen steps were worded differently on the two screens. Both wordings were correct and there were simply two of them. The step wording now comes from KapsuleHost in the language you are reading this page in, so both screens use one set of words and cannot drift apart again.

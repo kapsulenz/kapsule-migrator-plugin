@@ -99,8 +99,8 @@ msgid "Download a copy"
 msgstr "Tikiake he tārua"
 
 #: admin/class-admin-page.php:965
-msgid "Step 1 of 1"
-msgstr "Te Mahi 1 o te 1"
+msgid "The one thing you need to do"
+msgstr "Ko te mea kotahi hei mahi māu"
 
 #: admin/class-admin-page.php:966
 msgid "Move this site to KapsuleHost"

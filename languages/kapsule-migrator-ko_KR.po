@@ -99,8 +99,8 @@ msgid "Download a copy"
 msgstr "사본 다운로드"
 
 #: admin/class-admin-page.php:965
-msgid "Step 1 of 1"
-msgstr "1단계 중 1단계"
+msgid "The one thing you need to do"
+msgstr "고객님이 하실 일은 하나뿐입니다"
 
 #: admin/class-admin-page.php:966
 msgid "Move this site to KapsuleHost"

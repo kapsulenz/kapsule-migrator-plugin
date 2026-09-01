@@ -99,8 +99,8 @@ msgid "Download a copy"
 msgstr "Descarregar uma cópia"
 
 #: admin/class-admin-page.php:965
-msgid "Step 1 of 1"
-msgstr "Passo 1 de 1"
+msgid "The one thing you need to do"
+msgstr "A única coisa que tem de fazer"
 
 #: admin/class-admin-page.php:966
 msgid "Move this site to KapsuleHost"

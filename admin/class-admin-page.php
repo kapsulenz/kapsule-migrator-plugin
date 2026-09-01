@@ -979,7 +979,7 @@ class Kapsule_Admin_Page {
 
                     <div class="kapsule-tab-panel" id="kapsule-panel-connected">
                         <div class="km-card-body">
-                            <p class="km-eyebrow"><?php echo esc_html__( 'Step 1 of 1', 'kapsule-migrator' ); ?></p>
+                            <p class="km-eyebrow"><?php echo esc_html__( 'The one thing you need to do', 'kapsule-migrator' ); ?></p>
                             <h1 class="km-title"><?php echo esc_html__( 'Move this site to KapsuleHost', 'kapsule-migrator' ); ?></h1>
                             <p class="km-lede"><?php
                                 echo esc_html__( 'Paste the migration token from your KapsuleHost panel. We copy your files and your database across and leave this site exactly as it is, serving visitors the whole time.', 'kapsule-migrator' );
