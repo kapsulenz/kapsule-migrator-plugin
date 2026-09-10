@@ -375,6 +375,146 @@ class Kapsule_Packager {
     }
 
     /**
+     * WHICH OF THE THINGS `SHOW TABLES` RETURNS ARE ACTUALLY TABLES.
+     *
+     * `SHOW TABLES` lists VIEWS alongside base tables and says nothing about which is which, and for
+     * the whole life of this plugin the exporter believed all of them were tables. That is R-505: a
+     * view got `DROP TABLE IF EXISTS`, then `SHOW CREATE TABLE` (which for a view returns a CREATE
+     * VIEW), and then one INSERT per row into an object that has no rows of its own and usually
+     * cannot accept any. Measured on the ledger's own fixture:
+     *
+     *     ERROR 1471 (HY000) at line 40: The target table wp_posts_report of the INSERT is not
+     *     insertable-into
+     *
+     * and because mysql stops at the first statement it refuses, the two tables that sorted after the
+     * view (`wp_term_relationships`, `wp_users`) were never imported at all.
+     *
+     * ONE INSTRUMENT DECIDES BOTH THE POPULATION AND THE KIND. `SHOW FULL TABLES` returns the same
+     * rows as `SHOW TABLES` with the type attached, so there is no chance of walking a list from one
+     * query and classifying it from another that cannot see the same objects. `information_schema` is
+     * the fallback for the rare host that refuses `SHOW FULL TABLES`.
+     *
+     * AND IF NEITHER CAN SEE, WE REFUSE. If both classifiers come back empty while `SHOW TABLES` can
+     * still name objects, that is a blind instrument, not an empty database, and the difference
+     * matters: treating blind as empty is how you ship a dump with a view in it again.
+     *
+     * @return array<int, array{name: string, is_view: bool}>
+     */
+    private static function classify_objects( $wpdb ): array {
+        $objects = array();
+
+        foreach ( (array) $wpdb->get_results( 'SHOW FULL TABLES', ARRAY_N ) as $row ) {
+            if ( ! isset( $row[0] ) || '' === (string) $row[0] ) continue;
+            $type      = isset( $row[1] ) ? strtoupper( trim( (string) $row[1] ) ) : '';
+            $objects[] = array( 'name' => (string) $row[0], 'is_view' => ( 'VIEW' === $type ) );
+        }
+        if ( ! empty( $objects ) ) return $objects;
+
+        foreach ( (array) $wpdb->get_results(
+            'SELECT TABLE_NAME, TABLE_TYPE FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()',
+            ARRAY_N
+        ) as $row ) {
+            if ( ! isset( $row[0] ) || '' === (string) $row[0] ) continue;
+            $type      = isset( $row[1] ) ? strtoupper( trim( (string) $row[1] ) ) : '';
+            $objects[] = array( 'name' => (string) $row[0], 'is_view' => ( 'VIEW' === $type ) );
+        }
+        if ( ! empty( $objects ) ) return $objects;
+
+        $names = (array) $wpdb->get_col( 'SHOW TABLES' );
+        if ( empty( $names ) ) return array(); // A genuinely empty database. Zero, not blind.
+
+        throw new Exception( sprintf(
+            /* translators: %d: the number of database objects that could not be classified. */
+            __( 'We could not tell which of the %d parts of your database are tables and which are views, and copying them without knowing would produce a database copy that cannot be restored. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message.', 'kapsule-migrator' ),
+            count( $names )
+        ) );
+    }
+
+    /**
+     * Make a view's CREATE statement safe to replay on a machine that is not the customer's.
+     *
+     * TWO EDITS, BOTH OF THEM LOAD-BEARING, and both confined to the header of the statement (every
+     * byte before ` VIEW \``), so nothing inside the customer's own SELECT is ever rewritten.
+     *
+     *  1. DROP THE DEFINER. `SHOW CREATE VIEW` hands back `DEFINER=\`someuser\`@\`somehost\``, naming
+     *     an account on the server we are moving the site AWAY from. That account does not exist on
+     *     ours, so the CREATE fails outright for anyone but a superuser. mysqldump has the same
+     *     problem and hosts strip it for the same reason. With no DEFINER clause MySQL uses whoever
+     *     runs the import, which exists by definition.
+     *
+     *  2. FORCE `SQL SECURITY INVOKER`. This one is a security control, not tidiness. Our import runs
+     *     as root. A view carried in with `SQL SECURITY DEFINER` and its definer defaulted to root
+     *     would execute its SELECT WITH ROOT PRIVILEGES every time the site queried it, on a box that
+     *     hosts other customers. A migrated site that shipped `CREATE VIEW x AS SELECT * FROM
+     *     mysql.user` would then be able to read the server's account table through its own database
+     *     user. INVOKER makes the view run as whoever queries it, which for a WordPress site is its
+     *     own database user reading its own tables: the intended behaviour, and nothing more.
+     *
+     * The database-name strip is a third, smaller thing. MariaDB normalises a same-database qualifier
+     * away before we ever see it (measured: `FROM km_r505_probe.t` comes back as ``FROM `t``), but
+     * MySQL does not always, and a migration changes the database name by definition, so a view whose
+     * body still names the customer's OLD database would resolve to nothing here. Stripping only the
+     * source database's own qualifier cannot change meaning: inside that database the two forms are
+     * the same reference.
+     */
+    private static function sanitise_view_ddl( string $ddl, string $source_db = '' ): string {
+        $split = stripos( $ddl, ' VIEW `' );
+        if ( false === $split ) {
+            // Not a shape we recognise. Leave the customer's DDL alone rather than mangle it.
+            return $ddl;
+        }
+        $head = substr( $ddl, 0, $split );
+        $body = substr( $ddl, $split );
+
+        $head = preg_replace(
+            '/\s*DEFINER\s*=\s*(?:`(?:[^`]|``)*`|\'(?:[^\']|\'\')*\'|"(?:[^"]|"")*"|CURRENT_USER(?:\s*\(\s*\))?)'
+            . '(?:@(?:`(?:[^`]|``)*`|\'(?:[^\']|\'\')*\'|"(?:[^"]|"")*"|[^\s`\'"]+))?/i',
+            '',
+            $head
+        );
+
+        if ( preg_match( '/SQL\s+SECURITY\s+(?:DEFINER|INVOKER)/i', $head ) ) {
+            $head = preg_replace( '/SQL\s+SECURITY\s+DEFINER/i', 'SQL SECURITY INVOKER', $head );
+        } else {
+            $head = rtrim( $head ) . ' SQL SECURITY INVOKER';
+        }
+
+        $out = rtrim( $head ) . $body;
+
+        if ( '' !== $source_db ) {
+            $out = str_replace( '`' . $source_db . '`.`', '`', $out );
+        }
+
+        return $out;
+    }
+
+    /**
+     * Look for the R-505 shape in a finished dump: a statement aimed at a view that only a table can
+     * accept. Returns the first offender found, or '' when the dump is clean.
+     *
+     * WHY THIS IS HERE AND NOT ONLY IN THE TEST. The test proves today's writer is right. This proves
+     * TOMORROW'S is, on the customer's own database, before anything is uploaded. The writer above is
+     * two passes over two lists and it would take one careless edit to put a view back in the wrong
+     * one; a customer would then discover it the way the first one did, as a half-imported site. The
+     * population is the view list this very export derived, so it cannot drift out of step with what
+     * was written.
+     */
+    private static function find_view_dumped_as_table( string $file, array $view_names ): string {
+        if ( empty( $view_names ) ) return '';
+        $sql = @file_get_contents( $file );
+        if ( false === $sql || '' === $sql ) return '';
+        foreach ( $view_names as $view ) {
+            if ( false !== strpos( $sql, 'INSERT INTO `' . $view . '`' ) ) {
+                return sprintf( 'INSERT INTO `%s` (that object is a view, and a view holds no rows of its own)', $view );
+            }
+            if ( ! preg_match( '/^CREATE[^\n]*\bVIEW\s+`' . preg_quote( $view, '/' ) . '`/mi', $sql ) ) {
+                return sprintf( '`%s` is a view and no CREATE VIEW for it was written', $view );
+            }
+        }
+        return '';
+    }
+
+    /**
      * Export the WordPress database to a gzip-compressed SQL file.
      */
     public function export_database(): string {
@@ -383,7 +523,16 @@ class Kapsule_Packager {
         $db_file = $this->tmp_dir . 'database.sql';
         $gz_file = $db_file . '.gz';
 
-        $tables = $wpdb->get_col( 'SHOW TABLES' );
+        $objects   = self::classify_objects( $wpdb );
+        $source_db = (string) $wpdb->get_var( 'SELECT DATABASE()' );
+
+        $tables = array();
+        $views  = array();
+        foreach ( $objects as $object ) {
+            if ( $object['is_view'] ) $views[]  = $object['name'];
+            else                      $tables[] = $object['name'];
+        }
+
         $handle = fopen( $db_file, 'w' );
 
         // THE SESSION PREAMBLE A REAL mysqldump WRITES, AND THIS WRITER DID NOT.
@@ -440,6 +589,73 @@ class Kapsule_Packager {
             fwrite( $handle, "\n" );
         }
 
+        // ── VIEWS, AFTER EVERY TABLE, AND NEVER WITH A ROW IN THEM ────────────────────────────────
+        //
+        // A view is a stored SELECT. It owns no rows, so there is nothing to INSERT, and it cannot be
+        // created before the things it selects from exist. Hence: after the tables, always.
+        //
+        // THE STAND-IN PASS BELOW IS NOT DEFENSIVE PADDING, and it is the part that is easy to leave
+        // out. "After the tables" is not sufficient, because a view is very often built on ANOTHER
+        // view (a reporting plugin layering a summary over a detail view produces exactly that), and
+        // the order this walk sees is the server's, which is alphabetical. `wp_aaa_report_summary`
+        // reads `wp_posts_report` and sorts three thousand names ahead of it. Emitting the real
+        // CREATE VIEW in that order fails with ERROR 1146: the object it selects from does not exist
+        // yet, and the import stops there exactly as before.
+        //
+        // So every view name is first created as an empty stand-in TABLE with the right column names.
+        // Any view created afterwards resolves its references against those stand-ins, whatever the
+        // order. Each view's own section then drops its stand-in and creates the real view. Views
+        // resolve their sources by name when queried, not when created, so a view built against a
+        // stand-in is correct the moment the stand-in is replaced by the real thing.
+        //
+        // This is precisely what mysqldump does, for precisely this reason, and it is worth copying
+        // rather than inventing a dependency sort: MariaDB has no VIEW_TABLE_USAGE table to sort
+        // from, so a sort would have to guess dependencies out of the SELECT text, and a guess that
+        // is wrong produces the same failed migration with more code in front of it.
+        if ( ! empty( $views ) ) {
+            fwrite( $handle, "-- Stand-in tables for views. Each is replaced by the real view below.\n" );
+            foreach ( $views as $view ) {
+                $view_escaped = self::escape_for_dump( $wpdb, $view );
+                $columns      = (array) $wpdb->get_col( "SHOW COLUMNS FROM `{$view_escaped}`" );
+                if ( empty( $columns ) ) {
+                    // A view whose columns cannot be read is broken on the SOURCE (it usually selects
+                    // from something that has since been dropped). Its CREATE still travels, so the
+                    // customer keeps the object and its definition; there is simply no stand-in to
+                    // make, because there are no column names to make it out of.
+                    continue;
+                }
+                $defs = array();
+                foreach ( $columns as $column ) {
+                    $defs[] = '`' . str_replace( '`', '``', self::escape_for_dump( $wpdb, (string) $column ) ) . '` tinyint NOT NULL';
+                }
+                fwrite( $handle, "DROP TABLE IF EXISTS `{$view_escaped}`;\n" );
+                fwrite( $handle, "DROP VIEW IF EXISTS `{$view_escaped}`;\n" );
+                fwrite( $handle, "CREATE TABLE `{$view_escaped}` (\n  " . implode( ",\n  ", $defs ) . "\n);\n\n" );
+            }
+
+            foreach ( $views as $view ) {
+                $view_escaped = self::escape_for_dump( $wpdb, $view );
+
+                // SHOW CREATE VIEW, not SHOW CREATE TABLE. The old code used the table form, which
+                // happens to return the view's DDL, and that accident is what made the bug look like
+                // it was only about the INSERTs.
+                $create = $wpdb->get_row( "SHOW CREATE VIEW `{$view_escaped}`", ARRAY_N );
+                if ( ! is_array( $create ) || ! isset( $create[1] ) || '' === $create[1] ) {
+                    continue;
+                }
+
+                // BOTH drops. `DROP TABLE IF EXISTS` removes the stand-in this dump just made; it does
+                // NOT remove a view, which is the whole of ledger point 1 (measured on MariaDB 10.11:
+                // `DROP TABLE IF EXISTS <view>` returns Note 1965 "is a view", exit 0, and the view is
+                // still standing, so the CREATE behind it failed with ERROR 1050 on any second run).
+                // `DROP VIEW IF EXISTS` is the one that clears a real view. Together they make the
+                // dump replayable into a database that already holds either shape.
+                fwrite( $handle, "DROP TABLE IF EXISTS `{$view_escaped}`;\n" );
+                fwrite( $handle, "DROP VIEW IF EXISTS `{$view_escaped}`;\n" );
+                fwrite( $handle, self::sanitise_view_ddl( $create[1], $source_db ) . ";\n\n" );
+            }
+        }
+
         fwrite( $handle, "SET FOREIGN_KEY_CHECKS=1;\n" );
         // The matching epilogue, so the import leaves the session exactly as it found it rather than
         // leaving TIME_ZONE and SQL_MODE altered for whatever runs next on that connection.
@@ -466,6 +682,21 @@ class Kapsule_Packager {
                 /* translators: %s: the placeholder token found in the export. */
                 __( 'We built a copy of your database and then found it was not safe to send: it still contains an internal placeholder (%s) where your content has a percent sign. Sending it would have changed your links, styling and settings. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message.', 'kapsule-migrator' ),
                 substr( $leak, 0, 12 ) . '...'
+            ) );
+        }
+
+        // ── AND THE SAME TREATMENT FOR R-505 ──────────────────────────────────────────────────────
+        //
+        // Read the file that was just written and confirm no view in it was treated as a table. This
+        // is the check that would have caught the original defect on the customer's own machine,
+        // before a byte was uploaded, instead of three quarters of the way through an import on ours.
+        $view_defect = self::find_view_dumped_as_table( $db_file, $views );
+        if ( '' !== $view_defect ) {
+            @unlink( $db_file );
+            throw new Exception( sprintf(
+                /* translators: %s: a description of the offending statement found in the export. */
+                __( 'We built a copy of your database and then found it was not safe to send: it handles one of your database views as if it were a table (%s). Restoring it would stop partway through and leave some of your tables missing. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message.', 'kapsule-migrator' ),
+                $view_defect
             ) );
         }
 
