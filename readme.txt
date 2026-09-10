@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.9
+Stable tag: 1.5.10
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -97,7 +97,7 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 
 == Changelog ==
 
-= 1.5.9 =
+= 1.5.10 =
 * Fixed: the first screen of a move was headed "Step 1 of 1", and then you watched thirteen steps go past. It was trying to say that pasting the token is the only thing YOU have to do, and it read as though the whole move were one step. It now says that plainly: "The one thing you need to do". Translated in all fifteen languages rather than left in English.
 
 = 1.5.8 =
