@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.10
+Stable tag: 1.5.11
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,10 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.5.11 =
+* Fixed: while KapsuleHost was finishing your move, this screen reloaded itself over and over, flashing every few seconds for as long as you left it open. Nothing was wrong with the move and nothing was failing. The screen was watching for your migration to finish, and it had already finished: your copy is complete as soon as your files and database are across, which is usually some minutes before you point your domain at us. So it kept seeing "finished", reloading to show you, and then starting to watch all over again. It now checks whether the move has already finished before it starts watching, and it will not reload twice to show you the same thing.
+* Fixed: three lines on this screen were shown in English to everyone reading it in the other fifteen languages. They had been translated, but the files WordPress actually reads had not been rebuilt since.
 
 = 1.5.10 =
 * Fixed: the first screen of a move was headed "Step 1 of 1", and then you watched thirteen steps go past. It was trying to say that pasting the token is the only thing YOU have to do, and it read as though the whole move were one step. It now says that plainly: "The one thing you need to do". Translated in all fifteen languages rather than left in English.

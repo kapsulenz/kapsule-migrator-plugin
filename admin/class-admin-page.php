@@ -52,6 +52,41 @@ class Kapsule_Admin_Page {
     const JOB_COMPLETE = 'COMPLETED';
 
     /**
+     * Job statuses after which the portal will send no further news about this migration.
+     *
+     * DECLARED ONCE, HERE, AND HANDED TO THE BROWSER. The script used to carry its own copy of this
+     * list. Two spellings of one fact is how they drift, and a browser that disagrees with this file
+     * about whether a migration is finished either polls for ever or stops watching too early.
+     *
+     * "Terminal" means the JOB is over. It does NOT mean the customer is finished: a COMPLETED job is
+     * a copied site whose owner has usually not pointed their domain yet, which is exactly why the
+     * local status stays `awaiting_import` and why treating COMPLETED as a signal to reload cost a
+     * customer a page that flashed for the whole of their cutover.
+     */
+    const JOB_TERMINAL_STATUSES = array(
+        'COMPLETED',
+        'COMPLETED_WITH_ERRORS',
+        'FAILED',
+        'CANCELLED',
+        'OPS_ESCALATED',
+    );
+
+    /**
+     * Is this job state one the portal considers finished?
+     *
+     * Null-safe on purpose: a job we could not READ is not a job that finished. Returning true for an
+     * unreachable portal would tell the browser to stop watching at the exact moment it should keep
+     * trying, and the customer would sit on a stale screen believing it was current.
+     */
+    private function job_is_terminal( ?array $job ): bool {
+        if ( ! is_array( $job ) ) {
+            return false;
+        }
+        $status = (string) ( $job['status'] ?? '' );
+        return in_array( $status, self::JOB_TERMINAL_STATUSES, true );
+    }
+
+    /**
      * The only writer of the local status, and it refuses anything not in the vocabulary above.
      *
      * A `die()` would be worse than the bug for a customer, so an unknown value is coerced to `error`
@@ -166,6 +201,32 @@ class Kapsule_Admin_Page {
             // The browser owns the retry loop, so it owns the budget too. See admin.js and
             // Kapsule_Uploader: one ATTEMPT per request, never a sleep inside one.
             'maxAttempts' => Kapsule_Uploader::MAX_ATTEMPTS,
+            /*
+             * HAS THE JOB ALREADY FINISHED, AS OF THIS RENDER?
+             *
+             * THE DEFECT THIS EXISTS FOR, measured on a customer's own site 2026-09-16: up to 38
+             * requests a minute against this page for the whole of a migration, and the page visibly
+             * flashing the entire time. Every request returned 200. Nothing was failing.
+             *
+             * The loop: this plugin's LOCAL status stays `awaiting_import` once the upload is done and
+             * never advances, because from here the job is the only thing that knows anything. The JS
+             * reads that local status, starts `pollJob`, and the very first poll answers COMPLETED,
+             * which is in its terminal list, so it reloads. The reloaded page renders the completion
+             * card correctly and then starts `pollJob` again, because the local status is still
+             * `awaiting_import`. Reload, render, poll, reload, for as long as the tab is open.
+             *
+             * A RELOAD IS ONLY EVER WORTH DOING IF THE PAGE WILL COME BACK DIFFERENT. Here it could
+             * not: the browser was waiting for a transition that had already happened before it
+             * started watching. So the page now says whether the job is ALREADY terminal, and the
+             * browser does not begin a watch it has nothing left to see.
+             *
+             * Deliberately computed from `job_state_for_render()`, the SAME read the cards are drawn
+             * from, so the script's belief and the rendered page cannot disagree about whether this
+             * migration is finished.
+             */
+            'jobTerminal' => $this->job_is_terminal( $this->job_state_for_render() ),
+            // The list itself, so the script does not keep a second copy that can drift from this one.
+            'jobTerminalStatuses' => self::JOB_TERMINAL_STATUSES,
         ) );
     }
 

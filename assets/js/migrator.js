@@ -730,7 +730,17 @@
     // explicit "we cannot check" card rather than anything reassuring.
 
     /** Statuses after which polling is pointless because the job has stopped moving. */
-    var JOB_TERMINAL = ['COMPLETED', 'COMPLETED_WITH_ERRORS', 'FAILED', 'CANCELLED', 'OPS_ESCALATED'];
+    /*
+     * THE PORTAL'S TERMINAL STATUSES, TAKEN FROM THE PAGE RATHER THAN RESTATED HERE.
+     *
+     * This was a literal array, which made it a SECOND spelling of a list that also lives in
+     * class-admin-page.php. The fallback stays for a page rendered by an older PHP half: a script that
+     * read an absent config value as an empty list would never reload at all, and a customer would sit
+     * on a finished migration that still said "working on it".
+     */
+    var JOB_TERMINAL = (cfg.jobTerminalStatuses && cfg.jobTerminalStatuses.length)
+        ? cfg.jobTerminalStatuses
+        : ['COMPLETED', 'COMPLETED_WITH_ERRORS', 'FAILED', 'CANCELLED', 'OPS_ESCALATED'];
 
     function pollJob(delay) {
         setTimeout(function () {
@@ -770,8 +780,29 @@
                 var job = resp.data || {};
 
                 if (JOB_TERMINAL.indexOf(job.status) !== -1) {
-                    // The outcome, whatever it is, is rendered by PHP. Reload rather than build a
-                    // second implementation of the outcome cards out here that could disagree with it.
+                    /*
+                     * The outcome, whatever it is, is rendered by PHP. Reload rather than build a
+                     * second implementation of the outcome cards out here that could disagree.
+                     *
+                     * ONCE PER STATUS, AND THIS IS NOT BELT AND BRACES. The guard at the bottom of
+                     * this file stops the KNOWN loop by not starting this watch when the job has
+                     * already finished. This stops ANY path that reloads into a page whose own state
+                     * has not moved: a second reload for a status we have already reloaded for cannot
+                     * show the customer anything new, and doing it from inside a poll is an infinite
+                     * loop by construction.
+                     *
+                     * sessionStorage, so it is scoped to this tab and gone when they close it. Wrapped
+                     * because a browser with storage disabled must still reload the first time.
+                     */
+                    var already = null;
+                    try { already = window.sessionStorage.getItem('kmReloadedFor'); } catch (e) {}
+                    if (already === job.status) {
+                        // Already shown. Keep watching slowly in case it changes again, rather than
+                        // reloading into the identical page.
+                        pollJob(15000);
+                        return;
+                    }
+                    try { window.sessionStorage.setItem('kmReloadedFor', job.status); } catch (e) {}
                     window.location.reload();
                     return;
                 }
@@ -910,8 +941,26 @@
         pollStatus(3000);
 
     } else if (cfg.status === 'awaiting_import') {
-        // The upload is finished and the JOB is the only thing that knows anything now.
-        pollJob(4000);
+        /*
+         * THE UPLOAD IS FINISHED AND THE JOB IS THE ONLY THING THAT KNOWS ANYTHING NOW.
+         *
+         * UNLESS IT HAS ALREADY FINISHED, IN WHICH CASE THERE IS NOTHING LEFT TO WATCH FOR, and
+         * starting a watch anyway is what made this page flash for the whole of a customer's cutover
+         * on 2026-09-16: up to 38 requests a minute, every one of them a 200.
+         *
+         * The local status stays `awaiting_import` for ever once the upload is done, by design: from
+         * here the job decides everything. So the first poll answered COMPLETED, which is terminal, so
+         * the script reloaded. The reloaded page drew the completion card correctly and then started
+         * the same watch again, because the local status had not moved. Reload, render, poll, reload,
+         * for as long as the tab stayed open.
+         *
+         * A RELOAD IS ONLY WORTH DOING IF THE PAGE COMES BACK DIFFERENT. `cfg.jobTerminal` is the PHP
+         * half's answer to "has it already finished as of this render", read from the same job state
+         * the cards were drawn from, so the script and the page cannot disagree.
+         */
+        if (!cfg.jobTerminal) {
+            pollJob(4000);
+        }
 
     } else if (cfg.status === 'standalone_packaging') {
         pollStatus(5000);
