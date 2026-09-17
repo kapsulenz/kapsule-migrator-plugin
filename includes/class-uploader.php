@@ -132,7 +132,30 @@ class Kapsule_Uploader {
                 throw new Exception( $this->explain( $code, $size ) );
             }
 
-            $last_msg = $curl_error ? $curl_error : sprintf( /* translators: %s: an HTTP status code. */ __( 'the server replied %s', 'kapsule-migrator' ), $code );
+            /*
+             * THE SECOND PLACE libcurl's OWN ENGLISH REACHED A CUSTOMER, and the louder one.
+             *
+             * This was `$last_msg = $curl_error`, the raw string from `curl_error( $ch )`. It travels
+             * out through Kapsule_Retryable_Exception, into `ajax_upload_chunk`'s `reason`, and the
+             * browser prints it inside a sentence:
+             *
+             *   "We could not reach KapsuleHost after 5 tries (Operation timed out after 15002
+             *    milliseconds with 0 bytes received). Nothing is lost."
+             *
+             * A customer reading "0 bytes received" beside "nothing is lost" has been given two
+             * statements that contradict each other, one of which is about a socket.
+             *
+             * `stopped()` is the right half of the mapper here and not `customer()`: this value is
+             * rendered by `showPaused()`, which is the screen you get when the retries have RUN OUT,
+             * so a sentence promising another attempt would be a promise nothing keeps.
+             */
+            if ( $curl_error ) {
+                Kapsule_Transport_Message::log( 'chunk upload attempt failed', $curl_error );
+                $last_msg = Kapsule_Transport_Message::stopped( $curl_error );
+            } else {
+                /* translators: %s: an HTTP status code. */
+                $last_msg = sprintf( __( 'the server replied %s', 'kapsule-migrator' ), $code );
+            }
 
             if ( $attempt < $max_attempts ) {
                 // Exponential backoff with jitter, so a server under load is not hammered in lockstep

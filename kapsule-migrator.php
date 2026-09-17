@@ -3,7 +3,7 @@
  * Plugin Name: KapsuleHost Migrator
  * Plugin URI:  https://kapsulehost.com/migrate
  * Description: Migrate your WordPress site to KapsuleHost, or export your site for manual migration anywhere.
- * Version:     1.5.11
+ * Version:     1.6.0
  * Author:      KapsuleHost
  * Author URI:  https://kapsulehost.com
  * License:     GPL-2.0-or-later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'KAPSULE_MIGRATOR_VERSION',     '1.5.11' );
+define( 'KAPSULE_MIGRATOR_VERSION',     '1.6.0' );
 define( 'KAPSULE_MIGRATOR_PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'KAPSULE_MIGRATOR_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );
 /**
@@ -41,6 +41,9 @@ define( 'KAPSULE_MIGRATOR_SITE', apply_filters( 'kapsule_migrator_site', 'https:
 define( 'KAPSULE_MIGRATOR_API_BASE',    KAPSULE_MIGRATOR_HOST . '/api/migration/plugin' );
 define( 'KAPSULE_MIGRATOR_VERSION_API', KAPSULE_MIGRATOR_HOST . '/api/migration/plugin-version' );
 
+// FIRST, because three other files call it and none of them may print a transport library's own
+// English at a customer. See includes/class-transport-message.php for what reached one on 2026-08-31.
+require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'includes/class-transport-message.php';
 require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'includes/class-kapsule-migrator.php';
 require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'includes/class-preflight.php';
 require_once KAPSULE_MIGRATOR_PLUGIN_DIR . 'includes/class-dump-preamble.php';

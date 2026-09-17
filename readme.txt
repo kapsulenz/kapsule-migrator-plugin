@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.5.11
+Stable tag: 1.6.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,11 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.6.0 =
+* Fixed: the step name at the top of this screen stopped changing once the page had loaded, so it could say "Checking the connection" while the heading underneath described KapsuleHost assembling your site, twenty minutes later. An earlier release tried to fix this and the fix could not work: it wrote to a part of the page that only exists on the upload screen, so on this screen it changed nothing. The step name, the heading and the text beneath them now all come from one value and change together.
+* Fixed: when this site could not read how your move was going, it replaced the step description with the raw technical reason, so a customer read "cURL error 28: Operation timed out after 15002 milliseconds with 0 bytes received" in the middle of an otherwise ordinary screen. The move was fine and carried on. A failure to read the status is now said in plain words, on its own line, and everything else on the card holds still rather than pretending to make progress.
+* The wording of each step is now sent to this screen by KapsuleHost, already in your language, instead of this plugin keeping its own copy of the same fourteen phrases. There were three copies of that list across the plugin and your panel; there is now one, so the two screens cannot describe the same moment differently.
 
 = 1.5.11 =
 * Fixed: while KapsuleHost was finishing your move, this screen reloaded itself over and over, flashing every few seconds for as long as you left it open. Nothing was wrong with the move and nothing was failing. The screen was watching for your migration to finish, and it had already finished: your copy is complete as soon as your files and database are across, which is usually some minutes before you point your domain at us. So it kept seeing "finished", reloading to show you, and then starting to watch all over again. It now checks whether the move has already finished before it starts watching, and it will not reload twice to show you the same thing.
