@@ -54,6 +54,33 @@ The plugin scans your site, packages files in chunks (works even on large sites)
 * wp-config.php and wp-config-sample.php are never included in exports
 * Token and temporary files are deleted after migration completes
 
+== External services ==
+
+This plugin can send your site to KapsuleHost, a web hosting service operated by Kapsule Group
+Limited (New Zealand). It is not required in order to use the plugin: the export path packages your
+site into files you download yourself and contacts nothing.
+
+**When a connection is made.** Only after you start a migration in your KapsuleHost panel and paste
+the one-time token it gives you into this plugin, and only while that migration is running. Nothing
+is sent when the plugin is merely installed or activated, and nothing is sent if you only use the
+export path.
+
+**What is sent.** Your site's files and its database, uploaded in pieces to
+kpanel.kapsulehost.com, because that is the migration. Alongside them the plugin sends your site
+address, the token, a count of files and bytes so the progress bar can be honest, and the reason if
+a piece fails so the move can be resumed rather than restarted. Your WordPress administrator
+password is never sent: the token authorises the transfer, not your login.
+
+**What is received.** The state of your migration (which step, what percentage, any error), so this
+screen can report what is actually happening rather than guessing.
+
+**Update checks.** The copy of this plugin distributed from WordPress.org uses WordPress.org's own
+update system and makes no update requests to KapsuleHost. The copy downloaded directly from
+kapsulehost.com asks kpanel.kapsulehost.com for the current version at most once every six hours.
+
+Service terms: https://kapsulehost.com/en-us/legal/terms
+Privacy policy: https://kapsulehost.com/en-us/legal/privacy
+
 == Installation ==
 
 = For direct migration to Kapsule =
