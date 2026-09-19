@@ -23,7 +23,7 @@ class Kapsule_Packager {
         if ( class_exists( 'ZipArchive' ) )   return 'zip';
         if ( self::shell_tar_available() )     return 'shell-tar';
         if ( class_exists( 'PharData' ) )      return 'phar';
-        throw new Exception( __( 'This server cannot create archives, so we cannot package your site. Ask your host to enable the PHP zip extension, then contact KapsuleHost support if it still fails.', 'kapsule-migrator' ) );
+        throw new Exception( __( 'This server cannot create archives, so we cannot package your site. Ask your host to enable the PHP zip extension, then contact KapsuleHost support if it still fails.', 'kapsulehost-migrator' ) );
     }
 
     private static function shell_tar_available(): bool {
@@ -425,7 +425,7 @@ class Kapsule_Packager {
 
         throw new Exception( sprintf(
             /* translators: %d: the number of database objects that could not be classified. */
-            __( 'We could not tell which of the %d parts of your database are tables and which are views, and copying them without knowing would produce a database copy that cannot be restored. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message.', 'kapsule-migrator' ),
+            __( 'We could not tell which of the %d parts of your database are tables and which are views, and copying them without knowing would produce a database copy that cannot be restored. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message.', 'kapsulehost-migrator' ),
             count( $names )
         ) );
     }
@@ -680,7 +680,7 @@ class Kapsule_Packager {
             @unlink( $db_file );
             throw new Exception( sprintf(
                 /* translators: %s: the placeholder token found in the export. */
-                __( 'We built a copy of your database and then found it was not safe to send: it still contains an internal placeholder (%s) where your content has a percent sign. Sending it would have changed your links, styling and settings. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message.', 'kapsule-migrator' ),
+                __( 'We built a copy of your database and then found it was not safe to send: it still contains an internal placeholder (%s) where your content has a percent sign. Sending it would have changed your links, styling and settings. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message.', 'kapsulehost-migrator' ),
                 substr( $leak, 0, 12 ) . '...'
             ) );
         }
@@ -695,7 +695,7 @@ class Kapsule_Packager {
             @unlink( $db_file );
             throw new Exception( sprintf(
                 /* translators: %s: a description of the offending statement found in the export. */
-                __( 'We built a copy of your database and then found it was not safe to send: it handles one of your database views as if it were a table (%s). Restoring it would stop partway through and leave some of your tables missing. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message.', 'kapsule-migrator' ),
+                __( 'We built a copy of your database and then found it was not safe to send: it handles one of your database views as if it were a table (%s). Restoring it would stop partway through and leave some of your tables missing. Nothing has been uploaded and your site is untouched. Please contact KapsuleHost support and quote this message.', 'kapsulehost-migrator' ),
                 $view_defect
             ) );
         }

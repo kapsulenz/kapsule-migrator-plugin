@@ -109,7 +109,7 @@ class Kapsule_Uploader {
         }
 
         if ( ! file_exists( $file_path ) ) {
-            throw new Exception( __( 'We could not read a prepared piece of your site from disk. Free up space on the server and start the migration again.', 'kapsule-migrator' ) );
+            throw new Exception( __( 'We could not read a prepared piece of your site from disk. Free up space on the server and start the migration again.', 'kapsulehost-migrator' ) );
         }
 
         $size    = (int) filesize( $file_path );
@@ -154,7 +154,7 @@ class Kapsule_Uploader {
                 $last_msg = Kapsule_Transport_Message::stopped( $curl_error );
             } else {
                 /* translators: %s: an HTTP status code. */
-                $last_msg = sprintf( __( 'the server replied %s', 'kapsule-migrator' ), $code );
+                $last_msg = sprintf( __( 'the server replied %s', 'kapsulehost-migrator' ), $code );
             }
 
             if ( $attempt < $max_attempts ) {
@@ -182,7 +182,7 @@ class Kapsule_Uploader {
     private function send( string $file_path, string $filename, int $size, int $timeout ): array {
         $handle = fopen( $file_path, 'rb' );
         if ( ! $handle ) {
-            return array( 0, '', __( 'we could not open the prepared file', 'kapsule-migrator' ) );
+            return array( 0, '', __( 'we could not open the prepared file', 'kapsulehost-migrator' ) );
         }
 
         $ch = curl_init( $this->api_base . '/upload-chunk' );
@@ -238,20 +238,20 @@ class Kapsule_Uploader {
             case 413:
                 return sprintf(
                     /* translators: %s: the size of the piece that was rejected, e.g. "50". */
-                    __( 'One piece of your site (%s MB) was larger than the server would accept. This is a limit on our side, not a problem with your site. Contact support and we will raise it.', 'kapsule-migrator' ),
+                    __( 'One piece of your site (%s MB) was larger than the server would accept. This is a limit on our side, not a problem with your site. Contact support and we will raise it.', 'kapsulehost-migrator' ),
                     number_format_i18n( $mb )
                 );
             case 401:
             case 403:
-                return __( 'Your migration token is no longer valid. Generate a new one in your KapsuleHost panel and paste it in again.', 'kapsule-migrator' );
+                return __( 'Your migration token is no longer valid. Generate a new one in your KapsuleHost panel and paste it in again.', 'kapsulehost-migrator' );
             case 404:
-                return __( 'The migration this token belongs to no longer exists. Start a new migration from your KapsuleHost panel.', 'kapsule-migrator' );
+                return __( 'The migration this token belongs to no longer exists. Start a new migration from your KapsuleHost panel.', 'kapsulehost-migrator' );
             case 422:
-                return __( 'The server could not read one of the prepared pieces of your site. Start the migration again to rebuild it.', 'kapsule-migrator' );
+                return __( 'The server could not read one of the prepared pieces of your site. Start the migration again to rebuild it.', 'kapsulehost-migrator' );
             default:
                 return sprintf(
                     /* translators: %s: the HTTP status code the server returned. */
-                    __( 'The server refused a piece of your site (code %s). Your site has not been changed. Contact support and we will look at it.', 'kapsule-migrator' ),
+                    __( 'The server refused a piece of your site (code %s). Your site has not been changed. Contact support and we will look at it.', 'kapsulehost-migrator' ),
                     $code
                 );
         }

@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -123,6 +123,11 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.6.2 =
+* Fixed: the plugin screen built its status icons into HTML without escaping them, and four attributes were written the same way. Nothing could be injected through them, because every one was markup this plugin authors itself, but a reader cannot tell that from the code and neither can an automated check. The icons are now emitted from one place as fixed markup, so there is no value to escape, and the attributes are escaped.
+* The text domain is now "kapsulehost-migrator", matching the plugin slug, so translations contributed through translate.wordpress.org reach this plugin.
+* The WordPress.org package no longer carries bundled translation files or an internal .sql reference file. Translations for that channel come from translate.wordpress.org, and the .sql was a development reference the plugin never reads.
 
 = 1.6.1 =
 * Fixed: when a migration had been cancelled or removed on the KapsuleHost side, this screen said "KapsuleHost answered 401 when we asked about your move" and then went on retrying for ever, under a progress bar frozen near the end that could never advance. A status code is not a sentence, and "your migration is no longer there" is not "we could not reach KapsuleHost": the first is final and you need to know it, the second is worth waiting out. The two are now told apart. A migration that is gone says so in plain words and stops, and a moment when we cannot be reached says that instead and keeps trying. The technical code is still recorded for support, where a customer never reads it.

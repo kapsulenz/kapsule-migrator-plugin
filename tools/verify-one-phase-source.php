@@ -144,6 +144,32 @@ require_once $src;
 
 // ── Rendering helpers ────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Invoke render_job_outcome against WHICHEVER SIGNATURE THE SUBJECT HAS.
+ *
+ * ── WHY THIS IS NOT OVER-ENGINEERING ────────────────────────────────────────────────────────────
+ *
+ * The self-test replays these identical checks against a PINNED PRE-FIX COMMIT, which is what proves
+ * the checker can still go red. That pinned source takes ( $job, $tick, $bang, $info, $bold ); current
+ * source takes ( $job, $bold ), because the icons moved into Kapsule_Admin_Page::icon() when
+ * WordPress.org flagged them as unescaped output.
+ *
+ * Hardcoding either shape blinds one half. Passing the new shape made the pinned run fatal, and the
+ * self-test reported BLIND: the control WORKING, refusing rather than passing, exactly as the estate
+ * rule about a control silenced by its own success describes.
+ *
+ * So the arity is read from the subject instead of assumed. The pin stays immutable and the harness
+ * spans both shapes.
+ */
+function invoke_outcome( ReflectionMethod $m, $page, $job ) {
+    $bold = array( 'strong' => array() );
+    $icons = array( '<svg/>', '<svg/>', '<svg/>' );
+    $n = $m->getNumberOfParameters();
+    // 5 = the pre-fix shape (job, tick, bang, info, bold); 2 = current (job, bold).
+    $args = ( $n >= 5 ) ? array_merge( array( $job ), $icons, array( $bold ) ) : array( $job, $bold );
+    return $m->invokeArgs( $page, $args );
+}
+
 /** The three fields, pulled back out of the HTML the class actually emitted. */
 function render_card( array $job ): array {
     $page = new Kapsule_Admin_Page();
@@ -151,7 +177,7 @@ function render_card( array $job ): array {
     $m->setAccessible( true );
 
     ob_start();
-    $m->invoke( $page, $job, '<svg/>', '<svg/>', '<svg/>', array( 'strong' => array() ) );
+    invoke_outcome( $m, $page, $job );
     $html = ob_get_clean();
 
     // The chip is the FIRST km-chip on the card; the heading the first km-title; the body the first
@@ -382,7 +408,7 @@ function render_card_null(): array {
     $m    = new ReflectionMethod( 'Kapsule_Admin_Page', 'render_job_outcome' );
     $m->setAccessible( true );
     ob_start();
-    $m->invoke( $page, null, '<svg/>', '<svg/>', '<svg/>', array( 'strong' => array() ) );
+    invoke_outcome( $m, $page, null );
     return array( 'html' => ob_get_clean() );
 }
 if ( strpos( $c['html'], 'cURL' ) !== false || strpos( $c['html'], 'milliseconds' ) !== false ) {

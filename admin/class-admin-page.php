@@ -98,7 +98,7 @@ class Kapsule_Admin_Page {
         if ( ! in_array( $status, self::STATUSES, true ) ) {
             error_log( sprintf( '[kapsule-migrator] refused to set unknown migration status "%s"', $status ) );
             update_option( 'kapsule_migration_status', 'error' );
-            update_option( 'kapsule_migration_error', __( 'The migration ended in a state we do not recognise, so we stopped rather than guess. Your site here is untouched.', 'kapsule-migrator' ) );
+            update_option( 'kapsule_migration_error', __( 'The migration ended in a state we do not recognise, so we stopped rather than guess. Your site here is untouched.', 'kapsulehost-migrator' ) );
             return;
         }
         update_option( 'kapsule_migration_status', $status );
@@ -122,7 +122,7 @@ class Kapsule_Admin_Page {
             'KapsuleHost Migrator',
             'KapsuleHost Migrate',
             'manage_options',
-            'kapsule-migrator',
+            'kapsulehost-migrator',
             array( $this, 'render_page' ),
             // THE REAL KAPSULEHOST MARK, not a redraw of it. This file used to hold a hand-authored
             // approximation (flat cyan cloud, flat navy bar) which rendered fine and was still not our
@@ -142,7 +142,7 @@ class Kapsule_Admin_Page {
     }
 
     public function enqueue_scripts( string $hook ): void {
-        if ( strpos( $hook, 'kapsule-migrator' ) === false ) return;
+        if ( strpos( $hook, 'kapsulehost-migrator' ) === false ) return;
         wp_enqueue_style(
             'kapsule-migrator-admin',
             KAPSULE_MIGRATOR_PLUGIN_URL . 'assets/css/admin.css',
@@ -178,7 +178,7 @@ class Kapsule_Admin_Page {
         // screen translates and the half that moves stays English.
         wp_set_script_translations(
             'kapsule-migrator-admin',
-            'kapsule-migrator',
+            'kapsulehost-migrator',
             KAPSULE_MIGRATOR_PLUGIN_DIR . 'languages'
         );
         wp_localize_script( 'kapsule-migrator-admin', 'kapsuleMigrator', array(
@@ -271,7 +271,7 @@ class Kapsule_Admin_Page {
          */
         $token = get_option( 'kapsule_migration_token', '' );
         if ( empty( $token ) ) {
-            update_option( 'kapsule_migration_job_state_error', __( 'This site has no migration token stored, so there is nothing to ask about.', 'kapsule-migrator' ) );
+            update_option( 'kapsule_migration_job_state_error', __( 'This site has no migration token stored, so there is nothing to ask about.', 'kapsulehost-migrator' ) );
             return null;
         }
 
@@ -356,8 +356,8 @@ class Kapsule_Admin_Page {
             $gone = in_array( $code, array( 401, 403, 404, 410 ), true );
             update_option( 'kapsule_migration_job_gone', $gone ? 1 : 0 );
             update_option( 'kapsule_migration_job_state_error', $gone
-                ? __( 'This migration is no longer on your KapsuleHost account. It may have been cancelled or removed there. Your site has not been changed: start a new migration from your KapsuleHost panel when you are ready.', 'kapsule-migrator' )
-                : __( 'We could not reach KapsuleHost just now. Your site has not been changed and nothing is lost. We will keep trying.', 'kapsule-migrator' )
+                ? __( 'This migration is no longer on your KapsuleHost account. It may have been cancelled or removed there. Your site has not been changed: start a new migration from your KapsuleHost panel when you are ready.', 'kapsulehost-migrator' )
+                : __( 'We could not reach KapsuleHost just now. Your site has not been changed and nothing is lost. We will keep trying.', 'kapsulehost-migrator' )
             );
             return null;
         }
@@ -368,7 +368,7 @@ class Kapsule_Admin_Page {
         // being treated as fine.
         if ( ! is_array( $body ) || ! isset( $body['status'] ) || ! is_string( $body['status'] ) ) {
             update_option( 'kapsule_migration_job_gone', 0 );
-            update_option( 'kapsule_migration_job_state_error', __( 'KapsuleHost sent an answer we could not read.', 'kapsule-migrator' ) );
+            update_option( 'kapsule_migration_job_state_error', __( 'KapsuleHost sent an answer we could not read.', 'kapsulehost-migrator' ) );
             return null;
         }
 
@@ -442,10 +442,34 @@ class Kapsule_Admin_Page {
         return is_array( $job ) && isset( $job['status'] ) && $job['status'] === self::JOB_COMPLETE;
     }
 
+    /**
+     * Echo one of the three interface icons.
+     *
+     * Static developer-authored markup, emitted from ONE place rather than held in variables and
+     * echoed from seventeen. See the note where the icons used to be defined for why this is not
+     * wp_kses: that would lowercase `viewBox`, which is case-sensitive in SVG.
+     *
+     * Unknown names emit nothing rather than falling back to an arbitrary icon, because a wrong icon
+     * beside a real message is worse than no icon: it tells the customer the wrong thing confidently.
+     */
+    private static function icon( string $which ): void {
+        switch ( $which ) {
+            case 'tick':
+                echo '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6.2l2.6 2.6L10 3.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                break;
+            case 'bang':
+                echo '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.6" stroke="currentColor" stroke-width="1.6"/><path d="M8 4.8v3.6M8 11h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+                break;
+            case 'info':
+                echo '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.6" stroke="currentColor" stroke-width="1.6"/><path d="M8 7.4v3.8M8 4.9h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+                break;
+        }
+    }
+
     public function ajax_job_status(): void {
         check_ajax_referer( 'kapsule_migrator_nonce', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsule-migrator' ) );
+            wp_send_json_error( __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsulehost-migrator' ) );
             return;
         }
         $job = $this->fetch_job_state();
@@ -492,13 +516,13 @@ class Kapsule_Admin_Page {
     public function ajax_start_migration(): void {
         check_ajax_referer( 'kapsule_migrator_nonce', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsule-migrator' ) );
+            wp_send_json_error( __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsulehost-migrator' ) );
             return;
         }
 
         $token = sanitize_text_field( $_POST['token'] ?? '' );
         if ( empty( $token ) ) {
-            wp_send_json_error( __( 'Paste your migration token first. You will find it in your KapsuleHost panel under Sites, then Migrate.', 'kapsule-migrator' ) );
+            wp_send_json_error( __( 'Paste your migration token first. You will find it in your KapsuleHost panel under Sites, then Migrate.', 'kapsulehost-migrator' ) );
             return;
         }
 
@@ -524,7 +548,7 @@ class Kapsule_Admin_Page {
             Kapsule_Transport_Message::log( 'handshake failed', $raw );
             wp_send_json_error( sprintf(
                 /* translators: %s: a short plain description of what went wrong, e.g. "this server could not open a connection to KapsuleHost". */
-                __( 'We could not start the move because %s. Your token is probably fine. Check this server can reach the internet, then try again.', 'kapsule-migrator' ),
+                __( 'We could not start the move because %s. Your token is probably fine. Check this server can reach the internet, then try again.', 'kapsulehost-migrator' ),
                 Kapsule_Transport_Message::stopped( $raw )
             ) );
             return;
@@ -532,7 +556,7 @@ class Kapsule_Admin_Page {
 
         $body = json_decode( wp_remote_retrieve_body( $response ), true );
         if ( empty( $body['ok'] ) ) {
-            wp_send_json_error( $body['error'] ?? __( 'We could not connect to KapsuleHost with that token. Check it and try again.', 'kapsule-migrator' ) );
+            wp_send_json_error( $body['error'] ?? __( 'We could not connect to KapsuleHost with that token. Check it and try again.', 'kapsulehost-migrator' ) );
             return;
         }
 
@@ -606,7 +630,7 @@ class Kapsule_Admin_Page {
             // Permanent for the same reason: no number of retries grants a capability.
             wp_send_json_error( array(
                 'retryable' => false,
-                'reason'    => __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsule-migrator' ),
+                'reason'    => __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsulehost-migrator' ),
             ) );
             return;
         }
@@ -632,7 +656,7 @@ class Kapsule_Admin_Page {
         if ( empty( $token ) || null === $chunk || ! $tmp ) {
             wp_send_json_error( array(
                 'retryable' => false,
-                'reason'    => __( 'This migration is no longer in a state we can continue from. Stop and start over to begin a clean run.', 'kapsule-migrator' ),
+                'reason'    => __( 'This migration is no longer in a state we can continue from. Stop and start over to begin a clean run.', 'kapsulehost-migrator' ),
             ) );
             return;
         }
@@ -789,7 +813,7 @@ class Kapsule_Admin_Page {
     public function ajax_upload_db_and_complete(): void {
         check_ajax_referer( 'kapsule_migrator_nonce', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsule-migrator' ) );
+            wp_send_json_error( __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsulehost-migrator' ) );
             return;
         }
 
@@ -797,7 +821,7 @@ class Kapsule_Admin_Page {
         $tmp   = get_option( 'kapsule_migration_tmp_dir', '' );
 
         if ( empty( $token ) || ! $tmp ) {
-            wp_send_json_error( __( 'This migration is no longer in a state we can continue from. Stop and start over to begin a clean run.', 'kapsule-migrator' ) );
+            wp_send_json_error( __( 'This migration is no longer in a state we can continue from. Stop and start over to begin a clean run.', 'kapsulehost-migrator' ) );
             return;
         }
 
@@ -889,7 +913,7 @@ class Kapsule_Admin_Page {
     public function ajax_start_standalone(): void {
         check_ajax_referer( 'kapsule_migrator_nonce', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsule-migrator' ) );
+            wp_send_json_error( __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsulehost-migrator' ) );
             return;
         }
 
@@ -920,7 +944,7 @@ class Kapsule_Admin_Page {
     public function ajax_reset(): void {
         check_ajax_referer( 'kapsule_migrator_nonce', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsule-migrator' ) );
+            wp_send_json_error( __( 'You do not have permission to do that. Ask an administrator of this site to run the migration.', 'kapsulehost-migrator' ) );
             return;
         }
 
@@ -1005,26 +1029,26 @@ class Kapsule_Admin_Page {
 
     public function handle_download(): void {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'You do not have permission to download this file.', 'kapsule-migrator' ), 403 );
+            wp_die( esc_html__( 'You do not have permission to download this file.', 'kapsulehost-migrator' ), 403 );
         }
 
         $file_index = absint( $_GET['file'] ?? -1 );
         $nonce      = sanitize_text_field( $_GET['nonce'] ?? '' );
 
         if ( ! wp_verify_nonce( $nonce, 'kapsule_download_' . $file_index ) ) {
-            wp_die( esc_html__( 'That download link has expired. Reload this page and try again.', 'kapsule-migrator' ) );
+            wp_die( esc_html__( 'That download link has expired. Reload this page and try again.', 'kapsulehost-migrator' ) );
         }
 
         $files = get_option( 'kapsule_standalone_files', array() );
         if ( ! isset( $files[ $file_index ] ) ) {
-            wp_die( esc_html__( 'We could not find that file. The package may have been cleaned up, so package this site again.', 'kapsule-migrator' ) );
+            wp_die( esc_html__( 'We could not find that file. The package may have been cleaned up, so package this site again.', 'kapsulehost-migrator' ) );
         }
 
         $file_info = $files[ $file_index ];
         $path      = $file_info['path'];
 
         if ( ! file_exists( $path ) ) {
-            wp_die( esc_html__( 'That file is no longer on this server. Package this site again to rebuild it.', 'kapsule-migrator' ) );
+            wp_die( esc_html__( 'That file is no longer on this server. Package this site again to rebuild it.', 'kapsulehost-migrator' ) );
         }
 
         // Stream the file
@@ -1054,7 +1078,7 @@ class Kapsule_Admin_Page {
      * EVERY customer-facing string here is translated. This plugin runs on the customer's OWN
      * WordPress at the most nervous moment they will ever have with us, and an English wall in front
      * of a French or Arabic customer moving their business is a worse failure than an ugly screen.
-     * Strings are wrapped for the `kapsule-migrator` text domain and shipped as compiled catalogues
+     * Strings are wrapped for the `kapsulehost-migrator` text domain and shipped as compiled catalogues
      * for the same 16 locales the rest of the estate sells in.
      */
     public function render_page(): void {
@@ -1075,9 +1099,21 @@ class Kapsule_Admin_Page {
             }
         }
 
-        $tick = '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6.2l2.6 2.6L10 3.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-        $bang = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.6" stroke="currentColor" stroke-width="1.6"/><path d="M8 4.8v3.6M8 11h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
-        $info = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.6" stroke="currentColor" stroke-width="1.6"/><path d="M8 7.4v3.8M8 4.9h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+        /*
+         * THE THREE ICONS ARE NOW EMITTED BY `icon()`, NOT HELD IN VARIABLES.
+         *
+         * WordPress.org's review flagged `echo $info` and its siblings as unescaped output, and it
+         * was right to: a scanner cannot tell a variable holding developer-authored markup from one
+         * holding a customer's name, and neither can the next person editing this file.
+         *
+         * The obvious fix, wp_kses with an SVG allowlist, has a trap. wp_kses LOWERCASES attribute
+         * names, and `viewBox` is case-sensitive in SVG. It survives today only because the HTML
+         * parser's foreign-element adjustment table happens to map `viewbox` back, which is a rule
+         * about HTML parsing that I would be silently depending on for the icons to render at all.
+         *
+         * These are static markup, not data. So they are echoed as literals from one place, which
+         * removes the question instead of answering it, and there is no longer a variable to escape.
+         */
         $bold = array( 'strong' => array() );
         ?>
         <div class="wrap kapsule-mig">
@@ -1121,75 +1157,75 @@ class Kapsule_Admin_Page {
 
                 <div class="km-card">
                     <div class="km-tabs" role="tablist">
-                        <button class="kapsule-tab km-tab km-tab--on" data-tab="connected" role="tab"><?php echo esc_html__( 'Move to KapsuleHost', 'kapsule-migrator' ); ?></button>
-                        <button class="kapsule-tab km-tab" data-tab="standalone" role="tab"><?php echo esc_html__( 'Download a copy', 'kapsule-migrator' ); ?></button>
+                        <button class="kapsule-tab km-tab km-tab--on" data-tab="connected" role="tab"><?php echo esc_html__( 'Move to KapsuleHost', 'kapsulehost-migrator' ); ?></button>
+                        <button class="kapsule-tab km-tab" data-tab="standalone" role="tab"><?php echo esc_html__( 'Download a copy', 'kapsulehost-migrator' ); ?></button>
                     </div>
 
                     <div class="kapsule-tab-panel" id="kapsule-panel-connected">
                         <div class="km-card-body">
-                            <p class="km-eyebrow"><?php echo esc_html__( 'The one thing you need to do', 'kapsule-migrator' ); ?></p>
-                            <h1 class="km-title"><?php echo esc_html__( 'Move this site to KapsuleHost', 'kapsule-migrator' ); ?></h1>
+                            <p class="km-eyebrow"><?php echo esc_html__( 'The one thing you need to do', 'kapsulehost-migrator' ); ?></p>
+                            <h1 class="km-title"><?php echo esc_html__( 'Move this site to KapsuleHost', 'kapsulehost-migrator' ); ?></h1>
                             <p class="km-lede"><?php
-                                echo esc_html__( 'Paste the migration token from your KapsuleHost panel. We copy your files and your database across and leave this site exactly as it is, serving visitors the whole time.', 'kapsule-migrator' );
+                                echo esc_html__( 'Paste the migration token from your KapsuleHost panel. We copy your files and your database across and leave this site exactly as it is, serving visitors the whole time.', 'kapsulehost-migrator' );
                             ?></p>
 
                             <div class="km-field">
-                                <label class="km-label" for="kapsule-token-input"><?php echo esc_html__( 'Migration token', 'kapsule-migrator' ); ?></label>
+                                <label class="km-label" for="kapsule-token-input"><?php echo esc_html__( 'Migration token', 'kapsulehost-migrator' ); ?></label>
                                 <input type="text" id="kapsule-token-input" class="km-input" spellcheck="false" autocomplete="off"
-                                       placeholder="<?php echo esc_attr__( 'Paste your token', 'kapsule-migrator' ); ?>" />
+                                       placeholder="<?php echo esc_attr__( 'Paste your token', 'kapsulehost-migrator' ); ?>" />
                                 <span class="km-hint"><?php
-                                    echo esc_html__( 'Find it in your panel under Sites, then Migrate. The token works once and is deleted when the move finishes.', 'kapsule-migrator' );
+                                    echo esc_html__( 'Find it in your panel under Sites, then Migrate. The token works once and is deleted when the move finishes.', 'kapsulehost-migrator' );
                                 ?></span>
                             </div>
 
                             <div class="km-note" data-tone="info">
-                                <?php echo $info; ?>
+                                <?php self::icon( 'info' ); ?>
                                 <span><?php
                                     // HOW LONG IT TAKES depends on THIS server's upload speed, which nothing can know
                                     // before measuring it, so this sets an expectation without inventing a number. The
                                     // real figure appears during the transfer, derived from bytes actually moved.
-                                    echo esc_html__( 'How long this takes depends on how fast this server can upload. Small sites finish in a few minutes and large ones take longer; you will see a live estimate once the transfer starts. If it is interrupted, reopen this page and it carries on from the last piece that arrived.', 'kapsule-migrator' );
+                                    echo esc_html__( 'How long this takes depends on how fast this server can upload. Small sites finish in a few minutes and large ones take longer; you will see a live estimate once the transfer starts. If it is interrupted, reopen this page and it carries on from the last piece that arrived.', 'kapsulehost-migrator' );
                                 ?></span>
                             </div>
 
                             <div class="km-actions">
-                                <button id="kapsule-start-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Start the move', 'kapsule-migrator' ); ?></button>
+                                <button id="kapsule-start-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Start the move', 'kapsulehost-migrator' ); ?></button>
                             </div>
 
                             <div id="kapsule-error-msg" class="km-note" data-tone="error" style="display:none;">
-                                <?php echo $bang; ?>
+                                <?php self::icon( 'bang' ); ?>
                                 <span></span>
                             </div>
                         </div>
 
                         <div class="km-trust">
-                            <span class="km-trust-i"><?php echo $tick . esc_html__( 'Encrypted end to end', 'kapsule-migrator' ); ?></span>
-                            <span class="km-trust-i"><?php echo $tick . esc_html__( 'This site is only ever read, never changed', 'kapsule-migrator' ); ?></span>
-                            <span class="km-trust-i"><?php echo $tick . esc_html__( 'Token deleted after use', 'kapsule-migrator' ); ?></span>
+                            <span class="km-trust-i"><?php self::icon( 'tick' ); echo esc_html__( 'Encrypted end to end', 'kapsulehost-migrator' ); ?></span>
+                            <span class="km-trust-i"><?php self::icon( 'tick' ); echo esc_html__( 'This site is only ever read, never changed', 'kapsulehost-migrator' ); ?></span>
+                            <span class="km-trust-i"><?php self::icon( 'tick' ); echo esc_html__( 'Token deleted after use', 'kapsulehost-migrator' ); ?></span>
                         </div>
                     </div>
 
                     <div class="kapsule-tab-panel" id="kapsule-panel-standalone" style="display:none;">
                         <div class="km-card-body">
-                            <p class="km-eyebrow"><?php echo esc_html__( 'No account needed', 'kapsule-migrator' ); ?></p>
-                            <h1 class="km-title"><?php echo esc_html__( 'Download a copy of this site', 'kapsule-migrator' ); ?></h1>
+                            <p class="km-eyebrow"><?php echo esc_html__( 'No account needed', 'kapsulehost-migrator' ); ?></p>
+                            <h1 class="km-title"><?php echo esc_html__( 'Download a copy of this site', 'kapsulehost-migrator' ); ?></h1>
                             <p class="km-lede"><?php
-                                echo esc_html__( 'Package the files and database into archives you can download and take anywhere. Useful if you are moving by hand or want a copy before you change anything.', 'kapsule-migrator' );
+                                echo esc_html__( 'Package the files and database into archives you can download and take anywhere. Useful if you are moving by hand or want a copy before you change anything.', 'kapsulehost-migrator' );
                             ?></p>
 
                             <div class="km-actions">
-                                <button id="kapsule-standalone-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Package this site', 'kapsule-migrator' ); ?></button>
+                                <button id="kapsule-standalone-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Package this site', 'kapsulehost-migrator' ); ?></button>
                             </div>
 
                             <div id="kapsule-standalone-error-msg" class="km-note" data-tone="error" style="display:none;">
-                                <?php echo $bang; ?>
+                                <?php self::icon( 'bang' ); ?>
                                 <span></span>
                             </div>
                         </div>
 
                         <div class="km-trust">
-                            <span class="km-trust-i"><?php echo $tick . esc_html__( 'Files stay on your server until you download them', 'kapsule-migrator' ); ?></span>
-                            <span class="km-trust-i"><?php echo $tick . esc_html__( 'wp-config.php is left out on purpose', 'kapsule-migrator' ); ?></span>
+                            <span class="km-trust-i"><?php self::icon( 'tick' ); echo esc_html__( 'Files stay on your server until you download them', 'kapsulehost-migrator' ); ?></span>
+                            <span class="km-trust-i"><?php self::icon( 'tick' ); echo esc_html__( 'wp-config.php is left out on purpose', 'kapsulehost-migrator' ); ?></span>
                         </div>
                     </div>
                 </div>
@@ -1214,20 +1250,20 @@ class Kapsule_Admin_Page {
                 $pct = ( $total_bytes > 0 ) ? (int) min( 99, max( 0, round( ( $done_bytes / $total_bytes ) * 100 ) ) ) : 0;
 
                 if ( $is_standalone ) {
-                    $head = __( 'Packaging your site', 'kapsule-migrator' );
-                    $lede = __( 'We are building downloadable archives of your files and database. Keep this tab open.', 'kapsule-migrator' );
+                    $head = __( 'Packaging your site', 'kapsulehost-migrator' );
+                    $lede = __( 'We are building downloadable archives of your files and database. Keep this tab open.', 'kapsulehost-migrator' );
                 } elseif ( $step_scan_act ) {
-                    $head = __( 'Looking at your site', 'kapsule-migrator' );
-                    $lede = __( 'We are counting your files and checking the connection to KapsuleHost. Nothing has moved yet.', 'kapsule-migrator' );
+                    $head = __( 'Looking at your site', 'kapsulehost-migrator' );
+                    $lede = __( 'We are counting your files and checking the connection to KapsuleHost. Nothing has moved yet.', 'kapsulehost-migrator' );
                 } else {
-                    $head = __( 'Moving your site', 'kapsule-migrator' );
-                    $lede = __( 'Your site is being copied across in pieces. It stays live and unchanged the whole time.', 'kapsule-migrator' );
+                    $head = __( 'Moving your site', 'kapsulehost-migrator' );
+                    $lede = __( 'Your site is being copied across in pieces. It stays live and unchanged the whole time.', 'kapsulehost-migrator' );
                 }
             ?>
 
                 <div class="km-card">
                     <div class="km-card-body">
-                        <span class="km-chip" id="km-chip" data-state="<?php echo $step_scan_act || $is_standalone ? 'connecting' : 'transferring'; ?>">
+                        <span class="km-chip" id="km-chip" data-state="<?php echo esc_attr( $step_scan_act || $is_standalone ? 'connecting' : 'transferring' ); ?>">
                             <span id="km-chip-label"><?php echo esc_html( $this->status_label( $status ) ); ?></span>
                         </span>
 
@@ -1240,7 +1276,7 @@ class Kapsule_Admin_Page {
                                 <span class="km-meter-note" id="km-meter-note"><?php
                                     if ( $step_files_act && $chunk_count > 0 ) {
                                         /* translators: 1: current piece number, 2: total number of pieces. */
-                                        echo esc_html( sprintf( __( 'piece %1$s of %2$s', 'kapsule-migrator' ),
+                                        echo esc_html( sprintf( __( 'piece %1$s of %2$s', 'kapsulehost-migrator' ),
                                             number_format_i18n( min( $next_chunk + 1, $chunk_count ) ),
                                             number_format_i18n( $chunk_count ) ) );
                                     }
@@ -1254,56 +1290,56 @@ class Kapsule_Admin_Page {
                         <?php if ( ! $is_standalone ) : ?>
                         <div class="km-facts">
                             <div class="km-fact">
-                                <div class="km-fact-k"><?php echo esc_html__( 'Pieces sent', 'kapsule-migrator' ); ?></div>
+                                <div class="km-fact-k"><?php echo esc_html__( 'Pieces sent', 'kapsulehost-migrator' ); ?></div>
                                 <div class="km-fact-v" id="km-f-pieces"><?php echo esc_html( self::number_pair( number_format_i18n( $next_chunk ), number_format_i18n( $chunk_count ) ) ); ?></div>
                             </div>
                             <div class="km-fact">
-                                <div class="km-fact-k"><?php echo esc_html__( 'Moved', 'kapsule-migrator' ); ?></div>
+                                <div class="km-fact-k"><?php echo esc_html__( 'Moved', 'kapsulehost-migrator' ); ?></div>
                                 <div class="km-fact-v" id="km-f-moved"><?php echo esc_html( $this->format_bytes( $done_bytes ) ); ?></div>
                             </div>
                             <div class="km-fact">
-                                <div class="km-fact-k"><?php echo esc_html__( 'Total', 'kapsule-migrator' ); ?></div>
+                                <div class="km-fact-k"><?php echo esc_html__( 'Total', 'kapsulehost-migrator' ); ?></div>
                                 <div class="km-fact-v" id="km-f-total"><?php echo esc_html( $this->format_bytes( $total_bytes ) ); ?></div>
                             </div>
                             <div class="km-fact">
-                                <div class="km-fact-k" id="km-f-4k"><?php echo esc_html__( 'Files', 'kapsule-migrator' ); ?></div>
+                                <div class="km-fact-k" id="km-f-4k"><?php echo esc_html__( 'Files', 'kapsulehost-migrator' ); ?></div>
                                 <div class="km-fact-v" id="km-f-4v"><?php echo esc_html( number_format_i18n( $file_count ) ); ?></div>
                             </div>
                         </div>
 
                         <div class="km-steps" id="kapsule-steps">
-                            <div class="km-step kapsule-step" id="kstep-scan" data-done="<?php echo $step_scan_done ? '1' : '0'; ?>" data-on="<?php echo $step_scan_act ? '1' : '0'; ?>">
-                                <span class="km-step-i"><?php echo $tick; ?></span>
-                                <span><?php echo esc_html__( 'Count the files and check the connection', 'kapsule-migrator' ); ?></span>
+                            <div class="km-step kapsule-step" id="kstep-scan" data-done="<?php echo esc_attr( $step_scan_done ? '1' : '0' ); ?>" data-on="<?php echo esc_attr( $step_scan_act ? '1' : '0' ); ?>">
+                                <span class="km-step-i"><?php self::icon( 'tick' ); ?></span>
+                                <span><?php echo esc_html__( 'Count the files and check the connection', 'kapsulehost-migrator' ); ?></span>
                             </div>
-                            <div class="km-step kapsule-step" id="kstep-files" data-done="<?php echo $step_files_done ? '1' : '0'; ?>" data-on="<?php echo $step_files_act ? '1' : '0'; ?>">
-                                <span class="km-step-i"><?php echo $tick; ?></span>
-                                <span><?php echo esc_html__( 'Copy the files across', 'kapsule-migrator' ); ?></span>
+                            <div class="km-step kapsule-step" id="kstep-files" data-done="<?php echo esc_attr( $step_files_done ? '1' : '0' ); ?>" data-on="<?php echo esc_attr( $step_files_act ? '1' : '0' ); ?>">
+                                <span class="km-step-i"><?php self::icon( 'tick' ); ?></span>
+                                <span><?php echo esc_html__( 'Copy the files across', 'kapsulehost-migrator' ); ?></span>
                             </div>
-                            <div class="km-step kapsule-step" id="kstep-db" data-done="0" data-on="<?php echo $step_db_act ? '1' : '0'; ?>">
-                                <span class="km-step-i"><?php echo $tick; ?></span>
-                                <span><?php echo esc_html__( 'Copy the database across', 'kapsule-migrator' ); ?></span>
+                            <div class="km-step kapsule-step" id="kstep-db" data-done="0" data-on="<?php echo esc_attr( $step_db_act ? '1' : '0' ); ?>">
+                                <span class="km-step-i"><?php self::icon( 'tick' ); ?></span>
+                                <span><?php echo esc_html__( 'Copy the database across', 'kapsulehost-migrator' ); ?></span>
                             </div>
                             <div class="km-step kapsule-step" id="kstep-done" data-done="0" data-on="0">
-                                <span class="km-step-i"><?php echo $tick; ?></span>
-                                <span><?php echo esc_html__( 'KapsuleHost puts it together', 'kapsule-migrator' ); ?></span>
+                                <span class="km-step-i"><?php self::icon( 'tick' ); ?></span>
+                                <span><?php echo esc_html__( 'KapsuleHost puts it together', 'kapsulehost-migrator' ); ?></span>
                             </div>
                         </div>
                         <?php endif; ?>
 
                         <div class="km-note" id="km-note" data-tone="info">
-                            <?php echo $info; ?>
+                            <?php self::icon( 'info' ); ?>
                             <span id="km-note-text"><?php
                                 if ( $is_standalone ) {
-                                    echo esc_html__( 'Keep this tab open. We will show your download links the moment packaging finishes.', 'kapsule-migrator' );
+                                    echo esc_html__( 'Keep this tab open. We will show your download links the moment packaging finishes.', 'kapsulehost-migrator' );
                                 } else {
-                                    echo wp_kses( __( '<strong>Keep this tab open.</strong> The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived.', 'kapsule-migrator' ), $bold );
+                                    echo wp_kses( __( '<strong>Keep this tab open.</strong> The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived.', 'kapsulehost-migrator' ), $bold );
                                 }
                             ?></span>
                         </div>
 
                         <div class="km-actions">
-                            <button id="kapsule-reset-btn" class="km-btn km-btn--ghost"><?php echo esc_html__( 'Stop and start over', 'kapsule-migrator' ); ?></button>
+                            <button id="kapsule-reset-btn" class="km-btn km-btn--ghost"><?php echo esc_html__( 'Stop and start over', 'kapsulehost-migrator' ); ?></button>
                         </div>
                     </div>
                 </div>
@@ -1312,10 +1348,10 @@ class Kapsule_Admin_Page {
 
                 <div class="km-card">
                     <div class="km-card-body">
-                        <span class="km-chip" data-state="done"><?php echo esc_html__( 'Package ready', 'kapsule-migrator' ); ?></span>
-                        <h1 class="km-title"><?php echo esc_html__( 'Your site is packaged', 'kapsule-migrator' ); ?></h1>
+                        <span class="km-chip" data-state="done"><?php echo esc_html__( 'Package ready', 'kapsulehost-migrator' ); ?></span>
+                        <h1 class="km-title"><?php echo esc_html__( 'Your site is packaged', 'kapsulehost-migrator' ); ?></h1>
                         <p class="km-lede"><?php
-                            echo esc_html__( 'Download the archives below and import them on your new host. This site has not been changed.', 'kapsule-migrator' );
+                            echo esc_html__( 'Download the archives below and import them on your new host. This site has not been changed.', 'kapsulehost-migrator' );
                         ?></p>
 
                         <div class="km-files">
@@ -1325,18 +1361,18 @@ class Kapsule_Admin_Page {
                                         <div class="km-file-n"><?php echo esc_html( $file['name'] ); ?></div>
                                         <div class="km-file-s"><?php echo esc_html( $this->format_bytes( $file['size'] ) ); ?></div>
                                     </div>
-                                    <a href="<?php echo esc_url( $file['url'] ); ?>" class="km-btn km-btn--ghost"><?php echo esc_html__( 'Download', 'kapsule-migrator' ); ?></a>
+                                    <a href="<?php echo esc_url( $file['url'] ); ?>" class="km-btn km-btn--ghost"><?php echo esc_html__( 'Download', 'kapsulehost-migrator' ); ?></a>
                                 </div>
                             <?php endforeach; ?>
                         </div>
 
                         <div class="km-note" data-tone="info">
-                            <?php echo $info; ?>
-                            <span><?php echo esc_html__( 'Moving to KapsuleHost instead? Use the token path and we do all of this for you, with nothing to download.', 'kapsule-migrator' ); ?></span>
+                            <?php self::icon( 'info' ); ?>
+                            <span><?php echo esc_html__( 'Moving to KapsuleHost instead? Use the token path and we do all of this for you, with nothing to download.', 'kapsulehost-migrator' ); ?></span>
                         </div>
 
                         <div class="km-actions">
-                            <button id="kapsule-reset-btn" class="km-btn km-btn--ghost"><?php echo esc_html__( 'Delete the package and start over', 'kapsule-migrator' ); ?></button>
+                            <button id="kapsule-reset-btn" class="km-btn km-btn--ghost"><?php echo esc_html__( 'Delete the package and start over', 'kapsulehost-migrator' ); ?></button>
                         </div>
                     </div>
                 </div>
@@ -1347,29 +1383,29 @@ class Kapsule_Admin_Page {
                 // `$job` is null when we could not reach KapsuleHost, and that renders as "we cannot
                 // check" rather than as the last thing we saw. There is deliberately no `?:` here that
                 // could resolve to a completion.
-                $this->render_job_outcome( $this->job_state_for_render(), $tick, $bang, $info, $bold );
+                $this->render_job_outcome( $this->job_state_for_render(), $bold );
             ?>
 
             <?php elseif ( $status === 'error' ) : ?>
 
                 <div class="km-card">
                     <div class="km-card-body">
-                        <span class="km-chip" data-state="error"><?php echo esc_html__( 'Move stopped', 'kapsule-migrator' ); ?></span>
-                        <h1 class="km-title"><?php echo esc_html__( 'We stopped before anything changed', 'kapsule-migrator' ); ?></h1>
+                        <span class="km-chip" data-state="error"><?php echo esc_html__( 'Move stopped', 'kapsulehost-migrator' ); ?></span>
+                        <h1 class="km-title"><?php echo esc_html__( 'We stopped before anything changed', 'kapsulehost-migrator' ); ?></h1>
                         <p class="km-lede"><?php
-                            echo esc_html__( 'The move did not finish, so we stopped rather than leave you with half a site. Your site here is untouched and still serving visitors.', 'kapsule-migrator' );
+                            echo esc_html__( 'The move did not finish, so we stopped rather than leave you with half a site. Your site here is untouched and still serving visitors.', 'kapsulehost-migrator' );
                         ?></p>
 
                         <?php if ( $error ) : ?>
                             <div class="km-note" data-tone="error">
-                                <?php echo $bang; ?>
+                                <?php self::icon( 'bang' ); ?>
                                 <span><?php echo esc_html( $error ); ?></span>
                             </div>
                         <?php endif; ?>
 
                         <div class="km-actions">
-                            <button id="kapsule-reset-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Try again', 'kapsule-migrator' ); ?></button>
-                            <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/support" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Contact support', 'kapsule-migrator' ); ?></a>
+                            <button id="kapsule-reset-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Try again', 'kapsulehost-migrator' ); ?></button>
+                            <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/support" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Contact support', 'kapsulehost-migrator' ); ?></a>
                         </div>
                     </div>
                 </div>
@@ -1389,10 +1425,10 @@ class Kapsule_Admin_Page {
      * is not a terminal one and is safe for the ones that are: the panel then tells them the rest.
      * The opposite default is the entire defect.
      */
-    private function render_job_outcome( ?array $job, string $tick, string $bang, string $info, array $bold ): void {
+    private function render_job_outcome( ?array $job, array $bold ): void {
         // ONE call, one place, and it returns false for every input except a job the portal has
         // reported COMPLETED. If it returns false we fall through to the honest states below.
-        if ( $this->render_complete_card( $job, $tick, $bold ) ) {
+        if ( $this->render_complete_card( $job, $bold ) ) {
             return;
         }
 
@@ -1421,24 +1457,24 @@ class Kapsule_Admin_Page {
             ?>
             <div class="km-card">
                 <div class="km-card-body">
-                    <span class="km-chip"><?php echo esc_html__( 'Move stopped', 'kapsule-migrator' ); ?></span>
-                    <h1 class="km-title"><?php echo esc_html__( 'This move was stopped', 'kapsule-migrator' ); ?></h1>
+                    <span class="km-chip"><?php echo esc_html__( 'Move stopped', 'kapsulehost-migrator' ); ?></span>
+                    <h1 class="km-title"><?php echo esc_html__( 'This move was stopped', 'kapsulehost-migrator' ); ?></h1>
                     <p class="km-lede"><?php
                         echo esc_html(
                             $by_plugin
-                                ? __( 'You stopped this move from this screen. Nothing further is being sent and nothing on this site was changed.', 'kapsule-migrator' )
-                                : __( 'This move was stopped from your KapsuleHost panel. Nothing further is being sent and nothing on this site was changed.', 'kapsule-migrator' )
+                                ? __( 'You stopped this move from this screen. Nothing further is being sent and nothing on this site was changed.', 'kapsulehost-migrator' )
+                                : __( 'This move was stopped from your KapsuleHost panel. Nothing further is being sent and nothing on this site was changed.', 'kapsulehost-migrator' )
                         );
                     ?></p>
 
                     <div class="km-note" data-tone="info">
-                        <?php echo $info; ?>
-                        <span><?php echo esc_html__( 'Your site here is untouched and still serving visitors exactly as it was. The pieces that had already reached KapsuleHost are discarded, so starting again starts from the beginning rather than from a half delivered copy.', 'kapsule-migrator' ); ?></span>
+                        <?php self::icon( 'info' ); ?>
+                        <span><?php echo esc_html__( 'Your site here is untouched and still serving visitors exactly as it was. The pieces that had already reached KapsuleHost are discarded, so starting again starts from the beginning rather than from a half delivered copy.', 'kapsulehost-migrator' ); ?></span>
                     </div>
 
                     <div class="km-actions">
-                        <button id="kapsule-reset-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Start over', 'kapsule-migrator' ); ?></button>
-                        <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Open my panel', 'kapsule-migrator' ); ?></a>
+                        <button id="kapsule-reset-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Start over', 'kapsulehost-migrator' ); ?></button>
+                        <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Open my panel', 'kapsulehost-migrator' ); ?></a>
                     </div>
                 </div>
             </div>
@@ -1455,22 +1491,22 @@ class Kapsule_Admin_Page {
             ?>
             <div class="km-card">
                 <div class="km-card-body">
-                    <span class="km-chip" data-state="connecting"><?php echo esc_html__( 'Checking', 'kapsule-migrator' ); ?></span>
-                    <h1 class="km-title"><?php echo esc_html__( 'Your files are with KapsuleHost', 'kapsule-migrator' ); ?></h1>
-                    <p class="km-lede"><?php echo esc_html__( 'Everything uploaded from this site. We cannot reach KapsuleHost right now to tell you what has happened since, so we will not guess: open your panel to see where the move has got to.', 'kapsule-migrator' ); ?></p>
+                    <span class="km-chip" data-state="connecting"><?php echo esc_html__( 'Checking', 'kapsulehost-migrator' ); ?></span>
+                    <h1 class="km-title"><?php echo esc_html__( 'Your files are with KapsuleHost', 'kapsulehost-migrator' ); ?></h1>
+                    <p class="km-lede"><?php echo esc_html__( 'Everything uploaded from this site. We cannot reach KapsuleHost right now to tell you what has happened since, so we will not guess: open your panel to see where the move has got to.', 'kapsulehost-migrator' ); ?></p>
                     <?php if ( $reason ) : ?>
                         <div class="km-note" data-tone="warn">
-                            <?php echo $bang; ?>
+                            <?php self::icon( 'bang' ); ?>
                             <span><?php echo esc_html( $reason ); ?></span>
                         </div>
                     <?php endif; ?>
                     <div class="km-note" data-tone="info">
-                        <?php echo $info; ?>
-                        <span><?php echo esc_html__( 'This site has not been changed and is still serving visitors, whatever the move is doing.', 'kapsule-migrator' ); ?></span>
+                        <?php self::icon( 'info' ); ?>
+                        <span><?php echo esc_html__( 'This site has not been changed and is still serving visitors, whatever the move is doing.', 'kapsulehost-migrator' ); ?></span>
                     </div>
                     <div class="km-actions">
-                        <button id="kapsule-recheck-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Check again', 'kapsule-migrator' ); ?></button>
-                        <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Open my panel', 'kapsule-migrator' ); ?></a>
+                        <button id="kapsule-recheck-btn" class="km-btn km-btn--primary"><?php echo esc_html__( 'Check again', 'kapsulehost-migrator' ); ?></button>
+                        <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Open my panel', 'kapsulehost-migrator' ); ?></a>
                     </div>
                 </div>
             </div>
@@ -1486,38 +1522,38 @@ class Kapsule_Admin_Page {
             ?>
             <div class="km-card">
                 <div class="km-card-body">
-                    <span class="km-chip" data-state="error"><?php echo esc_html__( 'Move stopped', 'kapsule-migrator' ); ?></span>
-                    <h1 class="km-title"><?php echo esc_html__( 'The move did not finish', 'kapsule-migrator' ); ?></h1>
-                    <p class="km-lede"><?php echo esc_html__( 'Your files reached KapsuleHost, but putting the site together did not finish. Nothing here has changed: this site is untouched and still serving visitors, and nothing has moved for anyone visiting it.', 'kapsule-migrator' ); ?></p>
+                    <span class="km-chip" data-state="error"><?php echo esc_html__( 'Move stopped', 'kapsulehost-migrator' ); ?></span>
+                    <h1 class="km-title"><?php echo esc_html__( 'The move did not finish', 'kapsulehost-migrator' ); ?></h1>
+                    <p class="km-lede"><?php echo esc_html__( 'Your files reached KapsuleHost, but putting the site together did not finish. Nothing here has changed: this site is untouched and still serving visitors, and nothing has moved for anyone visiting it.', 'kapsulehost-migrator' ); ?></p>
 
                     <?php if ( $at ) : ?>
                         <div class="km-facts">
                             <div class="km-fact">
-                                <div class="km-fact-k"><?php echo esc_html__( 'Stopped at', 'kapsule-migrator' ); ?></div>
+                                <div class="km-fact-k"><?php echo esc_html__( 'Stopped at', 'kapsulehost-migrator' ); ?></div>
                                 <div class="km-fact-v"><?php echo esc_html( $at ); ?></div>
                             </div>
                             <div class="km-fact">
-                                <div class="km-fact-k"><?php echo esc_html__( 'Files placed', 'kapsule-migrator' ); ?></div>
-                                <div class="km-fact-v"><?php echo esc_html( ! empty( $job['filesPlaced'] ) ? __( 'Yes', 'kapsule-migrator' ) : __( 'No', 'kapsule-migrator' ) ); ?></div>
+                                <div class="km-fact-k"><?php echo esc_html__( 'Files placed', 'kapsulehost-migrator' ); ?></div>
+                                <div class="km-fact-v"><?php echo esc_html( ! empty( $job['filesPlaced'] ) ? __( 'Yes', 'kapsulehost-migrator' ) : __( 'No', 'kapsulehost-migrator' ) ); ?></div>
                             </div>
                             <div class="km-fact">
-                                <div class="km-fact-k"><?php echo esc_html__( 'Database', 'kapsule-migrator' ); ?></div>
-                                <div class="km-fact-v"><?php echo esc_html( ! empty( $job['databaseImported'] ) ? __( 'Imported', 'kapsule-migrator' ) : __( 'Not imported', 'kapsule-migrator' ) ); ?></div>
+                                <div class="km-fact-k"><?php echo esc_html__( 'Database', 'kapsulehost-migrator' ); ?></div>
+                                <div class="km-fact-v"><?php echo esc_html( ! empty( $job['databaseImported'] ) ? __( 'Imported', 'kapsulehost-migrator' ) : __( 'Not imported', 'kapsulehost-migrator' ) ); ?></div>
                             </div>
                         </div>
                     <?php endif; ?>
 
                     <?php if ( $why ) : ?>
                         <div class="km-note" data-tone="error">
-                            <?php echo $bang; ?>
+                            <?php self::icon( 'bang' ); ?>
                             <span><?php echo esc_html( $why ); ?></span>
                         </div>
                     <?php endif; ?>
 
                     <div class="km-actions">
-                        <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'See the details in my panel', 'kapsule-migrator' ); ?></a>
-                        <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/support" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Contact support', 'kapsule-migrator' ); ?></a>
-                        <button id="kapsule-reset-btn" class="km-btn km-btn--ghost"><?php echo esc_html__( 'Start over from here', 'kapsule-migrator' ); ?></button>
+                        <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'See the details in my panel', 'kapsulehost-migrator' ); ?></a>
+                        <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/support" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Contact support', 'kapsulehost-migrator' ); ?></a>
+                        <button id="kapsule-reset-btn" class="km-btn km-btn--ghost"><?php echo esc_html__( 'Start over from here', 'kapsulehost-migrator' ); ?></button>
                     </div>
                 </div>
             </div>
@@ -1529,12 +1565,12 @@ class Kapsule_Admin_Page {
             ?>
             <div class="km-card">
                 <div class="km-card-body">
-                    <span class="km-chip" data-state="error"><?php echo esc_html__( 'Needs a look', 'kapsule-migrator' ); ?></span>
-                    <h1 class="km-title"><?php echo esc_html__( 'Part of your site moved', 'kapsule-migrator' ); ?></h1>
-                    <p class="km-lede"><?php echo esc_html__( 'Some of the move finished and some of it did not, so we are not calling it done. Your panel lists exactly what came across and what is still here. This site is untouched and still serving visitors.', 'kapsule-migrator' ); ?></p>
+                    <span class="km-chip" data-state="error"><?php echo esc_html__( 'Needs a look', 'kapsulehost-migrator' ); ?></span>
+                    <h1 class="km-title"><?php echo esc_html__( 'Part of your site moved', 'kapsulehost-migrator' ); ?></h1>
+                    <p class="km-lede"><?php echo esc_html__( 'Some of the move finished and some of it did not, so we are not calling it done. Your panel lists exactly what came across and what is still here. This site is untouched and still serving visitors.', 'kapsulehost-migrator' ); ?></p>
                     <div class="km-actions">
-                        <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'See what moved', 'kapsule-migrator' ); ?></a>
-                        <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/support" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Contact support', 'kapsule-migrator' ); ?></a>
+                        <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'See what moved', 'kapsulehost-migrator' ); ?></a>
+                        <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/support" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Contact support', 'kapsulehost-migrator' ); ?></a>
                     </div>
                 </div>
             </div>
@@ -1608,17 +1644,17 @@ class Kapsule_Admin_Page {
                  */
                 ?>
                 <div class="km-note" id="km-job-retry" data-tone="warn" style="display:none;">
-                    <?php echo $bang; ?>
+                    <?php self::icon( 'bang' ); ?>
                     <span id="km-job-retry-text"></span>
                 </div>
 
                 <div class="km-note" data-tone="info">
-                    <?php echo $info; ?>
-                    <span><?php echo wp_kses( __( '<strong>This site has not been changed.</strong> It is still live and serving visitors, and nothing moves for them until you point your domain at the new copy. It is safe to close this tab: we will show you the outcome here.', 'kapsule-migrator' ), $bold ); ?></span>
+                    <?php self::icon( 'info' ); ?>
+                    <span><?php echo wp_kses( __( '<strong>This site has not been changed.</strong> It is still live and serving visitors, and nothing moves for them until you point your domain at the new copy. It is safe to close this tab: we will show you the outcome here.', 'kapsulehost-migrator' ), $bold ); ?></span>
                 </div>
 
                 <div class="km-actions">
-                    <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'Follow it in my panel', 'kapsule-migrator' ); ?></a>
+                    <a href="<?php echo esc_url( $panel ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'Follow it in my panel', 'kapsulehost-migrator' ); ?></a>
                 </div>
             </div>
         </div>
@@ -1640,7 +1676,7 @@ class Kapsule_Admin_Page {
      * files. The file COUNT and the byte total stay local, because they are honest local measurements
      * of what this plugin sent, and they are now labelled as what they are.
      */
-    private function render_complete_card( ?array $job, string $tick, array $bold ): bool {
+    private function render_complete_card( ?array $job, array $bold ): bool {
         if ( ! self::job_says_complete( $job ) ) {
             return false;
         }
@@ -1657,47 +1693,47 @@ class Kapsule_Admin_Page {
                     <div class="km-done-ring">
                         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </div>
-                    <span class="km-chip" data-state="done"><?php echo esc_html__( 'Move complete', 'kapsule-migrator' ); ?></span>
-                    <h1 class="km-title" style="margin-top:14px;"><?php echo esc_html__( 'Your site is on KapsuleHost', 'kapsule-migrator' ); ?></h1>
+                    <span class="km-chip" data-state="done"><?php echo esc_html__( 'Move complete', 'kapsulehost-migrator' ); ?></span>
+                    <h1 class="km-title" style="margin-top:14px;"><?php echo esc_html__( 'Your site is on KapsuleHost', 'kapsulehost-migrator' ); ?></h1>
                     <p class="km-lede" style="margin:9px auto 0;"><?php
                         /* translators: %s: number of files this site sent, already formatted for the locale. */
-                        printf( esc_html__( 'KapsuleHost has finished putting your site together from the %s files this site sent. Open the copy and look around before you point your domain at it.', 'kapsule-migrator' ),
+                        printf( esc_html__( 'KapsuleHost has finished putting your site together from the %s files this site sent. Open the copy and look around before you point your domain at it.', 'kapsulehost-migrator' ),
                             esc_html( number_format_i18n( $file_count ) ) );
                     ?></p>
                 </div>
 
                 <div class="km-facts">
                     <div class="km-fact">
-                        <div class="km-fact-k"><?php echo esc_html__( 'Files sent', 'kapsule-migrator' ); ?></div>
+                        <div class="km-fact-k"><?php echo esc_html__( 'Files sent', 'kapsulehost-migrator' ); ?></div>
                         <div class="km-fact-v"><?php echo esc_html( number_format_i18n( $file_count ) ); ?></div>
                     </div>
                     <div class="km-fact">
-                        <div class="km-fact-k"><?php echo esc_html__( 'Transferred', 'kapsule-migrator' ); ?></div>
+                        <div class="km-fact-k"><?php echo esc_html__( 'Transferred', 'kapsulehost-migrator' ); ?></div>
                         <div class="km-fact-v"><?php echo esc_html( $this->format_bytes( $total_bytes ) ); ?></div>
                     </div>
                     <div class="km-fact">
-                        <div class="km-fact-k"><?php echo esc_html__( 'Database', 'kapsule-migrator' ); ?></div>
-                        <div class="km-fact-v"><?php echo esc_html( $db_ok ? __( 'Imported', 'kapsule-migrator' ) : __( 'Not imported', 'kapsule-migrator' ) ); ?></div>
+                        <div class="km-fact-k"><?php echo esc_html__( 'Database', 'kapsulehost-migrator' ); ?></div>
+                        <div class="km-fact-v"><?php echo esc_html( $db_ok ? __( 'Imported', 'kapsulehost-migrator' ) : __( 'Not imported', 'kapsulehost-migrator' ) ); ?></div>
                     </div>
                     <div class="km-fact">
-                        <div class="km-fact-k"><?php echo esc_html__( 'Your copy', 'kapsule-migrator' ); ?></div>
-                        <div class="km-fact-v"><?php echo esc_html( $staging ? $staging : __( 'in your panel', 'kapsule-migrator' ) ); ?></div>
+                        <div class="km-fact-k"><?php echo esc_html__( 'Your copy', 'kapsulehost-migrator' ); ?></div>
+                        <div class="km-fact-v"><?php echo esc_html( $staging ? $staging : __( 'in your panel', 'kapsulehost-migrator' ) ); ?></div>
                     </div>
                 </div>
 
                 <div class="km-note" data-tone="good">
-                    <?php echo $tick; ?>
-                    <span><?php echo wp_kses( __( '<strong>This site has not been changed.</strong> It is still live and serving visitors. Nothing moves for your visitors until you point your domain at the new copy.', 'kapsule-migrator' ), $bold ); ?></span>
+                    <?php self::icon( 'tick' ); ?>
+                    <span><?php echo wp_kses( __( '<strong>This site has not been changed.</strong> It is still live and serving visitors. Nothing moves for your visitors until you point your domain at the new copy.', 'kapsulehost-migrator' ), $bold ); ?></span>
                 </div>
 
                 <div class="km-actions">
                     <?php if ( $staging ) : ?>
-                        <a href="https://<?php echo esc_attr( $staging ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'Open the migrated site', 'kapsule-migrator' ); ?></a>
+                        <a href="https://<?php echo esc_attr( $staging ); ?>" class="km-btn km-btn--primary" target="_blank" rel="noopener"><?php echo esc_html__( 'Open the migrated site', 'kapsulehost-migrator' ); ?></a>
                     <?php endif; ?>
                     <?php if ( $job_id ) : ?>
-                        <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/migration/<?php echo esc_attr( $job_id ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'See the move in my panel', 'kapsule-migrator' ); ?></a>
+                        <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>/migration/<?php echo esc_attr( $job_id ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'See the move in my panel', 'kapsulehost-migrator' ); ?></a>
                     <?php endif; ?>
-                    <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Back to my panel', 'kapsule-migrator' ); ?></a>
+                    <a href="<?php echo esc_url( KAPSULE_MIGRATOR_HOST ); ?>" class="km-btn km-btn--ghost" target="_blank" rel="noopener"><?php echo esc_html__( 'Back to my panel', 'kapsulehost-migrator' ); ?></a>
                 </div>
             </div>
         </div>
@@ -1811,61 +1847,61 @@ class Kapsule_Admin_Page {
     public static function job_copy( string $phase ): array {
         switch ( $phase ) {
             case 'queued': return array(
-                'badge' => __( 'Waiting to start', 'kapsule-migrator' ),
-                'head'  => __( 'Your move is queued', 'kapsule-migrator' ),
-                'body'  => __( 'Everything uploaded from this site. KapsuleHost has your copy and will start work on it shortly.', 'kapsule-migrator' ) );
+                'badge' => __( 'Waiting to start', 'kapsulehost-migrator' ),
+                'head'  => __( 'Your move is queued', 'kapsulehost-migrator' ),
+                'body'  => __( 'Everything uploaded from this site. KapsuleHost has your copy and will start work on it shortly.', 'kapsulehost-migrator' ) );
             case 'uploading': return array(
-                'badge' => __( 'Sending your site to KapsuleHost', 'kapsule-migrator' ),
-                'head'  => __( 'Sending your site to KapsuleHost', 'kapsule-migrator' ),
-                'body'  => __( 'Your site is being copied across in pieces. It stays live and unchanged the whole time.', 'kapsule-migrator' ) );
+                'badge' => __( 'Sending your site to KapsuleHost', 'kapsulehost-migrator' ),
+                'head'  => __( 'Sending your site to KapsuleHost', 'kapsulehost-migrator' ),
+                'body'  => __( 'Your site is being copied across in pieces. It stays live and unchanged the whole time.', 'kapsulehost-migrator' ) );
             case 'preflight': return array(
-                'badge' => __( 'Checking the connection', 'kapsule-migrator' ),
-                'head'  => __( 'KapsuleHost is checking what arrived', 'kapsule-migrator' ),
-                'body'  => __( 'Everything uploaded from this site. KapsuleHost is checking the copy is complete before it starts building your site.', 'kapsule-migrator' ) );
+                'badge' => __( 'Checking the connection', 'kapsulehost-migrator' ),
+                'head'  => __( 'KapsuleHost is checking what arrived', 'kapsulehost-migrator' ),
+                'body'  => __( 'Everything uploaded from this site. KapsuleHost is checking the copy is complete before it starts building your site.', 'kapsulehost-migrator' ) );
             case 'connecting': return array(
-                'badge' => __( 'Connecting to your old host', 'kapsule-migrator' ),
-                'head'  => __( 'KapsuleHost is connecting to your old host', 'kapsule-migrator' ),
-                'body'  => __( 'KapsuleHost is opening a connection to the server your site is on today.', 'kapsule-migrator' ) );
+                'badge' => __( 'Connecting to your old host', 'kapsulehost-migrator' ),
+                'head'  => __( 'KapsuleHost is connecting to your old host', 'kapsulehost-migrator' ),
+                'body'  => __( 'KapsuleHost is opening a connection to the server your site is on today.', 'kapsulehost-migrator' ) );
             case 'scanning': return array(
-                'badge' => __( 'Counting your files', 'kapsule-migrator' ),
-                'head'  => __( 'KapsuleHost is counting your files', 'kapsule-migrator' ),
-                'body'  => __( 'KapsuleHost is working out how much there is to move before it starts moving it.', 'kapsule-migrator' ) );
+                'badge' => __( 'Counting your files', 'kapsulehost-migrator' ),
+                'head'  => __( 'KapsuleHost is counting your files', 'kapsulehost-migrator' ),
+                'body'  => __( 'KapsuleHost is working out how much there is to move before it starts moving it.', 'kapsulehost-migrator' ) );
             case 'provisioning': return array(
-                'badge' => __( 'Preparing space on KapsuleHost', 'kapsule-migrator' ),
-                'head'  => __( 'KapsuleHost is preparing space for your site', 'kapsule-migrator' ),
-                'body'  => __( 'Everything uploaded from this site. KapsuleHost is setting up the server your site will run on.', 'kapsule-migrator' ) );
+                'badge' => __( 'Preparing space on KapsuleHost', 'kapsulehost-migrator' ),
+                'head'  => __( 'KapsuleHost is preparing space for your site', 'kapsulehost-migrator' ),
+                'body'  => __( 'Everything uploaded from this site. KapsuleHost is setting up the server your site will run on.', 'kapsulehost-migrator' ) );
             case 'receiving': return array(
-                'badge' => __( 'Receiving your site', 'kapsule-migrator' ),
-                'head'  => __( 'KapsuleHost is receiving your site', 'kapsule-migrator' ),
-                'body'  => __( 'Everything uploaded from this site. KapsuleHost is moving your copy onto the server that will run it.', 'kapsule-migrator' ) );
+                'badge' => __( 'Receiving your site', 'kapsulehost-migrator' ),
+                'head'  => __( 'KapsuleHost is receiving your site', 'kapsulehost-migrator' ),
+                'body'  => __( 'Everything uploaded from this site. KapsuleHost is moving your copy onto the server that will run it.', 'kapsulehost-migrator' ) );
             case 'unpacking': return array(
-                'badge' => __( 'Unpacking your files', 'kapsule-migrator' ),
-                'head'  => __( 'KapsuleHost is unpacking your files', 'kapsule-migrator' ),
-                'body'  => __( 'Everything uploaded from this site. KapsuleHost is opening the pieces this site sent and reading your files out of them.', 'kapsule-migrator' ) );
+                'badge' => __( 'Unpacking your files', 'kapsulehost-migrator' ),
+                'head'  => __( 'KapsuleHost is unpacking your files', 'kapsulehost-migrator' ),
+                'body'  => __( 'Everything uploaded from this site. KapsuleHost is opening the pieces this site sent and reading your files out of them.', 'kapsulehost-migrator' ) );
             case 'placing_files': return array(
-                'badge' => __( 'Putting your files in place', 'kapsule-migrator' ),
-                'head'  => __( 'KapsuleHost is putting your files in place', 'kapsule-migrator' ),
-                'body'  => __( 'Everything uploaded from this site. KapsuleHost is writing your files onto the new server.', 'kapsule-migrator' ) );
+                'badge' => __( 'Putting your files in place', 'kapsulehost-migrator' ),
+                'head'  => __( 'KapsuleHost is putting your files in place', 'kapsulehost-migrator' ),
+                'body'  => __( 'Everything uploaded from this site. KapsuleHost is writing your files onto the new server.', 'kapsulehost-migrator' ) );
             case 'pulling_files': return array(
-                'badge' => __( 'Copying your files across', 'kapsule-migrator' ),
-                'head'  => __( 'KapsuleHost is copying your files across', 'kapsule-migrator' ),
-                'body'  => __( 'KapsuleHost is copying your files onto the new server.', 'kapsule-migrator' ) );
+                'badge' => __( 'Copying your files across', 'kapsulehost-migrator' ),
+                'head'  => __( 'KapsuleHost is copying your files across', 'kapsulehost-migrator' ),
+                'body'  => __( 'KapsuleHost is copying your files onto the new server.', 'kapsulehost-migrator' ) );
             case 'importing_db': return array(
-                'badge' => __( 'Importing your database', 'kapsule-migrator' ),
-                'head'  => __( 'KapsuleHost is importing your database', 'kapsule-migrator' ),
-                'body'  => __( 'Your files are in place. KapsuleHost is loading your posts, pages, settings and comments into the new database.', 'kapsule-migrator' ) );
+                'badge' => __( 'Importing your database', 'kapsulehost-migrator' ),
+                'head'  => __( 'KapsuleHost is importing your database', 'kapsulehost-migrator' ),
+                'body'  => __( 'Your files are in place. KapsuleHost is loading your posts, pages, settings and comments into the new database.', 'kapsulehost-migrator' ) );
             case 'search_replace': return array(
-                'badge' => __( 'Updating the addresses inside your site', 'kapsule-migrator' ),
-                'head'  => __( 'KapsuleHost is updating the addresses inside your site', 'kapsule-migrator' ),
-                'body'  => __( 'Your database is in. KapsuleHost is rewriting the links and image addresses stored in your content so they point at the new copy.', 'kapsule-migrator' ) );
+                'badge' => __( 'Updating the addresses inside your site', 'kapsulehost-migrator' ),
+                'head'  => __( 'KapsuleHost is updating the addresses inside your site', 'kapsulehost-migrator' ),
+                'body'  => __( 'Your database is in. KapsuleHost is rewriting the links and image addresses stored in your content so they point at the new copy.', 'kapsulehost-migrator' ) );
             case 'verifying': return array(
-                'badge' => __( 'Checking the copy that arrived', 'kapsule-migrator' ),
-                'head'  => __( 'KapsuleHost is checking the copy that arrived', 'kapsule-migrator' ),
-                'body'  => __( 'Your site is assembled. KapsuleHost is loading it to confirm it serves before telling you it is ready.', 'kapsule-migrator' ) );
+                'badge' => __( 'Checking the copy that arrived', 'kapsulehost-migrator' ),
+                'head'  => __( 'KapsuleHost is checking the copy that arrived', 'kapsulehost-migrator' ),
+                'body'  => __( 'Your site is assembled. KapsuleHost is loading it to confirm it serves before telling you it is ready.', 'kapsulehost-migrator' ) );
             case 'done': return array(
-                'badge' => __( 'Done', 'kapsule-migrator' ),
-                'head'  => __( 'KapsuleHost has finished putting your site together', 'kapsule-migrator' ),
-                'body'  => __( 'Every step has finished. We are writing up the result for you now.', 'kapsule-migrator' ) );
+                'badge' => __( 'Done', 'kapsulehost-migrator' ),
+                'head'  => __( 'KapsuleHost has finished putting your site together', 'kapsulehost-migrator' ),
+                'body'  => __( 'Every step has finished. We are writing up the result for you now.', 'kapsulehost-migrator' ) );
         }
 
         /*
@@ -1876,9 +1912,9 @@ class Kapsule_Admin_Page {
          * rest. Crucially it is still ONE row, so the three fields still cannot contradict each other.
          */
         return array(
-            'badge' => __( 'Working', 'kapsule-migrator' ),
-            'head'  => __( 'KapsuleHost is putting your site together', 'kapsule-migrator' ),
-            'body'  => __( 'Everything uploaded from this site. KapsuleHost is working on your site now. Your panel shows which step it is on.', 'kapsule-migrator' ),
+            'badge' => __( 'Working', 'kapsulehost-migrator' ),
+            'head'  => __( 'KapsuleHost is putting your site together', 'kapsulehost-migrator' ),
+            'body'  => __( 'Everything uploaded from this site. KapsuleHost is working on your site now. Your panel shows which step it is on.', 'kapsulehost-migrator' ),
         );
     }
 
@@ -1922,13 +1958,13 @@ class Kapsule_Admin_Page {
      */
     private function status_label( string $status ): string {
         switch ( $status ) {
-            case 'preflight':            return __( 'Checking the connection', 'kapsule-migrator' );
-            case 'scanning':             return __( 'Counting your files', 'kapsule-migrator' );
-            case 'uploading_files':      return __( 'Copying files', 'kapsule-migrator' );
-            case 'uploading_db':         return __( 'Copying database', 'kapsule-migrator' );
-            case 'awaiting_import':      return __( 'KapsuleHost is working on it', 'kapsule-migrator' );
-            case 'standalone_packaging': return __( 'Packaging', 'kapsule-migrator' );
-            default:                     return __( 'Working', 'kapsule-migrator' );
+            case 'preflight':            return __( 'Checking the connection', 'kapsulehost-migrator' );
+            case 'scanning':             return __( 'Counting your files', 'kapsulehost-migrator' );
+            case 'uploading_files':      return __( 'Copying files', 'kapsulehost-migrator' );
+            case 'uploading_db':         return __( 'Copying database', 'kapsulehost-migrator' );
+            case 'awaiting_import':      return __( 'KapsuleHost is working on it', 'kapsulehost-migrator' );
+            case 'standalone_packaging': return __( 'Packaging', 'kapsulehost-migrator' );
+            default:                     return __( 'Working', 'kapsulehost-migrator' );
         }
     }
 
@@ -1942,18 +1978,18 @@ class Kapsule_Admin_Page {
     private function format_bytes( int $bytes ): string {
         if ( $bytes >= 1073741824 ) {
             /* translators: %s: a formatted number of gigabytes, e.g. "5.9". */
-            return sprintf( __( '%s GB', 'kapsule-migrator' ), number_format_i18n( $bytes / 1073741824, 1 ) );
+            return sprintf( __( '%s GB', 'kapsulehost-migrator' ), number_format_i18n( $bytes / 1073741824, 1 ) );
         }
         if ( $bytes >= 1048576 ) {
             /* translators: %s: a formatted number of megabytes. */
-            return sprintf( __( '%s MB', 'kapsule-migrator' ), number_format_i18n( $bytes / 1048576, 1 ) );
+            return sprintf( __( '%s MB', 'kapsulehost-migrator' ), number_format_i18n( $bytes / 1048576, 1 ) );
         }
         if ( $bytes >= 1024 ) {
             /* translators: %s: a formatted number of kilobytes. */
-            return sprintf( __( '%s KB', 'kapsule-migrator' ), number_format_i18n( $bytes / 1024, 1 ) );
+            return sprintf( __( '%s KB', 'kapsulehost-migrator' ), number_format_i18n( $bytes / 1024, 1 ) );
         }
         /* translators: %s: a formatted number of bytes. */
-        return sprintf( __( '%s B', 'kapsule-migrator' ), number_format_i18n( $bytes ) );
+        return sprintf( __( '%s B', 'kapsulehost-migrator' ), number_format_i18n( $bytes ) );
     }
 
     /**

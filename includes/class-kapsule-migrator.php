@@ -225,7 +225,7 @@ class Kapsule_Migrator {
             Kapsule_Transport_Message::log( 'cron api call failed', $raw );
             throw new Exception( sprintf(
                 /* translators: %s: a short plain description of what went wrong, e.g. "this server could not open a connection to KapsuleHost". */
-                __( 'The move could not continue because %s. Nothing on this site has been changed.', 'kapsule-migrator' ),
+                __( 'The move could not continue because %s. Nothing on this site has been changed.', 'kapsulehost-migrator' ),
                 Kapsule_Transport_Message::stopped( $raw )
             ) );
         }

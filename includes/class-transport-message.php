@@ -54,24 +54,24 @@ class Kapsule_Transport_Message {
         $r = strtolower( $raw );
 
         if ( self::has( $r, array( 'timed out', 'timeout', 'operation too slow', 'curl error 28' ) ) ) {
-            return __( 'KapsuleHost did not answer in time when we asked how your move is going. Nothing has gone wrong with your site and nothing is needed from you. We are checking again in a moment.', 'kapsule-migrator' );
+            return __( 'KapsuleHost did not answer in time when we asked how your move is going. Nothing has gone wrong with your site and nothing is needed from you. We are checking again in a moment.', 'kapsulehost-migrator' );
         }
         // "Could not resolve host" and "Couldn t resolve host" differ only in the apostrophe across
         // libcurl versions, so the needle is the part they share.
         if ( self::has( $r, array( 'resolve host', 'resolve proxy', 'name or service not known', 'curl error 6' ) ) ) {
-            return __( 'This server could not look up the address for KapsuleHost when we asked how your move is going. That is a name lookup on this server rather than a problem with your site. We are checking again in a moment.', 'kapsule-migrator' );
+            return __( 'This server could not look up the address for KapsuleHost when we asked how your move is going. That is a name lookup on this server rather than a problem with your site. We are checking again in a moment.', 'kapsulehost-migrator' );
         }
         if ( self::has( $r, array( 'connection refused', 'failed to connect', 'connect to server', 'curl error 7' ) ) ) {
-            return __( 'This server could not open a connection to KapsuleHost when we asked how your move is going. Nothing has gone wrong with your site and nothing is needed from you. We are checking again in a moment.', 'kapsule-migrator' );
+            return __( 'This server could not open a connection to KapsuleHost when we asked how your move is going. Nothing has gone wrong with your site and nothing is needed from you. We are checking again in a moment.', 'kapsulehost-migrator' );
         }
         if ( self::has( $r, array( 'ssl', 'tls', 'certificate' ) ) ) {
-            return __( 'The secure connection to KapsuleHost could not be completed when we asked how your move is going. We are checking again in a moment. If this keeps happening, this server may need its list of trusted certificates updated.', 'kapsule-migrator' );
+            return __( 'The secure connection to KapsuleHost could not be completed when we asked how your move is going. We are checking again in a moment. If this keeps happening, this server may need its list of trusted certificates updated.', 'kapsulehost-migrator' );
         }
         if ( self::has( $r, array( 'connection reset', 'recv failure', 'empty reply', 'transfer closed' ) ) ) {
-            return __( 'The connection to KapsuleHost closed before we finished asking how your move is going. Nothing has gone wrong with your site and nothing is needed from you. We are checking again in a moment.', 'kapsule-migrator' );
+            return __( 'The connection to KapsuleHost closed before we finished asking how your move is going. Nothing has gone wrong with your site and nothing is needed from you. We are checking again in a moment.', 'kapsulehost-migrator' );
         }
 
-        return __( 'We could not read how your move is going just now. Your files are already with KapsuleHost and this site has not been changed. We are checking again in a moment.', 'kapsule-migrator' );
+        return __( 'We could not read how your move is going just now. Your files are already with KapsuleHost and this site has not been changed. We are checking again in a moment.', 'kapsulehost-migrator' );
     }
 
     /**
@@ -85,22 +85,22 @@ class Kapsule_Transport_Message {
         $r = strtolower( $raw );
 
         if ( self::has( $r, array( 'timed out', 'timeout', 'operation too slow', 'curl error 28' ) ) ) {
-            return __( 'KapsuleHost stopped answering this server in time', 'kapsule-migrator' );
+            return __( 'KapsuleHost stopped answering this server in time', 'kapsulehost-migrator' );
         }
         if ( self::has( $r, array( 'resolve host', 'resolve proxy', 'name or service not known', 'curl error 6' ) ) ) {
-            return __( 'this server could not look up the address for KapsuleHost', 'kapsule-migrator' );
+            return __( 'this server could not look up the address for KapsuleHost', 'kapsulehost-migrator' );
         }
         if ( self::has( $r, array( 'connection refused', 'failed to connect', 'connect to server', 'curl error 7' ) ) ) {
-            return __( 'this server could not open a connection to KapsuleHost', 'kapsule-migrator' );
+            return __( 'this server could not open a connection to KapsuleHost', 'kapsulehost-migrator' );
         }
         if ( self::has( $r, array( 'ssl', 'tls', 'certificate' ) ) ) {
-            return __( 'the secure connection to KapsuleHost could not be completed', 'kapsule-migrator' );
+            return __( 'the secure connection to KapsuleHost could not be completed', 'kapsulehost-migrator' );
         }
         if ( self::has( $r, array( 'connection reset', 'recv failure', 'empty reply', 'transfer closed' ) ) ) {
-            return __( 'the connection to KapsuleHost kept closing part way through', 'kapsule-migrator' );
+            return __( 'the connection to KapsuleHost kept closing part way through', 'kapsulehost-migrator' );
         }
 
-        return __( 'this server could not complete a request to KapsuleHost', 'kapsule-migrator' );
+        return __( 'this server could not complete a request to KapsuleHost', 'kapsulehost-migrator' );
     }
 
     /**

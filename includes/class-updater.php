@@ -62,7 +62,7 @@ class Kapsule_Updater {
          */
         return (object) array(
             'id'           => 'kpanel.kapsulehost.com/' . $this->plugin_slug,
-            'slug'         => 'kapsule-migrator',
+            'slug'         => 'kapsulehost-migrator',
             'plugin'       => $this->plugin_slug,
             'version'      => $remote['version'],
             'new_version'  => $remote['version'],
@@ -77,14 +77,14 @@ class Kapsule_Updater {
 
     public function plugin_info( $result, string $action, $args ) {
         if ( $action !== 'plugin_information' ) return $result;
-        if ( ( $args->slug ?? '' ) !== 'kapsule-migrator' ) return $result;
+        if ( ( $args->slug ?? '' ) !== 'kapsulehost-migrator' ) return $result;
 
         $remote = $this->fetch_version_info();
         if ( ! $remote ) return $result;
 
         return (object) array(
             'name'          => 'Kapsule Migrator',
-            'slug'          => 'kapsule-migrator',
+            'slug'          => 'kapsulehost-migrator',
             'version'       => $remote['version'] ?? KAPSULE_MIGRATOR_VERSION,
             'requires'      => '5.0',
             'requires_php'  => '7.4',

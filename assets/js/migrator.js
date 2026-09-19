@@ -11,7 +11,7 @@
  * frozen progress bar: the honest thing to display during a retry is what is being retried and how
  * long until the next go.
  *
- * EVERY string here is translated through wp.i18n against the `kapsule-migrator` domain. The states
+ * EVERY string here is translated through wp.i18n against the `kapsulehost-migrator` domain. The states
  * that move are built at runtime in JS, so leaving them untranslated would give a French or Arabic
  * customer a half-translated screen: static copy in their language, and every word describing what
  * is happening to their site in English.
@@ -30,7 +30,7 @@
             return pos ? a[parseInt(pos, 10) - 1] : a[i++];
         });
     };
-    var DOMAIN = 'kapsule-migrator';
+    var DOMAIN = 'kapsulehost-migrator';
 
     var cfg = window.kapsuleMigrator || {};
     var MAX_ATTEMPTS = parseInt(cfg.maxAttempts, 10) || 5;
@@ -65,10 +65,10 @@
      */
     function fmtBytes(n) {
         n = Number(n) || 0;
-        if (n >= 1073741824) return sprintf(__('%s GB', 'kapsule-migrator'), localeNum(n / 1073741824, 1));
-        if (n >= 1048576)    return sprintf(__('%s MB', 'kapsule-migrator'), localeNum(n / 1048576, 1));
-        if (n >= 1024)       return sprintf(__('%s KB', 'kapsule-migrator'), localeNum(n / 1024, 1));
-        return sprintf(__('%s B', 'kapsule-migrator'), localeNum(n, 0));
+        if (n >= 1073741824) return sprintf(__('%s GB', 'kapsulehost-migrator'), localeNum(n / 1073741824, 1));
+        if (n >= 1048576)    return sprintf(__('%s MB', 'kapsulehost-migrator'), localeNum(n / 1048576, 1));
+        if (n >= 1024)       return sprintf(__('%s KB', 'kapsulehost-migrator'), localeNum(n / 1024, 1));
+        return sprintf(__('%s B', 'kapsulehost-migrator'), localeNum(n, 0));
     }
 
     /**
@@ -84,17 +84,17 @@
      */
     function fmtEtaBucket(eta) {
         if (!eta || !eta.kind || eta.kind === 'none') return '';
-        if (eta.kind === 'under_minute') return __('less than a minute left', 'kapsule-migrator');
+        if (eta.kind === 'under_minute') return __('less than a minute left', 'kapsulehost-migrator');
         if (eta.kind === 'minutes') {
             /* translators: %s: whole number of minutes remaining. */
-            return sprintf(_n('about %s minute left', 'about %s minutes left', eta.minutes, 'kapsule-migrator'), fmtCount(eta.minutes));
+            return sprintf(_n('about %s minute left', 'about %s minutes left', eta.minutes, 'kapsulehost-migrator'), fmtCount(eta.minutes));
         }
         if (eta.kind === 'hours') {
             /* translators: %s: whole number of hours remaining. */
-            return sprintf(_n('about %s hour left', 'about %s hours left', eta.hours, 'kapsule-migrator'), fmtCount(eta.hours));
+            return sprintf(_n('about %s hour left', 'about %s hours left', eta.hours, 'kapsulehost-migrator'), fmtCount(eta.hours));
         }
         /* translators: 1: whole hours remaining, 2: additional minutes remaining. */
-        return sprintf(__('about %1$s h %2$s min left', 'kapsule-migrator'), fmtCount(eta.hours), fmtCount(eta.minutes));
+        return sprintf(__('about %1$s h %2$s min left', 'kapsulehost-migrator'), fmtCount(eta.hours), fmtCount(eta.minutes));
     }
 
     /**
@@ -364,7 +364,7 @@
     var lastServerBytes = null;
 
     function pieceOf(done, total) {
-        return sprintf(__('piece %1$s of %2$s', 'kapsule-migrator'), fmtCount(Math.min(done, total)), fmtCount(total));
+        return sprintf(__('piece %1$s of %2$s', 'kapsulehost-migrator'), fmtCount(Math.min(done, total)), fmtCount(total));
     }
 
     // ── Idle screen ──────────────────────────────────────────────────────────
@@ -395,12 +395,12 @@
         var $err  = $('#kapsule-error-msg');
 
         if (!token) {
-            showFormError($err, __('Paste your migration token first. You will find it in your KapsuleHost panel under Sites, then Migrate.', 'kapsule-migrator'));
+            showFormError($err, __('Paste your migration token first. You will find it in your KapsuleHost panel under Sites, then Migrate.', 'kapsulehost-migrator'));
             $('#kapsule-token-input').focus();
             return;
         }
 
-        $btn.prop('disabled', true).text(__('Checking your site...', 'kapsule-migrator'));
+        $btn.prop('disabled', true).text(__('Checking your site...', 'kapsulehost-migrator'));
         $err.hide();
 
         $.post(cfg.ajaxUrl, {
@@ -411,12 +411,12 @@
             if (resp.success) {
                 window.location.reload();
             } else {
-                showFormError($err, reasonOf(resp) || __('We could not connect to KapsuleHost with that token. Check it and try again.', 'kapsule-migrator'));
-                $btn.prop('disabled', false).text(__('Start the move', 'kapsule-migrator'));
+                showFormError($err, reasonOf(resp) || __('We could not connect to KapsuleHost with that token. Check it and try again.', 'kapsulehost-migrator'));
+                $btn.prop('disabled', false).text(__('Start the move', 'kapsulehost-migrator'));
             }
         }).fail(function () {
-            showFormError($err, __('We could not reach KapsuleHost just now. Check this server can get online, then try again.', 'kapsule-migrator'));
-            $btn.prop('disabled', false).text(__('Start the move', 'kapsule-migrator'));
+            showFormError($err, __('We could not reach KapsuleHost just now. Check this server can get online, then try again.', 'kapsulehost-migrator'));
+            $btn.prop('disabled', false).text(__('Start the move', 'kapsulehost-migrator'));
         });
     });
 
@@ -424,7 +424,7 @@
         var $btn = $(this);
         var $err = $('#kapsule-standalone-error-msg');
 
-        $btn.prop('disabled', true).text(__('Packaging...', 'kapsule-migrator'));
+        $btn.prop('disabled', true).text(__('Packaging...', 'kapsulehost-migrator'));
         $err.hide();
 
         $.post(cfg.ajaxUrl, {
@@ -434,18 +434,18 @@
             if (resp.success) {
                 window.location.reload();
             } else {
-                showFormError($err, reasonOf(resp) || __('We could not start packaging. Please try again.', 'kapsule-migrator'));
-                $btn.prop('disabled', false).text(__('Package this site', 'kapsule-migrator'));
+                showFormError($err, reasonOf(resp) || __('We could not start packaging. Please try again.', 'kapsulehost-migrator'));
+                $btn.prop('disabled', false).text(__('Package this site', 'kapsulehost-migrator'));
             }
         }).fail(function () {
-            showFormError($err, __('We could not start packaging. Please try again.', 'kapsule-migrator'));
-            $btn.prop('disabled', false).text(__('Package this site', 'kapsule-migrator'));
+            showFormError($err, __('We could not start packaging. Please try again.', 'kapsulehost-migrator'));
+            $btn.prop('disabled', false).text(__('Package this site', 'kapsulehost-migrator'));
         });
     });
 
     $(document).on('click', '#kapsule-reset-btn', function () {
         cancelled = true;
-        $(this).prop('disabled', true).text(__('Cleaning up...', 'kapsule-migrator'));
+        $(this).prop('disabled', true).text(__('Cleaning up...', 'kapsulehost-migrator'));
 
         $.post(cfg.ajaxUrl, {
             action: 'kapsule_reset',
@@ -545,11 +545,11 @@
         if (srvEta !== null) {
             var eta = fmtEta(srvEta);
             /* translators: 1: which piece is moving, 2: estimated time remaining. Joined into one line. */
-            if (eta) note = sprintf(__('%1$s, %2$s', 'kapsule-migrator'), note, eta);
+            if (eta) note = sprintf(__('%1$s, %2$s', 'kapsulehost-migrator'), note, eta);
         } else if (elapsed > 15 && moved > 0 && totalBytes > bytesDone) {
             var eta = fmtEta((totalBytes - bytesDone) / (moved / elapsed));
             /* translators: 1: which piece is moving, 2: estimated time remaining. Joined into one line. */
-            if (eta) note = sprintf(__('%1$s, %2$s', 'kapsule-migrator'), note, eta);
+            if (eta) note = sprintf(__('%1$s, %2$s', 'kapsulehost-migrator'), note, eta);
         }
 
         /*
@@ -621,9 +621,9 @@
             var why;
             if (xhr && xhr.status) {
                 /* translators: %s: the HTTP status code the server returned, e.g. "502". */
-                why = sprintf(__('the connection returned %s', 'kapsule-migrator'), xhr.status);
+                why = sprintf(__('the connection returned %s', 'kapsulehost-migrator'), xhr.status);
             } else {
-                why = __('the connection dropped', 'kapsule-migrator');
+                why = __('the connection dropped', 'kapsulehost-migrator');
             }
             scheduleRetry(chunkCount, totalBytes, index, attempt, why);
         });
@@ -631,16 +631,16 @@
 
     /** The one string carrying markup. Assembled here so the emphasis cannot be lost in translation. */
     function keepTabOpenHtml() {
-        return '<strong>' + escapeHtml(__('Keep this tab open.', 'kapsule-migrator')) + '</strong> ' +
-               escapeHtml(__('The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived.', 'kapsule-migrator'));
+        return '<strong>' + escapeHtml(__('Keep this tab open.', 'kapsulehost-migrator')) + '</strong> ' +
+               escapeHtml(__('The move runs from here, so closing the tab pauses it. Nothing is lost if you do: reopen this page and it carries on from the last piece that arrived.', 'kapsulehost-migrator'));
     }
 
     function restoreTransferringState() {
-        setChip('transferring', __('Copying files', 'kapsule-migrator'));
-        setHead(__('Moving your site', 'kapsule-migrator'),
-                __('Your site is being copied across in pieces. It stays live and unchanged the whole time.', 'kapsule-migrator'));
+        setChip('transferring', __('Copying files', 'kapsulehost-migrator'));
+        setHead(__('Moving your site', 'kapsulehost-migrator'),
+                __('Your site is being copied across in pieces. It stays live and unchanged the whole time.', 'kapsulehost-migrator'));
         setLive(true);
-        setFact4(__('Files', 'kapsule-migrator'), fmtCount(cfg.fileCount));
+        setFact4(__('Files', 'kapsulehost-migrator'), fmtCount(cfg.fileCount));
         setNote('info', keepTabOpenHtml());
     }
 
@@ -653,14 +653,14 @@
         var wait = backoffSeconds(attempt);
         var next = attempt + 1;
 
-        setChip('retrying', __('Retrying', 'kapsule-migrator'));
-        setHead(__('The connection dropped', 'kapsule-migrator'),
+        setChip('retrying', __('Retrying', 'kapsulehost-migrator'));
+        setHead(__('The connection dropped', 'kapsulehost-migrator'),
                 /* translators: %s: the number of the piece being retried. */
-                sprintf(__('We are retrying piece %s. Everything already sent is kept, so this carries on from where it stopped rather than starting again.', 'kapsule-migrator'),
+                sprintf(__('We are retrying piece %s. Everything already sent is kept, so this carries on from where it stopped rather than starting again.', 'kapsulehost-migrator'),
                         fmtCount(index + 1)));
         setLive(false);
-        setFact4(__('Attempt', 'kapsule-migrator'), pair(fmtCount(next), fmtCount(MAX_ATTEMPTS)));
-        setNote('warn', escapeHtml(__('Nothing has been lost. Your site is untouched and still serving visitors. If this keeps failing we will tell you exactly what to do next.', 'kapsule-migrator')));
+        setFact4(__('Attempt', 'kapsulehost-migrator'), pair(fmtCount(next), fmtCount(MAX_ATTEMPTS)));
+        setNote('warn', escapeHtml(__('Nothing has been lost. Your site is untouched and still serving visitors. If this keeps failing we will tell you exactly what to do next.', 'kapsulehost-migrator')));
 
         var remaining = wait;
         (function tick() {
@@ -669,11 +669,11 @@
             if (remaining > 0) {
                 /* translators: 1: seconds until the next attempt, 2: the attempt number, 3: total attempts. */
                 var pattern = _n('retrying in %1$s second, attempt %2$s of %3$s',
-                                 'retrying in %1$s seconds, attempt %2$s of %3$s', remaining, 'kapsule-migrator');
+                                 'retrying in %1$s seconds, attempt %2$s of %3$s', remaining, 'kapsulehost-migrator');
                 countdown = sprintf(pattern, fmtCount(remaining), fmtCount(next), fmtCount(MAX_ATTEMPTS));
             } else {
                 /* translators: 1: the attempt number, 2: total attempts. */
-                countdown = sprintf(__('retrying now, attempt %1$s of %2$s', 'kapsule-migrator'), fmtCount(next), fmtCount(MAX_ATTEMPTS));
+                countdown = sprintf(__('retrying now, attempt %1$s of %2$s', 'kapsulehost-migrator'), fmtCount(next), fmtCount(MAX_ATTEMPTS));
             }
             $('#km-meter-note').text(countdown);
             if (remaining <= 0) {
@@ -696,20 +696,20 @@
      * customer everything transferred so far.
      */
     function showPaused(chunkCount, totalBytes, index, why) {
-        setChip('error', __('Paused', 'kapsule-migrator'));
-        setHead(__('We have paused the move', 'kapsule-migrator'),
+        setChip('error', __('Paused', 'kapsulehost-migrator'));
+        setHead(__('We have paused the move', 'kapsulehost-migrator'),
                 /* translators: 1: how many attempts were made, 2: why the connection failed. */
-                sprintf(__('We could not reach KapsuleHost after %1$s tries (%2$s). Nothing is lost. Everything already copied is still there, and this site has not been changed.', 'kapsule-migrator'),
-                        fmtCount(MAX_ATTEMPTS), why || __('the connection dropped', 'kapsule-migrator')));
+                sprintf(__('We could not reach KapsuleHost after %1$s tries (%2$s). Nothing is lost. Everything already copied is still there, and this site has not been changed.', 'kapsulehost-migrator'),
+                        fmtCount(MAX_ATTEMPTS), why || __('the connection dropped', 'kapsulehost-migrator')));
         setLive(false);
-        setFact4(__('Stopped at', 'kapsule-migrator'), pieceOf(index + 1, chunkCount));
+        setFact4(__('Stopped at', 'kapsulehost-migrator'), pieceOf(index + 1, chunkCount));
         /* translators: %s: describes which piece the transfer stopped on, e.g. "piece 57 of 119". */
-        $('#km-meter-note').text(sprintf(__('paused at %s', 'kapsule-migrator'), pieceOf(index + 1, chunkCount)));
-        setNote('error', escapeHtml(__('Check this server can reach the internet, then pick up where you left off. Nothing needs to be re-sent.', 'kapsule-migrator')));
+        $('#km-meter-note').text(sprintf(__('paused at %s', 'kapsulehost-migrator'), pieceOf(index + 1, chunkCount)));
+        setNote('error', escapeHtml(__('Check this server can reach the internet, then pick up where you left off. Nothing needs to be re-sent.', 'kapsulehost-migrator')));
 
         if (!$('#km-resume-btn').length) {
             $('<button id="km-resume-btn" class="km-btn km-btn--primary"></button>')
-                .text(__('Pick up where it stopped', 'kapsule-migrator'))
+                .text(__('Pick up where it stopped', 'kapsulehost-migrator'))
                 .prependTo('.km-actions')
                 .on('click', function () {
                     $(this).remove();
@@ -737,11 +737,11 @@
         if (cancelled) return;
 
         setStep('kstep-db');
-        setChip('transferring', __('Copying database', 'kapsule-migrator'));
-        setHead(__('Copying your database', 'kapsule-migrator'),
-                __('The files are across. We are copying your database now, which is usually the quickest part.', 'kapsule-migrator'));
+        setChip('transferring', __('Copying database', 'kapsulehost-migrator'));
+        setHead(__('Copying your database', 'kapsulehost-migrator'),
+                __('The files are across. We are copying your database now, which is usually the quickest part.', 'kapsulehost-migrator'));
         setLive(true);
-        setMeterNote(__('database', 'kapsule-migrator'));
+        setMeterNote(__('database', 'kapsulehost-migrator'));
 
         $.post(cfg.ajaxUrl, {
             action: 'kapsule_upload_db_and_complete',
@@ -750,10 +750,10 @@
             if (cancelled) return;
             // The upload is over. The fourth step belongs to KapsuleHost and is NOT ticked here: the
             // page reloads into the awaiting-import screen, which reports what the JOB says.
-            setChip('transferring', __('Handing over to KapsuleHost', 'kapsule-migrator'));
+            setChip('transferring', __('Handing over to KapsuleHost', 'kapsulehost-migrator'));
             setLive(false);
             // The moment the customer needs named plainly: their side is finished and ours is running.
-            setMeterNote(__('All files sent. KapsuleHost is finishing the move.', 'kapsule-migrator'));
+            setMeterNote(__('All files sent. KapsuleHost is finishing the move.', 'kapsulehost-migrator'));
             window.location.reload();
         }).fail(function () {
             if (!cancelled) window.location.reload();
@@ -840,10 +840,10 @@
                     }
                     showJobRetry(
                         d.reachable === false
-                            ? (d.reason || __('We could not read how your move is going just now. We are checking again in a moment.', 'kapsule-migrator'))
+                            ? (d.reason || __('We could not read how your move is going just now. We are checking again in a moment.', 'kapsulehost-migrator'))
                             : (typeof resp.data === 'string' && resp.data)
                                 ? resp.data
-                                : __('This site could not read the status of your move just now. Your files are already with KapsuleHost and this site has not been changed. We are checking again in a moment.', 'kapsule-migrator')
+                                : __('This site could not read the status of your move just now. Your files are already with KapsuleHost and this site has not been changed. We are checking again in a moment.', 'kapsulehost-migrator')
                     );
                     pollJob(15000);
                     return;
@@ -927,14 +927,14 @@
                 if (cancelled) return;
                 // The request never completed, so this site's own admin did not answer. Same rule: one
                 // line, nothing else moves.
-                showJobRetry(__('This site could not read the status of your move just now. Your files are already with KapsuleHost and this site has not been changed. We are checking again in a moment.', 'kapsule-migrator'));
+                showJobRetry(__('This site could not read the status of your move just now. Your files are already with KapsuleHost and this site has not been changed. We are checking again in a moment.', 'kapsulehost-migrator'));
                 pollJob(15000);
             });
         }, delay);
     }
 
     $(document).on('click', '#kapsule-recheck-btn', function () {
-        $(this).prop('disabled', true).text(__('Checking...', 'kapsule-migrator'));
+        $(this).prop('disabled', true).text(__('Checking...', 'kapsulehost-migrator'));
         $.post(cfg.ajaxUrl, {
             action: 'kapsule_job_status',
             nonce:  cfg.nonce
@@ -947,12 +947,12 @@
 
     function statusLabel(status) {
         switch (status) {
-            case 'preflight':            return __('Checking the connection', 'kapsule-migrator');
-            case 'scanning':             return __('Counting your files', 'kapsule-migrator');
-            case 'uploading_files':      return __('Copying files', 'kapsule-migrator');
-            case 'uploading_db':         return __('Copying database', 'kapsule-migrator');
-            case 'awaiting_import':      return __('KapsuleHost is working on it', 'kapsule-migrator');
-            case 'standalone_packaging': return __('Packaging', 'kapsule-migrator');
+            case 'preflight':            return __('Checking the connection', 'kapsulehost-migrator');
+            case 'scanning':             return __('Counting your files', 'kapsulehost-migrator');
+            case 'uploading_files':      return __('Copying files', 'kapsulehost-migrator');
+            case 'uploading_db':         return __('Copying database', 'kapsulehost-migrator');
+            case 'awaiting_import':      return __('KapsuleHost is working on it', 'kapsulehost-migrator');
+            case 'standalone_packaging': return __('Packaging', 'kapsulehost-migrator');
             default:                     return '';
         }
     }
@@ -1013,7 +1013,7 @@
 
     } else if (cfg.status === 'uploading_db') {
         setStep('kstep-db');
-        setMeterNote(__('database', 'kapsule-migrator'));
+        setMeterNote(__('database', 'kapsulehost-migrator'));
         pollStatus(3000);
 
     } else if (cfg.status === 'awaiting_import') {
