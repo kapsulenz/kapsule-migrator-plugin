@@ -820,6 +820,24 @@
                       read anything is a customer believing work is happening that may not be.
                     */
                     var d = resp.data || {};
+
+                    /*
+                     * TERMINAL vs TRANSIENT, and only one of them is worth retrying.
+                     *
+                     * `gone` is set by the PHP from the HTTP status (401/403/404/410): the migration is
+                     * no longer on the KapsuleHost side. Before this, that case fell through to the
+                     * retry below and the poll ran for ever. Jesse watched 31 polls over nine minutes
+                     * against a deleted token, under a bar frozen at 96%. No number of retries fixes a
+                     * token that no longer exists.
+                     *
+                     * Reload rather than render the outcome here, for the same reason the terminal-status
+                     * branch below reloads: PHP owns the outcome cards and a second implementation out
+                     * here could disagree with it.
+                     */
+                    if (d.gone) {
+                        window.location.reload();
+                        return;
+                    }
                     showJobRetry(
                         d.reachable === false
                             ? (d.reason || __('We could not read how your move is going just now. We are checking again in a moment.', 'kapsule-migrator'))

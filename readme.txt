@@ -3,7 +3,7 @@ Contributors: kapsulehost
 Tags: migration, migrate, wordpress, backup, export
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -123,6 +123,9 @@ wp-config.php and wp-config-sample.php are always excluded. Common cache directo
 4. Export complete — download your files and database archives when packaging finishes.
 
 == Changelog ==
+
+= 1.6.1 =
+* Fixed: when a migration had been cancelled or removed on the KapsuleHost side, this screen said "KapsuleHost answered 401 when we asked about your move" and then went on retrying for ever, under a progress bar frozen near the end that could never advance. A status code is not a sentence, and "your migration is no longer there" is not "we could not reach KapsuleHost": the first is final and you need to know it, the second is worth waiting out. The two are now told apart. A migration that is gone says so in plain words and stops, and a moment when we cannot be reached says that instead and keeps trying. The technical code is still recorded for support, where a customer never reads it.
 
 = 1.6.0 =
 * Fixed: the step name at the top of this screen stopped changing once the page had loaded, so it could say "Checking the connection" while the heading underneath described KapsuleHost assembling your site, twenty minutes later. An earlier release tried to fix this and the fix could not work: it wrote to a part of the page that only exists on the upload screen, so on this screen it changed nothing. The step name, the heading and the text beneath them now all come from one value and change together.

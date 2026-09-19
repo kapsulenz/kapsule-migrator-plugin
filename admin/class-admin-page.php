@@ -319,15 +319,46 @@ class Kapsule_Admin_Page {
                 'message' => $raw,
                 'at'      => time(),
             ), false );
+            update_option( 'kapsule_migration_job_gone', 0 );
             update_option( 'kapsule_migration_job_state_error', Kapsule_Transport_Message::customer( $raw ) );
             return null;
         }
-        if ( (int) wp_remote_retrieve_response_code( $response ) !== 200 ) {
-            update_option( 'kapsule_migration_job_state_error', sprintf(
-                /* translators: %s: an HTTP status code, e.g. "503". */
-                __( 'KapsuleHost answered %s when we asked about your move.', 'kapsule-migrator' ),
-                (string) wp_remote_retrieve_response_code( $response )
-            ) );
+        $code = (int) wp_remote_retrieve_response_code( $response );
+        if ( 200 !== $code ) {
+            /*
+             * THE LINE THAT PUT AN HTTP STATUS CODE ON A CUSTOMER'S SCREEN, and the branch above is
+             * the same defect already fixed. It used to be:
+             *
+             *     __( 'KapsuleHost answered %s when we asked about your move.' ), '401'
+             *
+             * ── FOUND BY JESSE, 2026-09-19 ──────────────────────────────────────────────────────
+             *
+             * His screen read "KapsuleHost answered 401 when we asked about your move." The transport
+             * branch directly above already knew not to do this: it sends the raw text to a
+             * developer-only option and gives the customer a sentence. This branch was left as the
+             * odd one out, in the same function, so one kind of failure spoke English and the other
+             * spoke HTTP.
+             *
+             * AND THE WORSE HALF, WHICH IS NOT ABOUT WORDING. Every non-200 was treated identically,
+             * so the poll retried a DELETED migration for NINE MINUTES: 31 requests, all 401, each
+             * rendered as "still trying", under a bar frozen at 96% that could never advance.
+             *
+             * 401/403/404/410 mean the migration is no longer there and the customer must act.
+             * 429 and 5xx mean we could not reach us this second and waiting is right. Collapsing
+             * them makes the terminal case unreachable: no number of retries fixes a deleted token.
+             */
+            Kapsule_Transport_Message::log( 'job-status non-200', (string) $code );
+            update_option( 'kapsule_migration_job_state_error_raw', array(
+                'code'    => 'http_' . $code,
+                'message' => 'job-status returned HTTP ' . $code,
+                'at'      => time(),
+            ), false );
+            $gone = in_array( $code, array( 401, 403, 404, 410 ), true );
+            update_option( 'kapsule_migration_job_gone', $gone ? 1 : 0 );
+            update_option( 'kapsule_migration_job_state_error', $gone
+                ? __( 'This migration is no longer on your KapsuleHost account. It may have been cancelled or removed there. Your site has not been changed: start a new migration from your KapsuleHost panel when you are ready.', 'kapsule-migrator' )
+                : __( 'We could not reach KapsuleHost just now. Your site has not been changed and nothing is lost. We will keep trying.', 'kapsule-migrator' )
+            );
             return null;
         }
 
@@ -336,6 +367,7 @@ class Kapsule_Admin_Page {
         // or an empty response render as a job with no status, and "no status" is one `??` away from
         // being treated as fine.
         if ( ! is_array( $body ) || ! isset( $body['status'] ) || ! is_string( $body['status'] ) ) {
+            update_option( 'kapsule_migration_job_gone', 0 );
             update_option( 'kapsule_migration_job_state_error', __( 'KapsuleHost sent an answer we could not read.', 'kapsule-migrator' ) );
             return null;
         }
@@ -346,6 +378,9 @@ class Kapsule_Admin_Page {
         // The developer copy goes with it. A stale raw error left beside a healthy read is a support
         // reader being handed the wrong incident.
         delete_option( 'kapsule_migration_job_state_error_raw' );
+        // Same reason as the line above: a stale TERMINAL flag beside a healthy read would render a
+        // recovered migration as permanently gone.
+        delete_option( 'kapsule_migration_job_gone' );
 
         if ( ! empty( $body['jobId'] ) && is_string( $body['jobId'] ) ) {
             update_option( 'kapsule_migration_job_id', $body['jobId'] );
@@ -417,6 +452,8 @@ class Kapsule_Admin_Page {
         if ( $job === null ) {
             wp_send_json_error( array(
                 'reachable' => false,
+                // TERMINAL vs TRANSIENT. Without this the poll retries a deleted migration for ever.
+                'gone'      => (bool) get_option( 'kapsule_migration_job_gone', 0 ),
                 'reason'    => get_option( 'kapsule_migration_job_state_error', '' ),
             ) );
             return;
